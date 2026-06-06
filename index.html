@@ -1,0 +1,2019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Garden">
+  <meta name="theme-color" content="#0e0e0a">
+  <meta name="description" content="Garden Manager — track beds, plants, chemicals, and more">
+  <title>Garden Manager</title>
+
+  <!-- Home screen icon (inline SVG) -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230e0e0a'/%3E%3Crect x='3' y='3' width='94' height='94' rx='19' fill='none' stroke='%23d4a853' stroke-width='1.5' opacity='0.35'/%3E%3Ctext x='50' y='66' font-size='54' text-anchor='middle'%3E%F0%9F%8C%BF%3C/text%3E%3C/svg%3E">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html { height: 100%; }
+    body {
+      height: 100%;
+      background: #0e0e0a;
+      color: #e8e4dc;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overscroll-behavior: none;
+      -webkit-font-smoothing: antialiased;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+    #root { height: 100%; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(212,168,83,0.25); border-radius: 3px; }
+    input, select, textarea, button { font-family: inherit; }
+  </style>
+
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+
+  <script type="text/babel" data-presets="react">
+
+const STORAGE_KEY = "van_garden_v4";
+
+const PLANT_IMAGES = {
+  "p1":  "https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=300&q=80",
+  "p2":  "https://images.unsplash.com/photo-1582284540020-8acbe03f4924?w=300&q=80",
+  "p3":  "https://images.unsplash.com/photo-1592841200221-a6898f307baa?w=300&q=80",
+  "p4":  "https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=300&q=80",
+  "p5":  "https://images.unsplash.com/photo-1498557850523-fd3d118b962e?w=300&q=80",
+  "p6":  "https://images.unsplash.com/photo-1498557850523-fd3d118b962e?w=300&q=80",
+  "p7":  "https://images.unsplash.com/photo-1498557850523-fd3d118b962e?w=300&q=80",
+  "p8":  "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=300&q=80",
+  "p9":  "https://images.unsplash.com/photo-1615485291234-9d694218aeb3?w=300&q=80",
+  "p10": "https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=300&q=80",
+  "p11": "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?w=300&q=80",
+  "p12": "https://images.unsplash.com/photo-1615484477778-ca3b77940c25?w=300&q=80",
+  "p13": "https://images.unsplash.com/photo-1541344999736-83eca272f6fc?w=300&q=80",
+  "p14": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=300&q=80",
+  "p15": "https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?w=300&q=80",
+  "p16": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=300&q=80",
+  "p17": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=300&q=80",
+};
+
+const DEFAULT_DATA = {
+  beds: [
+    { id:"b1", name:"Raised Bed A",     type:"vegetable",  notes:"South-facing, full sun",             irrigated:true  },
+    { id:"b2", name:"Raised Bed B",     type:"vegetable",  notes:"Next to garage",                     irrigated:true  },
+    { id:"b3", name:"Berry Patch",      type:"berry",      notes:"East side of yard",                  irrigated:true  },
+    { id:"b4", name:"Perennial Bed",    type:"perennial",  notes:"Asparagus established",              irrigated:true  },
+    { id:"b5", name:"South Fence Line", type:"fruit",      notes:"Fig trained on fence",               irrigated:false },
+    { id:"b6", name:"Back Yard Trees",  type:"fruit",      notes:"Pear, Persimmon, Crabapple",         irrigated:false },
+    { id:"b7", name:"Front Yard",       type:"ornamental", notes:"Weeping Redbud",                     irrigated:true  },
+    { id:"b8", name:"Strawberry Tower", type:"berry",      notes:"Hand watered — check daily in heat", irrigated:false },
+  ],
+  plants: [
+    { id:"p1",  bedId:"b1", name:"Sun Gold Tomato",              category:"Tomato",        status:"growing",    planted:"2024-05-07", notes:"Indeterminate — heavy staking needed",             emoji:"🍅" },
+    { id:"p2",  bedId:"b1", name:"Cherokee Purple Tomato",       category:"Tomato",        status:"growing",    planted:"2024-05-07", notes:"Heirloom — watch for early blight",               emoji:"🍅" },
+    { id:"p3",  bedId:"b2", name:"Brandywine Tomato",            category:"Tomato",        status:"growing",    planted:"2024-05-07", notes:"Large fruit — needs consistent moisture",          emoji:"🍅" },
+    { id:"p4",  bedId:"b2", name:"Tomatoberry",                  category:"Tomato",        status:"growing",    planted:"2024-05-07", notes:"Strawberry-shaped cherry type",                   emoji:"🍅" },
+    { id:"p5",  bedId:"b3", name:"Northblue Blueberry",          category:"Blueberry",     status:"fruiting",   planted:"2022-05-20", notes:"pH 4.5-5.5, acid fertilizer only",               emoji:"🫐" },
+    { id:"p6",  bedId:"b3", name:"Bluecrop Blueberry",           category:"Blueberry",     status:"fruiting",   planted:"2022-05-20", notes:"Heavy producer, mid-season variety",              emoji:"🫐" },
+    { id:"p7",  bedId:"b3", name:"Patriot Blueberry",            category:"Blueberry",     status:"fruiting",   planted:"2022-05-20", notes:"Early season — first to ripen",                  emoji:"🫐" },
+    { id:"p8",  bedId:"b3", name:"Red Latham Raspberry",         category:"Raspberry",     status:"growing",    planted:"2023-05-05", notes:"Cut floricanes after harvest",                    emoji:"🍓" },
+    { id:"p9",  bedId:"b3", name:"Prime-Ark Freedom Blackberry", category:"Blackberry",    status:"growing",    planted:"2023-05-05", notes:"Thornless everbearing — tie new canes",           emoji:"🫐" },
+    { id:"p10", bedId:"b4", name:"Asparagus",                    category:"Perennial Veg", status:"harvesting", planted:"2021-04-01", notes:"Year 4 — full harvest OK now",                   emoji:"🌿" },
+    { id:"p11", bedId:"b5", name:"Violette de Bordeaux Fig",     category:"Fig",           status:"growing",    planted:"2023-04-15", notes:"Wrap in burlap before hard freeze",               emoji:"🫐" },
+    { id:"p12", bedId:"b6", name:"Hosui Asian Pear",             category:"Pear",          status:"growing",    planted:"2022-04-10", notes:"Thin clusters in June — 1 per cluster, 4-6 apart",emoji:"🍐" },
+    { id:"p13", bedId:"b6", name:"Ichi-Ki-Kei-Jiro Persimmon",  category:"Persimmon",     status:"growing",    planted:"2022-04-10", notes:"Non-astringent, harvest Oct-Nov when fully orange",emoji:"🟠" },
+    { id:"p14", bedId:"b6", name:"Crabapple",                    category:"Tree",          status:"healthy",    planted:"2020-04-01", notes:"Ornamental + pollinates pear",                    emoji:"🍎" },
+    { id:"p15", bedId:"b7", name:"Weeping Redbud",               category:"Ornamental",    status:"healthy",    planted:"2021-03-20", notes:"No pruning needed — spectacular spring bloom",    emoji:"🌸" },
+    { id:"p16", bedId:"b8", name:"Ozark Beauty Strawberry",      category:"Strawberry",    status:"fruiting",   planted:"2024-04-20", notes:"Tower pocket — hand water daily in heat",         emoji:"🍓" },
+    { id:"p17", bedId:"b8", name:"Tribute Strawberry",           category:"Strawberry",    status:"fruiting",   planted:"2024-04-20", notes:"Everbearing — runner control needed",             emoji:"🍓" },
+  ],
+  chemicals: [
+    { id:"c1", name:"Dr. Earth Tomato Veg & Herb", type:"Fertilizer",   target:"Tomatoes, all vegetables",        interval:14,  lastApplied:"2024-05-25", notes:"4 tbsp per plant, scratch into soil",        active:true  },
+    { id:"c2", name:"Dr. Earth Acid Lovers",        type:"Fertilizer",   target:"Blueberries, fig",                interval:30,  lastApplied:"2024-05-10", notes:"Acidifies soil, top dress at drip line",     active:true  },
+    { id:"c3", name:"Dr. Earth Fruit Tree",         type:"Fertilizer",   target:"Pear, persimmon, crabapple",      interval:30,  lastApplied:"2024-04-15", notes:"Apply to drip line, not trunk",              active:true  },
+    { id:"c4", name:"Copper Fungicide",             type:"Fungicide",    target:"Tomatoes",                        interval:10,  lastApplied:"2024-05-28", notes:"Preventive spray, 7-10 day cycle",           active:true  },
+    { id:"c5", name:"Dormant Oil Spray",            type:"Pest Control", target:"All fruit trees",                 interval:365, lastApplied:"2024-03-15", notes:"Apply before bud break ONLY. Annual.",       active:true  },
+    { id:"c6", name:"Neem Oil",                     type:"Pest Control", target:"All beds",                        interval:14,  lastApplied:"2024-05-20", notes:"Evening spray only, avoid open blooms",      active:true  },
+    { id:"c7", name:"Dr. Earth Fertilizer Tea",     type:"Fertilizer",   target:"All beds",                        interval:21,  lastApplied:"2024-05-15", notes:"Soak 24h, strain, apply as root drench",     active:true  },
+    { id:"c8", name:"Holly-tone",                   type:"Fertilizer",   target:"Blueberries (spring and fall)",   interval:180, lastApplied:"2024-04-01", notes:"Secondary to Dr. Earth Acid",                active:false },
+  ],
+  tasks: [
+    { id:"t1",  month:3,  title:"Start tomatoes and peppers indoors",      category:"Seed Starting",  done:false, priority:"high",   detail:"6-8 wks before last frost (May 15 LI). Use grow lights." },
+    { id:"t2",  month:3,  title:"Apply dormant oil to fruit trees",        category:"Pest Control",   done:false, priority:"high",   detail:"Before buds swell. Covers scale, mites, aphid eggs." },
+    { id:"t3",  month:4,  title:"Fertilize blueberries with Holly-tone",   category:"Fertilizing",    done:false, priority:"medium", detail:"Top dress, 6 inches from crown, water in well." },
+    { id:"t4",  month:4,  title:"Remove fig burlap, check winter damage",  category:"Fruit Trees",    done:true,  priority:"high",   detail:"Remove wrap when temps stay above 40F." },
+    { id:"t5",  month:5,  title:"Harden off and transplant tomato seedlings",category:"Planting",     done:true,  priority:"high",   detail:"LI last frost May 15. Bury 2/3 of stem for strong roots." },
+    { id:"t6",  month:5,  title:"Set up tomato stakes and cages",          category:"Infrastructure", done:true,  priority:"medium", detail:"Florida weave or heavy-duty cages." },
+    { id:"t7",  month:5,  title:"Plant strawberry tower",                  category:"Planting",       done:true,  priority:"medium", detail:"Fill tower, plant Ozark Beauty and Tribute in pockets." },
+    { id:"t8",  month:6,  title:"Thin Asian pear fruit clusters",          category:"Fruit Trees",    done:false, priority:"high",   detail:"Leave 1 fruit per cluster, 4-6 inches apart." },
+    { id:"t9",  month:6,  title:"Mulch all beds 3 inch layer",             category:"Maintenance",    done:false, priority:"medium", detail:"Suppresses weeds, retains moisture. Keep away from stems." },
+    { id:"t10", month:6,  title:"Begin weekly copper fungicide on tomatoes",category:"Pest Control",  done:false, priority:"high",   detail:"Preventive — start before disease appears." },
+    { id:"t11", month:6,  title:"Pinch tomato suckers weekly",             category:"Maintenance",    done:false, priority:"medium", detail:"Remove V-crotch suckers. Improves airflow." },
+    { id:"t12", month:6,  title:"Net blueberries before ripening",         category:"Pest Control",   done:false, priority:"high",   detail:"Birds will strip them overnight. Act early." },
+    { id:"t13", month:7,  title:"Side-dress tomatoes with fertilizer",     category:"Fertilizing",    done:false, priority:"medium", detail:"Apply 2-3 inches from stem. Dr. Earth Tomato." },
+    { id:"t14", month:7,  title:"Harvest blueberries — check daily",       category:"Harvest",        done:false, priority:"high",   detail:"Wait until fully blue, then 3-5 more days." },
+    { id:"t15", month:7,  title:"Cut raspberry floricanes after harvest",  category:"Pruning",        done:false, priority:"medium", detail:"Remove 2-yr canes at ground. Leave new primocanes." },
+    { id:"t16", month:8,  title:"Harvest blackberries — everbearing",      category:"Harvest",        done:false, priority:"medium", detail:"Prime-Ark Freedom: pick when deep black." },
+    { id:"t17", month:8,  title:"Sow fall crops: kale, bok choy, radish",  category:"Planting",       done:false, priority:"medium", detail:"Direct sow 8-10 weeks before first frost (Oct 15 LI)." },
+    { id:"t18", month:9,  title:"Apply fall fertilizer to fruit trees",    category:"Fertilizing",    done:false, priority:"medium", detail:"Low-nitrogen formula. Root growth focus." },
+    { id:"t19", month:10, title:"Harvest Ichi-Ki-Kei-Jiro persimmon",     category:"Harvest",        done:false, priority:"high",   detail:"Non-astringent — harvest when fully orange." },
+    { id:"t20", month:10, title:"Plant garlic for next year",              category:"Planting",       done:false, priority:"medium", detail:"2-4 wks before ground freezes. 2 inches deep." },
+    { id:"t21", month:11, title:"Wrap fig for winter with burlap",         category:"Fruit Trees",    done:false, priority:"high",   detail:"After leaves drop. Bundle canes, burlap wrap." },
+    { id:"t22", month:11, title:"Cut back perennials and mulch beds",      category:"Maintenance",    done:false, priority:"medium", detail:"Leave some seed heads for birds. Mulch tower." },
+    { id:"t23", month:12, title:"Order seeds for next season",             category:"Planning",       done:false, priority:"low",    detail:"Johnny's, Baker Creek, Burpee." },
+    { id:"t24", month:1,  title:"Plan bed layout and crop rotation",       category:"Planning",       done:false, priority:"low",    detail:"Rotate nightshade family. Sketch new configurations." },
+    { id:"t25", month:2,  title:"Order bare-root strawberries if replacing",category:"Planning",      done:false, priority:"low",    detail:"Replace towers every 3-4 years." },
+  ],
+  harvests: [],
+  journal: [],
+  bedPositions: {
+    "b1": { x:10,  y:10,  w:120, h:70  },
+    "b2": { x:10,  y:90,  w:120, h:70  },
+    "b3": { x:160, y:10,  w:130, h:100 },
+    "b4": { x:160, y:120, w:130, h:60  },
+    "b5": { x:10,  y:175, w:270, h:40  },
+    "b6": { x:10,  y:225, w:180, h:80  },
+    "b7": { x:200, y:225, w:80,  h:80  },
+    "b8": { x:305, y:10,  w:55,  h:80  },
+  },
+  settings: {
+    gardenName: "",
+    location: "",
+    zone: "",
+    irrigationLabel: "",
+    lastFrost: "05-15",
+    firstFrost: "10-15",
+    lat: null,
+    lon: null,
+  },
+};
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return DEFAULT_DATA;
+}
+function saveData(d) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); } catch(e) {}
+}
+function uid() { return "_" + Math.random().toString(36).slice(2,9); }
+
+const TODAY_STR = new Date().toISOString().split("T")[0];
+const TODAY = new Date(TODAY_STR);
+const CURRENT_MONTH = TODAY.getMonth() + 1;
+
+function daysSince(ds) { if (!ds) return 999; return Math.floor((TODAY - new Date(ds)) / 86400000); }
+function daysLeft(la, iv) { return iv - daysSince(la); }
+function isDue(la, iv) { return daysLeft(la, iv) <= 0; }
+function isSoon(la, iv) { var d = daysLeft(la, iv); return d > 0 && d <= 4; }
+function fmtDateShort(s) { if (!s) return ""; return new Date(s).toLocaleDateString("en-US", {month:"short", day:"numeric"}); }
+function fmtDate(s) { if (!s) return ""; return new Date(s).toLocaleDateString("en-US", {month:"long", day:"numeric", year:"numeric"}); }
+
+var MONTHS_S = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+var MONTHS_L = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+var BED_COLORS   = { vegetable:"#d4a853", berry:"#c084fc", fruit:"#fb923c", perennial:"#34d399", ornamental:"#f472b6", other:"#94a3b8" };
+var STATUS_CFG   = { growing:{color:"#d4a853",label:"Growing"}, healthy:{color:"#60a5fa",label:"Healthy"}, fruiting:{color:"#fb923c",label:"Fruiting"}, harvesting:{color:"#fbbf24",label:"Harvesting"}, dormant:{color:"#64748b",label:"Dormant"}, struggling:{color:"#f87171",label:"Struggling"} };
+var CHEM_COLORS  = { Fertilizer:"#d4a853", Fungicide:"#fb923c", "Pest Control":"#f87171", Herbicide:"#fbbf24", Other:"#94a3b8" };
+var TASK_COLORS  = { "Seed Starting":"#a78bfa","Pest Control":"#f87171","Fertilizing":"#d4a853","Planting":"#34d399","Fruit Trees":"#fb923c","Infrastructure":"#60a5fa","Maintenance":"#94a3b8","Harvest":"#fbbf24","Pruning":"#f472b6","Planning":"#818cf8" };
+var JOURNAL_ICONS = { observation:"👁", pest:"🐛", disease:"🍂", milestone:"🌟", treatment:"💊", note:"📝" };
+var SEV_CFG = {
+  low:      { color:"#d4a853", bg:"rgba(212,168,83,0.1)",   border:"rgba(212,168,83,0.25)",   label:"Low",      icon:"🟢" },
+  moderate: { color:"#fbbf24", bg:"rgba(251,191,36,0.1)",   border:"rgba(251,191,36,0.25)",   label:"Moderate", icon:"🟡" },
+  high:     { color:"#fb923c", bg:"rgba(251,146,60,0.12)",  border:"rgba(251,146,60,0.3)",    label:"High",     icon:"🟠" },
+  critical: { color:"#f87171", bg:"rgba(248,113,113,0.12)", border:"rgba(248,113,113,0.3)",   label:"Critical", icon:"🔴" },
+};
+
+var INP = { width:"100%", padding:"10px 12px", background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:10, color:"#f0ede8", fontSize:13, fontFamily:"inherit", boxSizing:"border-box" };
+var SEL = Object.assign({}, INP, { appearance:"none" });
+var G   = "#d4a853";   // warm gold — primary accent
+var DIM = "#4a4a3a";   // muted warm grey
+
+function Label(props) {
+  return React.createElement("div", { style:{fontSize:9,color:"#6b6b52",textTransform:"uppercase",letterSpacing:1.5,marginBottom:5,marginTop:14,fontWeight:"600"} }, props.children);
+}
+function Tag(props) {
+  return React.createElement("span", { style:{fontSize:9,padding:"2px 8px",borderRadius:20,background:props.color+"18",color:props.color,border:"1px solid "+props.color+"30",whiteSpace:"nowrap",letterSpacing:0.3,fontWeight:"500"} }, props.children);
+}
+function PBtn(props) {
+  return React.createElement("button", { onClick:props.onClick, style:Object.assign({width:"100%",padding:"12px 0",background:"linear-gradient(135deg,rgba(212,168,83,0.22),rgba(212,168,83,0.12))",border:"1px solid rgba(212,168,83,0.4)",borderRadius:12,color:G,fontSize:14,cursor:"pointer",fontFamily:"inherit",marginTop:12,letterSpacing:0.3,fontWeight:"600"},props.style||{}) }, props.children);
+}
+function DBtn(props) {
+  return React.createElement("button", { onClick:props.onClick, style:{width:"100%",padding:"10px 0",background:"rgba(220,80,80,0.08)",border:"1px solid rgba(220,80,80,0.25)",borderRadius:12,color:"#e07070",fontSize:13,cursor:"pointer",fontFamily:"inherit",marginTop:6,letterSpacing:0.3} }, props.children);
+}
+
+function Modal(props) {
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:200,display:"flex",alignItems:"flex-end",justifyContent:"center",background:"rgba(0,0,0,0.75)",backdropFilter:"blur(12px)"}} onClick={props.onClose}>
+      <div onClick={function(e){e.stopPropagation();}} style={{background:"linear-gradient(180deg,#1c1c14 0%,#161610 100%)",border:"1px solid rgba(212,168,83,0.2)",borderRadius:"24px 24px 0 0",width:"100%",maxWidth:480,maxHeight:"90vh",overflowY:"auto",padding:22}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
+          <div style={{fontSize:16,fontWeight:"700",color:G,letterSpacing:0.3}}>{props.title}</div>
+          <button onClick={props.onClose} style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,color:"#8a8a7a",width:30,height:30,cursor:"pointer",fontSize:14,fontFamily:"inherit",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+        </div>
+        {props.children}
+      </div>
+    </div>
+  );
+}
+
+function PlantImage(props) {
+  var plantId = props.plantId;
+  var plantName = props.plantName;
+  var plantEmoji = props.plantEmoji || "🌱";
+  var size = props.size || 120;
+  var radius = props.radius || 10;
+
+  var curated = PLANT_IMAGES[plantId];
+  var [src, setSrc] = useState(curated || null);
+  var [err, setErr] = useState(false);
+
+  var boxStyle = { width:size, height:size, borderRadius:radius, flexShrink:0, overflow:"hidden" };
+
+  if (err || !src) {
+    return <div style={Object.assign({},boxStyle,{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.08)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:size>80?34:20})}>{plantEmoji}</div>;
+  }
+  return (
+    <div style={boxStyle}>
+      <img src={src} alt={plantName} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}} onError={function(){setErr(true);}} />
+    </div>
+  );
+}
+
+function BedForm(props) {
+  var bed = props.bed;
+  var [form, setForm] = useState({ name:"", type:"vegetable", notes:"", irrigated:true, ...bed });
+  function upd(k,v) { setForm(function(p){return Object.assign({},p,{[k]:v});}); }
+  return (
+    <div>
+      <Label>Bed Name</Label>
+      <input style={INP} value={form.name} onChange={function(e){upd("name",e.target.value);}} placeholder="e.g. Raised Bed A" />
+      <Label>Type</Label>
+      <select style={SEL} value={form.type} onChange={function(e){upd("type",e.target.value);}}>
+        <option value="vegetable">Vegetable</option>
+        <option value="berry">Berry</option>
+        <option value="fruit">Fruit</option>
+        <option value="perennial">Perennial</option>
+        <option value="ornamental">Ornamental</option>
+        <option value="other">Other</option>
+      </select>
+      <Label>Notes</Label>
+      <textarea style={Object.assign({},INP,{height:64,resize:"none"})} value={form.notes} onChange={function(e){upd("notes",e.target.value);}} placeholder="Sun exposure, location, size..." />
+      <Label>Irrigation</Label>
+      <div style={{display:"flex",gap:8,marginTop:4}}>
+        <button onClick={function(){upd("irrigated",true);}} style={{flex:1,padding:"8px 0",borderRadius:8,cursor:"pointer",fontFamily:"inherit",fontSize:12,background:form.irrigated?"rgba(212,168,83,0.18)":"rgba(255,255,255,0.05)",border:form.irrigated?"1px solid rgba(212,168,83,0.38)":"1px solid rgba(255,255,255,0.1)",color:form.irrigated?G:DIM}}>💧 Rachio (auto)</button>
+        <button onClick={function(){upd("irrigated",false);}} style={{flex:1,padding:"8px 0",borderRadius:8,cursor:"pointer",fontFamily:"inherit",fontSize:12,background:!form.irrigated?"rgba(212,168,83,0.18)":"rgba(255,255,255,0.05)",border:!form.irrigated?"1px solid rgba(212,168,83,0.38)":"1px solid rgba(255,255,255,0.1)",color:!form.irrigated?G:DIM}}>🪣 Hand water</button>
+      </div>
+      <PBtn onClick={function(){props.onSave(form);}}>Save Bed</PBtn>
+      {bed.id && <DBtn onClick={function(){props.onDelete(bed.id);}}>Delete Bed and Its Plants</DBtn>}
+    </div>
+  );
+}
+
+function PlantForm(props) {
+  var plant = props.plant;
+  var beds = props.beds;
+  var EMOJIS = ["🌱","🍅","🫐","🍓","🍐","🟠","🍎","🌿","🌸","🌻","🥬","🫛","🌶️","🥒","🧅","🧄"];
+  var [form, setForm] = useState({ name:"", category:"", status:"growing", planted:"", notes:"", emoji:"🌱", bedId:"", cropType:"", ...plant });
+  function upd(k,v) { setForm(function(p){return Object.assign({},p,{[k]:v});}); }
+
+  // When cropType is selected, auto-fill name/emoji/category if empty
+  function onCropType(cropId) {
+    upd("cropType", cropId);
+    if (cropId) {
+      var crop = CROPS.find(function(c){ return c.id === cropId; });
+      if (crop) {
+        if (!form.name) upd("name", crop.name);
+        if (!form.category || form.category === "") upd("category", crop.category);
+        if (form.emoji === "🌱") upd("emoji", crop.emoji);
+      }
+    }
+  }
+
+  var statuses = Object.entries(STATUS_CFG);
+  return (
+    <div>
+      <Label>Crop Type (links to Planner)</Label>
+      <select style={SEL} value={form.cropType} onChange={function(e){ onCropType(e.target.value); }}>
+        <option value="">Custom / not listed</option>
+        {CROPS.map(function(c){ return <option key={c.id} value={c.id}>{c.emoji} {c.name}</option>; })}
+      </select>
+      <Label>Plant Name</Label>
+      <input style={INP} value={form.name} onChange={function(e){upd("name",e.target.value);}} placeholder="e.g. Sun Gold Tomato" />
+      <Label>Emoji</Label>
+      <div style={{display:"flex",flexWrap:"wrap",gap:5,marginTop:4}}>
+        {EMOJIS.map(function(em) {
+          return <button key={em} onClick={function(){upd("emoji",em);}} style={{fontSize:20,background:form.emoji===em?"rgba(212,168,83,0.2)":"rgba(255,255,255,0.05)",border:form.emoji===em?"1px solid rgba(212,168,83,0.4)":"1px solid rgba(255,255,255,0.08)",borderRadius:8,padding:"4px 6px",cursor:"pointer"}}>{em}</button>;
+        })}
+      </div>
+      <Label>Category</Label>
+      <input style={INP} value={form.category} onChange={function(e){upd("category",e.target.value);}} placeholder="e.g. Tomato, Blueberry, Fig" />
+      <Label>Garden Bed</Label>
+      <select style={SEL} value={form.bedId} onChange={function(e){upd("bedId",e.target.value);}}>
+        <option value="">Select a bed...</option>
+        {beds.map(function(b) { return <option key={b.id} value={b.id}>{b.name}</option>; })}
+      </select>
+      <Label>Status</Label>
+      <div style={{display:"flex",flexWrap:"wrap",gap:5,marginTop:4}}>
+        {statuses.map(function(entry) {
+          var k = entry[0]; var v = entry[1];
+          return <button key={k} onClick={function(){upd("status",k);}} style={{padding:"5px 10px",borderRadius:8,cursor:"pointer",fontFamily:"inherit",fontSize:11,background:form.status===k?v.color+"22":"rgba(255,255,255,0.05)",border:form.status===k?"1px solid "+v.color+"55":"1px solid rgba(255,255,255,0.08)",color:form.status===k?v.color:DIM}}>{v.label}</button>;
+        })}
+      </div>
+      <Label>Date Planted</Label>
+      <input type="date" style={INP} value={form.planted} onChange={function(e){upd("planted",e.target.value);}} />
+      <Label>Notes</Label>
+      <textarea style={Object.assign({},INP,{height:72,resize:"none"})} value={form.notes} onChange={function(e){upd("notes",e.target.value);}} placeholder="Care tips, variety notes..." />
+      <PBtn onClick={function(){props.onSave(form);}}>Save Plant</PBtn>
+      {plant.id && <DBtn onClick={function(){props.onDelete(plant.id);}}>Delete Plant</DBtn>}
+    </div>
+  );
+}
+
+function ChemForm(props) {
+  var chem = props.chem;
+  var [form, setForm] = useState({ name:"", type:"Fertilizer", target:"", interval:14, lastApplied:"", notes:"", active:true, ...chem });
+  function upd(k,v) { setForm(function(p){return Object.assign({},p,{[k]:v});}); }
+  return (
+    <div>
+      <Label>Product Name</Label>
+      <input style={INP} value={form.name} onChange={function(e){upd("name",e.target.value);}} placeholder="e.g. Dr. Earth Tomato" />
+      <Label>Type</Label>
+      <select style={SEL} value={form.type} onChange={function(e){upd("type",e.target.value);}}>
+        <option>Fertilizer</option>
+        <option>Fungicide</option>
+        <option>Pest Control</option>
+        <option>Herbicide</option>
+        <option>Other</option>
+      </select>
+      <Label>Target Plants / Beds</Label>
+      <input style={INP} value={form.target} onChange={function(e){upd("target",e.target.value);}} placeholder="e.g. Tomatoes, all vegetables" />
+      <Label>Application Interval (days)</Label>
+      <input type="number" style={INP} value={form.interval} onChange={function(e){upd("interval",parseInt(e.target.value)||1);}} min={1} />
+      <Label>Last Applied</Label>
+      <input type="date" style={INP} value={form.lastApplied} onChange={function(e){upd("lastApplied",e.target.value);}} />
+      <Label>Notes</Label>
+      <textarea style={Object.assign({},INP,{height:72,resize:"none"})} value={form.notes} onChange={function(e){upd("notes",e.target.value);}} placeholder="Application rate, timing tips..." />
+      <Label>Status</Label>
+      <div style={{display:"flex",gap:8,marginTop:4}}>
+        <button onClick={function(){upd("active",true);}} style={{flex:1,padding:"8px 0",borderRadius:8,cursor:"pointer",fontFamily:"inherit",fontSize:12,background:form.active?"rgba(212,168,83,0.18)":"rgba(255,255,255,0.05)",border:form.active?"1px solid rgba(212,168,83,0.38)":"1px solid rgba(255,255,255,0.1)",color:form.active?G:DIM}}>Active</button>
+        <button onClick={function(){upd("active",false);}} style={{flex:1,padding:"8px 0",borderRadius:8,cursor:"pointer",fontFamily:"inherit",fontSize:12,background:!form.active?"rgba(212,168,83,0.18)":"rgba(255,255,255,0.05)",border:!form.active?"1px solid rgba(212,168,83,0.38)":"1px solid rgba(255,255,255,0.1)",color:!form.active?G:DIM}}>Archived</button>
+      </div>
+      <PBtn onClick={function(){props.onSave(form);}}>Save</PBtn>
+      {chem.id && <DBtn onClick={function(){props.onDelete(chem.id);}}>Delete</DBtn>}
+    </div>
+  );
+}
+
+function TaskForm(props) {
+  var task = props.task;
+  var [form, setForm] = useState({ title:"", month:CURRENT_MONTH, category:"Maintenance", priority:"medium", detail:"", done:false, ...task });
+  function upd(k,v) { setForm(function(p){return Object.assign({},p,{[k]:v});}); }
+  return (
+    <div>
+      <Label>Task Title</Label>
+      <input style={INP} value={form.title} onChange={function(e){upd("title",e.target.value);}} placeholder="e.g. Apply copper fungicide" />
+      <Label>Month</Label>
+      <select style={SEL} value={form.month} onChange={function(e){upd("month",parseInt(e.target.value));}}>
+        {MONTHS_L.map(function(m,i){ return <option key={i+1} value={i+1}>{m}</option>; })}
+      </select>
+      <Label>Category</Label>
+      <select style={SEL} value={form.category} onChange={function(e){upd("category",e.target.value);}}>
+        {Object.keys(TASK_COLORS).map(function(c){ return <option key={c}>{c}</option>; })}
+      </select>
+      <Label>Priority</Label>
+      <div style={{display:"flex",gap:6,marginTop:4}}>
+        {[["high","#f87171"],["medium","#fbbf24"],["low","#d4a853"]].map(function(pair){
+          var p = pair[0]; var c = pair[1];
+          return <button key={p} onClick={function(){upd("priority",p);}} style={{flex:1,padding:"7px 0",borderRadius:8,cursor:"pointer",fontFamily:"inherit",fontSize:12,background:form.priority===p?c+"22":"rgba(255,255,255,0.05)",border:form.priority===p?"1px solid "+c+"55":"1px solid rgba(255,255,255,0.08)",color:form.priority===p?c:DIM,textTransform:"capitalize"}}>{p}</button>;
+        })}
+      </div>
+      <Label>Detail</Label>
+      <textarea style={Object.assign({},INP,{height:72,resize:"none"})} value={form.detail} onChange={function(e){upd("detail",e.target.value);}} placeholder="Instructions, reminders..." />
+      <PBtn onClick={function(){props.onSave(form);}}>Save Task</PBtn>
+      {task.id && <DBtn onClick={function(){props.onDelete(task.id);}}>Delete Task</DBtn>}
+    </div>
+  );
+}
+
+function HarvestForm(props) {
+  var plants = props.plants;
+  var harvest = props.harvest;
+  var [form, setForm] = useState({ plantId:"", date:TODAY_STR, amount:"", unit:"lbs", notes:"", ...harvest });
+  function upd(k,v) { setForm(function(p){return Object.assign({},p,{[k]:v});}); }
+  return (
+    <div>
+      <Label>Plant</Label>
+      <select style={SEL} value={form.plantId} onChange={function(e){upd("plantId",e.target.value);}}>
+        <option value="">Select plant...</option>
+        {plants.map(function(p){ return <option key={p.id} value={p.id}>{p.emoji} {p.name}</option>; })}
+      </select>
+      <Label>Date</Label>
+      <input type="date" style={INP} value={form.date} onChange={function(e){upd("date",e.target.value);}} />
+      <div style={{display:"flex",gap:8}}>
+        <div style={{flex:2}}>
+          <Label>Amount</Label>
+          <input type="number" style={INP} value={form.amount} onChange={function(e){upd("amount",e.target.value);}} placeholder="0" min="0" step="0.1" />
+        </div>
+        <div style={{flex:1}}>
+          <Label>Unit</Label>
+          <select style={SEL} value={form.unit} onChange={function(e){upd("unit",e.target.value);}}>
+            {["lbs","oz","cups","pints","quarts","count","bunches"].map(function(u){ return <option key={u}>{u}</option>; })}
+          </select>
+        </div>
+      </div>
+      <Label>Notes</Label>
+      <textarea style={Object.assign({},INP,{height:60,resize:"none"})} value={form.notes} onChange={function(e){upd("notes",e.target.value);}} placeholder="Quality, observations..." />
+      <PBtn onClick={function(){props.onSave(form);}}>Log Harvest</PBtn>
+      {harvest && harvest.id && <DBtn onClick={function(){props.onDelete(harvest.id);}}>Delete Entry</DBtn>}
+    </div>
+  );
+}
+
+function JournalForm(props) {
+  var beds = props.beds;
+  var plants = props.plants;
+  var entry = props.entry;
+  var [form, setForm] = useState({ bedId:"", plantId:"", date:TODAY_STR, type:"observation", text:"", ...entry });
+  function upd(k,v) { setForm(function(p){return Object.assign({},p,{[k]:v});}); }
+  var bedPlants = form.bedId ? plants.filter(function(p){return p.bedId===form.bedId;}) : plants;
+  var types = Object.entries(JOURNAL_ICONS);
+  return (
+    <div>
+      <Label>Type</Label>
+      <div style={{display:"flex",flexWrap:"wrap",gap:5,marginTop:4}}>
+        {types.map(function(entry2){
+          var k = entry2[0]; var icon = entry2[1];
+          return <button key={k} onClick={function(){upd("type",k);}} style={{padding:"5px 10px",borderRadius:8,cursor:"pointer",fontFamily:"inherit",fontSize:12,background:form.type===k?"rgba(212,168,83,0.2)":"rgba(255,255,255,0.05)",border:form.type===k?"1px solid rgba(212,168,83,0.4)":"1px solid rgba(255,255,255,0.08)",color:form.type===k?G:DIM,textTransform:"capitalize"}}>{icon} {k}</button>;
+        })}
+      </div>
+      <Label>Date</Label>
+      <input type="date" style={INP} value={form.date} onChange={function(e){upd("date",e.target.value);}} />
+      <Label>Bed (optional)</Label>
+      <select style={SEL} value={form.bedId} onChange={function(e){upd("bedId",e.target.value); upd("plantId","");}}>
+        <option value="">All beds</option>
+        {beds.map(function(b){ return <option key={b.id} value={b.id}>{b.name}</option>; })}
+      </select>
+      <Label>Plant (optional)</Label>
+      <select style={SEL} value={form.plantId} onChange={function(e){upd("plantId",e.target.value);}}>
+        <option value="">No specific plant</option>
+        {bedPlants.map(function(p){ return <option key={p.id} value={p.id}>{p.emoji} {p.name}</option>; })}
+      </select>
+      <Label>Notes</Label>
+      <textarea style={Object.assign({},INP,{height:96,resize:"none"})} value={form.text} onChange={function(e){upd("text",e.target.value);}} placeholder="What did you observe? Pest, new growth, bloom..." />
+      <PBtn onClick={function(){props.onSave(form);}}>Save Entry</PBtn>
+      {entry && entry.id && <DBtn onClick={function(){props.onDelete(entry.id);}}>Delete</DBtn>}
+    </div>
+  );
+}
+
+
+
+// ─── SEASONAL ADVISORY ───────────────────────────────────────────────────────
+// No network needed — uses current date + Zone 7a knowledge for Melville NY
+var ZONE7A_ADVISORIES = {
+  1:  { icon:"❄️", season:"Winter", temp:"20–40°F", alerts:[
+    "Order seeds now — Johnny's, Baker Creek, Burpee",
+    "Plan crop rotation for spring — rotate tomato family",
+    "Check stored garlic bulbs for rot",
+    "Service tools and sharpen pruners",
+  ], spray:"Too cold for any chemical applications" },
+  2:  { icon:"🌱", season:"Late Winter", temp:"25–45°F", alerts:[
+    "Order bare-root strawberries if replacing towers",
+    "Start onion and leek seeds indoors",
+    "Prepare seed starting setup — lights, trays, heat mats",
+    "Prune dormant fruit trees before buds swell",
+  ], spray:"Too cold — wait for consistent 40°F+ temps" },
+  3:  { icon:"🌿", season:"Early Spring", temp:"35–55°F", alerts:[
+    "Start tomatoes and peppers indoors (6–8 weeks before May 15)",
+    "Apply dormant oil to fruit trees before buds swell",
+    "Uncover fig — check for winter damage",
+    "Direct sow peas and spinach outside",
+  ], spray:"Apply dormant oil now — before any bud break" },
+  4:  { icon:"🌸", season:"Spring", temp:"45–65°F", alerts:[
+    "Harden off tomato seedlings over 1–2 weeks",
+    "Fertilize blueberries with Holly-tone or acid fertilizer",
+    "Plant asparagus crowns if expanding bed",
+    "Watch for last frost — LI average May 15",
+  ], spray:"Begin neem oil preventive schedule once temps stay above 50°F" },
+  5:  { icon:"🌤", season:"Late Spring", temp:"55–75°F", alerts:[
+    "Transplant tomatoes after May 15 — bury 2/3 of stem",
+    "Set up stakes, cages, Florida weave",
+    "Plant strawberry tower — water daily until established",
+    "Set up Rachio schedule for new plantings",
+  ], spray:"Start preventive copper fungicide on tomatoes once transplanted" },
+  6:  { icon:"☀️", season:"Early Summer", temp:"65–85°F", alerts:[
+    "Thin Asian pear clusters — 1 fruit per cluster, 4–6\" apart",
+    "Pinch tomato suckers weekly for airflow and fruit size",
+    "Net blueberries before they ripen — birds act fast",
+    "Mulch all beds 3\" — suppresses weeds, retains moisture",
+  ], spray:"Copper fungicide every 7–10 days on tomatoes. Neem oil every 14 days. Spray evening only." },
+  7:  { icon:"🔆", season:"Peak Summer", temp:"70–90°F", alerts:[
+    "Harvest blueberries — check daily, pick when deep blue",
+    "Side-dress tomatoes with Dr. Earth fertilizer",
+    "Cut raspberry floricanes to ground after harvest",
+    "Check strawberry tower daily — may need twice-daily water in heat",
+  ], spray:"High humidity = high fungal risk. Don't skip copper spray schedule. Avoid spraying above 90°F." },
+  8:  { icon:"🌻", season:"Late Summer", temp:"65–85°F", alerts:[
+    "Harvest blackberries when deep black and slightly soft",
+    "Sow fall crops: kale, bok choy, radish (8–10 wks before Oct 15)",
+    "Start reducing nitrogen on tomatoes to push fruit ripening",
+    "Note what worked this season for next year's planning",
+  ], spray:"Watch for late blight on tomatoes as nights cool. Continue copper schedule." },
+  9:  { icon:"🍂", season:"Early Fall", temp:"55–75°F", alerts:[
+    "Apply fall fertilizer to fruit trees — low nitrogen formula",
+    "Watch for first frost warning — LI average Oct 15",
+    "Harvest winter squash and pumpkins before frost",
+    "Take cuttings of herbs to overwinter indoors",
+  ], spray:"Last neem oil application before season winds down" },
+  10: { icon:"🍁", season:"Fall", temp:"40–60°F", alerts:[
+    "Harvest Ichi-Ki-Kei-Jiro persimmon — fully orange is fine",
+    "Plant garlic: 2\" deep, 6\" apart, pointed end up",
+    "First frost likely — protect tender plants",
+    "Dig and store dahlia and canna bulbs",
+  ], spray:"No spray needed — season ending" },
+  11: { icon:"🍂", season:"Late Fall", temp:"30–50°F", alerts:[
+    "Wrap fig in burlap after leaves drop — bundle canes first",
+    "Cut back perennials, leave some seed heads for birds",
+    "Heavy mulch on strawberry tower for winter protection",
+    "Clean and oil all tools before storage",
+  ], spray:"No spray needed" },
+  12: { icon:"🌨", season:"Early Winter", temp:"25–40°F", alerts:[
+    "Order seeds for next season — varieties sell out early",
+    "Review harvest logs — what to grow more of next year",
+    "Check blueberry soil pH — amend if needed over winter",
+    "Clean greenhouse or seed-starting area",
+  ], spray:"No spray needed" },
+};
+
+function WeatherWidget(props) {
+  var settings = props.settings || {};
+  var [wx, setWx]         = useState(null);
+  var [loading, setLoading] = useState(true);
+  var [errMsg, setErrMsg] = useState(null);
+
+  useEffect(function() {
+    // Get coordinates from settings, fall back to Melville NY
+    var lat = settings.lat || 40.7876;
+    var lon = settings.lon || -73.4096;
+    var url = "https://api.open-meteo.com/v1/forecast"
+      + "?latitude=" + lat + "&longitude=" + lon
+      + "&current=temperature_2m,relative_humidity_2m,precipitation,weathercode,windspeed_10m"
+      + "&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max"
+      + "&hourly=temperature_2m,precipitation,windspeed_10m"
+      + "&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch"
+      + "&timezone=auto&forecast_days=5";
+
+    fetch(url)
+      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(function(d){
+        if (!d.current) throw new Error("No data");
+        setWx(d); setLoading(false);
+      })
+      .catch(function(e){ setErrMsg(e.message); setLoading(false); });
+  }, [settings.lat, settings.lon]);
+
+  if (loading) return (
+    <div style={{background:"rgba(96,165,250,0.06)",border:"1px solid rgba(96,165,250,0.15)",borderRadius:12,padding:"12px 14px",marginBottom:14,display:"flex",alignItems:"center",gap:10}}>
+      <div style={{width:14,height:14,border:"2px solid rgba(212,168,83,0.2)",borderTop:"2px solid #d4a853",borderRadius:"50%",animation:"spin 0.8s linear infinite"}}/>
+      <span style={{fontSize:12,color:DIM}}>Loading weather...</span>
+    </div>
+  );
+
+  if (errMsg) {
+    // Fall through to SeasonalAdvisory on error
+    return <SeasonalAdvisory settings={settings} />;
+  }
+
+  var cur    = wx.current;
+  var daily  = wx.daily;
+  var hourly = wx.hourly;
+  var code   = cur.weathercode;
+  var tempF  = Math.round(cur.temperature_2m);
+  var humidity = cur.relative_humidity_2m;
+  var windMph  = Math.round(cur.windspeed_10m);
+
+  var WX_EMOJI = {0:"☀️",1:"🌤",2:"⛅",3:"☁️",45:"🌫",48:"🌫",51:"🌦",53:"🌧",55:"🌧",61:"🌧",63:"🌧",65:"🌧",71:"🌨",73:"❄️",75:"❄️",80:"🌦",81:"🌧",82:"⛈",95:"⛈",96:"⛈",99:"⛈"};
+  var WX_DESC  = {0:"Clear",1:"Mainly clear",2:"Partly cloudy",3:"Overcast",45:"Foggy",51:"Light drizzle",53:"Drizzle",55:"Heavy drizzle",61:"Light rain",63:"Rain",65:"Heavy rain",71:"Light snow",73:"Snow",80:"Showers",81:"Showers",82:"Heavy showers",95:"Thunderstorm"};
+
+  // Spray safety: no rain in 4h, wind < 15mph, temp 45-90F
+  var rain4h = hourly ? hourly.precipitation.slice(0,4).reduce(function(a,b){return a+b;},0) : 0;
+  var wind4h = hourly ? Math.max.apply(null,hourly.windspeed_10m.slice(0,4)) : windMph;
+  var spraySafe = rain4h < 0.1 && wind4h < 15 && tempF > 45 && tempF < 90;
+  var sprayReason = rain4h >= 0.1 ? "Rain expected" : wind4h >= 15 ? "Wind too high ("+Math.round(wind4h)+" mph)" : tempF <= 45 ? "Too cold ("+tempF+"°F)" : tempF >= 90 ? "Too hot ("+tempF+"°F)" : "";
+
+  var fungalRisk = humidity > 80 && tempF > 60 && tempF < 90;
+  var heatStress = tempF > 88;
+  var frostRisk  = tempF < 38;
+
+  var locationLabel = settings.location || "Your Garden";
+
+  return (
+    <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:14,marginBottom:14,padding:"14px 14px"}}>
+
+      {/* Current */}
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
+        <span style={{fontSize:30,flexShrink:0}}>{WX_EMOJI[code]||"🌡"}</span>
+        <div style={{flex:1}}>
+          <div style={{display:"flex",alignItems:"baseline",gap:7}}>
+            <span style={{fontSize:24,fontWeight:"700",color:"#60a5fa",letterSpacing:"-0.5px"}}>{tempF}°F</span>
+            <span style={{fontSize:12,color:DIM}}>{WX_DESC[code]||""}</span>
+          </div>
+          <div style={{fontSize:11,color:DIM,marginTop:1}}>💧{humidity}% · 💨{windMph}mph · {locationLabel}</div>
+        </div>
+        <div style={{flexShrink:0,textAlign:"center"}}>
+          <div style={{fontSize:10,padding:"4px 9px",borderRadius:8,background:spraySafe?"rgba(126,200,126,0.15)":"rgba(224,112,112,0.12)",color:spraySafe?"#7ec87e":"#e07070",border:"1px solid "+(spraySafe?"rgba(126,200,126,0.3)":"rgba(224,112,112,0.25)"),fontWeight:"600"}}>
+            {spraySafe ? "✓ Spray OK" : "✗ Skip Spray"}
+          </div>
+        </div>
+      </div>
+
+      {/* Alerts */}
+      {fungalRisk && <div style={{background:"rgba(224,112,112,0.08)",border:"1px solid rgba(224,112,112,0.2)",borderRadius:8,padding:"7px 10px",marginBottom:6,fontSize:11,color:"#e07070"}}>🍂 High humidity — fungal pressure high. Check tomatoes, apply copper if due.</div>}
+      {heatStress && <div style={{background:"rgba(251,191,36,0.08)",border:"1px solid rgba(251,191,36,0.18)",borderRadius:8,padding:"7px 10px",marginBottom:6,fontSize:11,color:"#fbbf24"}}>🌡 Heat stress risk — water strawberry tower. Avoid spraying.</div>}
+      {frostRisk  && <div style={{background:"rgba(96,165,250,0.08)",border:"1px solid rgba(96,165,250,0.2)",borderRadius:8,padding:"7px 10px",marginBottom:6,fontSize:11,color:"#60a5fa"}}>❄️ Frost risk tonight — cover tender plants.</div>}
+      {!spraySafe && sprayReason && <div style={{background:"rgba(251,146,60,0.08)",border:"1px solid rgba(251,146,60,0.2)",borderRadius:8,padding:"7px 10px",marginBottom:6,fontSize:11,color:"#fb923c"}}>⚠️ {sprayReason} — delay chemical applications.</div>}
+
+      {/* 5-day forecast */}
+      {daily && daily.time && (
+        <div>
+          <div style={{fontSize:9,color:DIM,textTransform:"uppercase",letterSpacing:1.2,marginBottom:8,marginTop:4,fontWeight:"600"}}>5-Day Forecast</div>
+          <div style={{display:"flex",gap:5}}>
+            {daily.time.slice(0,5).map(function(dateStr,i){
+              var dc   = daily.weathercode[i];
+              var hi   = Math.round(daily.temperature_2m_max[i]);
+              var lo   = Math.round(daily.temperature_2m_min[i]);
+              var rain = daily.precipitation_sum[i] || 0;
+              var wind = Math.round(daily.windspeed_10m_max[i] || 0);
+              var name = i===0 ? "Today" : i===1 ? "Tmrw" : new Date(dateStr+"T12:00:00").toLocaleDateString("en-US",{weekday:"short"});
+              var ok   = rain < 0.05 && wind < 15 && hi > 45 && hi < 90;
+              return (
+                <div key={dateStr} style={{flex:1,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:10,padding:"8px 4px",textAlign:"center"}}>
+                  <div style={{fontSize:10,color:DIM,marginBottom:2,fontWeight:"500"}}>{name}</div>
+                  <div style={{fontSize:20,marginBottom:2}}>{WX_EMOJI[dc]||"🌡"}</div>
+                  <div style={{fontSize:12,color:"#e8e4dc",fontWeight:"700"}}>{hi}°</div>
+                  <div style={{fontSize:10,color:DIM}}>{lo}°</div>
+                  {rain > 0.05 && <div style={{fontSize:9,color:"#60a5fa",marginTop:2}}>💧{rain.toFixed(2)}"</div>}
+                  {ok && <div style={{fontSize:9,color:"#7ec87e",marginTop:2,fontWeight:"600"}}>✓ spray</div>}
+                </div>
+              );
+            })}
+          </div>
+          <div style={{fontSize:9,color:DIM,marginTop:7,textAlign:"right"}}>Open-Meteo · ✓ = good spray day</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SeasonalAdvisory(props) {
+
+
+// ─── PLANTING CALENDAR ───────────────────────────────────────────────────────
+// Zone 7a, Melville NY — Last frost May 15, First frost Oct 15
+// All dates are week-of-month references for the current year
+
+var YEAR = new Date().getFullYear();
+
+// Frost dates are defaults — overridden by settings at runtime
+function getFrostDates(settings) {
+  var s = settings || {};
+  var lf = s.lastFrost  || "05-15";
+  var ff = s.firstFrost || "10-15";
+  return {
+    lastFrost:  new Date(YEAR + "-" + lf),
+    firstFrost: new Date(YEAR + "-" + ff),
+  };
+}
+
+// Module-level defaults (used by CROPS array init — settings override at render time)
+var LAST_FROST  = new Date(YEAR + "-05-15");
+var FIRST_FROST = new Date(YEAR + "-10-15");
+
+function addDays(date, days) {
+  var d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+function fmtRange(d1, d2) {
+  var opts = { month:"short", day:"numeric" };
+  return d1.toLocaleDateString("en-US", opts) + " – " + d2.toLocaleDateString("en-US", opts);
+}
+function fmtSingle(d) {
+  return d.toLocaleDateString("en-US", { month:"short", day:"numeric" });
+}
+function isPast(d) { return d < new Date(); }
+function isNow(d1, d2) { var n = new Date(); return n >= d1 && n <= d2; }
+function isUpcoming(d1) { var n = new Date(); return d1 > n && (d1 - n) < 30*86400000; }
+
+var CROPS = [
+  // Tomatoes
+  { id:"c1",  name:"Tomatoes",           emoji:"🍅", category:"Nightshade",
+    startIndoor: addDays(LAST_FROST, -56), transplant: addDays(LAST_FROST, 0),
+    directSow: null, harvest: addDays(LAST_FROST, 70), frostTender:true,
+    spacing:"24-36\"", depth:"1/4\"", sunlight:"Full sun",
+    tip:"Bury 2/3 of stem when transplanting. Set up stakes at planting time." },
+
+  // Peppers
+  { id:"c2",  name:"Peppers",            emoji:"🌶️", category:"Nightshade",
+    startIndoor: addDays(LAST_FROST, -70), transplant: addDays(LAST_FROST, 7),
+    directSow: null, harvest: addDays(LAST_FROST, 75), frostTender:true,
+    spacing:"18\"", depth:"1/4\"", sunlight:"Full sun",
+    tip:"Need warmth to germinate — use heat mat. Slower than tomatoes." },
+
+  // Basil
+  { id:"c3",  name:"Basil",              emoji:"🌿", category:"Herb",
+    startIndoor: addDays(LAST_FROST, -28), transplant: addDays(LAST_FROST, 7),
+    directSow: addDays(LAST_FROST, 7), harvest: addDays(LAST_FROST, 60), frostTender:true,
+    spacing:"12\"", depth:"1/4\"", sunlight:"Full sun",
+    tip:"Plant near tomatoes. Pinch flowers immediately to extend harvest." },
+
+  // Cucumbers
+  { id:"c4",  name:"Cucumbers",          emoji:"🥒", category:"Cucurbit",
+    startIndoor: addDays(LAST_FROST, -21), transplant: addDays(LAST_FROST, 7),
+    directSow: addDays(LAST_FROST, 7), harvest: addDays(LAST_FROST, 55), frostTender:true,
+    spacing:"12\" (trellis)", depth:"1\"", sunlight:"Full sun",
+    tip:"Direct sow preferred — resents root disturbance. Trellis saves space." },
+
+  // Zucchini
+  { id:"c5",  name:"Zucchini",           emoji:"🫛", category:"Cucurbit",
+    startIndoor: addDays(LAST_FROST, -21), transplant: addDays(LAST_FROST, 7),
+    directSow: addDays(LAST_FROST, 7), harvest: addDays(LAST_FROST, 50), frostTender:true,
+    spacing:"36\"", depth:"1\"", sunlight:"Full sun",
+    tip:"Harvest at 6-8\" for best flavor. Check daily — hides under leaves." },
+
+  // Kale
+  { id:"c6",  name:"Kale (Spring)",      emoji:"🥬", category:"Brassica",
+    startIndoor: addDays(LAST_FROST, -42), transplant: addDays(LAST_FROST, -14),
+    directSow: addDays(LAST_FROST, -28), harvest: addDays(LAST_FROST, 30), frostTender:false,
+    spacing:"18\"", depth:"1/2\"", sunlight:"Full/Part sun",
+    tip:"Frost improves flavor. Harvest outer leaves. Start fall crop in August." },
+
+  // Bok Choy
+  { id:"c7",  name:"Bok Choy",           emoji:"🥬", category:"Brassica",
+    startIndoor: addDays(LAST_FROST, -35), transplant: addDays(LAST_FROST, -14),
+    directSow: addDays(LAST_FROST, -21), harvest: addDays(LAST_FROST, 25), frostTender:false,
+    spacing:"6-12\"", depth:"1/4\"", sunlight:"Part/Full sun",
+    tip:"Best as spring and fall crop — bolts in summer heat. Sow again in Aug." },
+
+  // Spinach
+  { id:"c8",  name:"Spinach",            emoji:"🥬", category:"Leafy Green",
+    startIndoor: null, transplant: null,
+    directSow: addDays(LAST_FROST, -42), harvest: addDays(LAST_FROST, -10), frostTender:false,
+    spacing:"3-6\"", depth:"1/2\"", sunlight:"Part shade OK",
+    tip:"Direct sow as soon as soil workable (early April LI). Bolts in heat — succession sow." },
+
+  // Peas
+  { id:"c9",  name:"Snap Peas",          emoji:"🫛", category:"Legume",
+    startIndoor: null, transplant: null,
+    directSow: addDays(LAST_FROST, -42), harvest: addDays(LAST_FROST, 10), frostTender:false,
+    spacing:"2-3\"", depth:"1\"", sunlight:"Full sun",
+    tip:"Direct sow early April. Need trellis. Pull plants when summer heat arrives." },
+
+  // Radishes
+  { id:"c10", name:"Radishes",           emoji:"🌱", category:"Root Veg",
+    startIndoor: null, transplant: null,
+    directSow: addDays(LAST_FROST, -42), harvest: addDays(LAST_FROST, -25), frostTender:false,
+    spacing:"2\"", depth:"1/2\"", sunlight:"Full/Part sun",
+    tip:"Fastest crop — ready in 25 days. Great for marking slow-germinating rows." },
+
+  // Garlic
+  { id:"c11", name:"Garlic",             emoji:"🧄", category:"Allium",
+    startIndoor: null, transplant: null,
+    directSow: new Date(YEAR + "-10-15"), harvest: new Date((YEAR+1) + "-07-01"), frostTender:false,
+    spacing:"6\"", depth:"2\"", sunlight:"Full sun",
+    tip:"Plant in fall, harvest next July when lower leaves brown. Cure 3-4 weeks." },
+
+  // Onions
+  { id:"c12", name:"Onions",             emoji:"🧅", category:"Allium",
+    startIndoor: addDays(LAST_FROST, -84), transplant: addDays(LAST_FROST, -14),
+    directSow: null, harvest: addDays(LAST_FROST, 90), frostTender:false,
+    spacing:"4-6\"", depth:"1/4\"", sunlight:"Full sun",
+    tip:"Start indoors in late January. Long season — be patient." },
+
+  // Lettuce
+  { id:"c13", name:"Lettuce",            emoji:"🥬", category:"Leafy Green",
+    startIndoor: addDays(LAST_FROST, -42), transplant: addDays(LAST_FROST, -21),
+    directSow: addDays(LAST_FROST, -35), harvest: addDays(LAST_FROST, 5), frostTender:false,
+    spacing:"8-12\"", depth:"1/8\"", sunlight:"Part shade in summer",
+    tip:"Cut-and-come-again. Succession sow every 2 weeks spring and fall." },
+
+  // Beans
+  { id:"c14", name:"Green Beans",        emoji:"🫛", category:"Legume",
+    startIndoor: null, transplant: null,
+    directSow: addDays(LAST_FROST, 7), harvest: addDays(LAST_FROST, 55), frostTender:true,
+    spacing:"4-6\"", depth:"1\"", sunlight:"Full sun",
+    tip:"Direct sow only — resents transplanting. Succession sow every 2 weeks for continuous harvest." },
+
+  // Eggplant
+  { id:"c15", name:"Eggplant",           emoji:"🍆", category:"Nightshade",
+    startIndoor: addDays(LAST_FROST, -70), transplant: addDays(LAST_FROST, 14),
+    directSow: null, harvest: addDays(LAST_FROST, 80), frostTender:true,
+    spacing:"24\"", depth:"1/4\"", sunlight:"Full sun",
+    tip:"Needs even more heat than peppers. Wait until soil is warm. Mulch heavily." },
+
+  // Fall Kale
+  { id:"c16", name:"Kale (Fall)",        emoji:"🥬", category:"Brassica",
+    startIndoor: null, transplant: null,
+    directSow: addDays(FIRST_FROST, -70), harvest: addDays(FIRST_FROST, 0), frostTender:false,
+    spacing:"18\"", depth:"1/2\"", sunlight:"Full/Part sun",
+    tip:"Direct sow early August. Harvest through frost — flavor improves after freeze." },
+
+  // Fall Radish
+  { id:"c17", name:"Radishes (Fall)",    emoji:"🌱", category:"Root Veg",
+    startIndoor: null, transplant: null,
+    directSow: addDays(FIRST_FROST, -35), harvest: addDays(FIRST_FROST, -10), frostTender:false,
+    spacing:"2\"", depth:"1/2\"", sunlight:"Full/Part sun",
+    tip:"Sow mid-September for October harvest. Fast and easy fall crop." },
+];
+
+var CATEGORIES = ["All", "Nightshade", "Brassica", "Leafy Green", "Cucurbit", "Legume", "Herb", "Root Veg", "Allium"];
+
+function statusForCrop(crop) {
+  var now = new Date();
+  // Check each window
+  if (crop.startIndoor && isNow(crop.startIndoor, addDays(crop.startIndoor, 14))) return "start";
+  if (crop.directSow && isNow(crop.directSow, addDays(crop.directSow, 14))) return "sow";
+  if (crop.transplant && isNow(crop.transplant, addDays(crop.transplant, 14))) return "transplant";
+  if (crop.harvest && isNow(addDays(crop.harvest, -7), addDays(crop.harvest, 30))) return "harvest";
+  if (crop.startIndoor && isUpcoming(crop.startIndoor)) return "upcoming_start";
+  if (crop.directSow && isUpcoming(crop.directSow)) return "upcoming_sow";
+  if (crop.transplant && isUpcoming(crop.transplant)) return "upcoming_transplant";
+  return "none";
+}
+
+var STATUS_LABELS = {
+  start:              { color:"#a78bfa", bg:"rgba(167,139,250,0.15)", label:"Start indoors now" },
+  sow:                { color:"#d4a853", bg:"rgba(212,168,83,0.15)",  label:"Direct sow now"    },
+  transplant:         { color:"#fb923c", bg:"rgba(251,146,60,0.15)",  label:"Transplant now"    },
+  harvest:            { color:"#fbbf24", bg:"rgba(251,191,36,0.15)",  label:"Harvest window"    },
+  upcoming_start:     { color:"#a78bfa", bg:"rgba(167,139,250,0.08)", label:"Start indoors soon"},
+  upcoming_sow:       { color:"#d4a853", bg:"rgba(212,168,83,0.08)",  label:"Direct sow soon"   },
+  upcoming_transplant:{ color:"#fb923c", bg:"rgba(251,146,60,0.08)",  label:"Transplant soon"   },
+  none:               { color:"#5a5844", bg:"rgba(255,255,255,0.035)", label:""                  },
+};
+
+function PlantingCalendar(props) {
+  var plants = props.plants || [];
+  var beds   = props.beds   || [];
+  var s      = props.settings || {};
+  var frosts = getFrostDates(s);
+  var lastFrostLocal  = frosts.lastFrost;
+  var firstFrostLocal = frosts.firstFrost;
+  var frostLabel = "Last frost " + fmtSingle(lastFrostLocal) + " · First frost " + fmtSingle(firstFrostLocal);
+  var locationLabel = [s.location, s.zone ? "Zone "+s.zone : ""].filter(Boolean).join(" · ") || "Your Garden";
+  var [filterCat, setFilterCat] = useState("All");
+  var [selectedCrop, setSelectedCrop] = useState(null);
+  var [tab, setTab] = useState("myGarden"); // "myGarden" | "guide"
+  var [showAll, setShowAll] = useState(false);
+
+  // ── MY GARDEN TAB ──
+  // Plants that have a cropType linked — show real timeline from planted date
+  var linkedPlants = plants.filter(function(p){ return p.cropType; });
+  var unlinkedPlants = plants.filter(function(p){ return !p.cropType; });
+
+  function plantTimeline(plant) {
+    var crop = CROPS.find(function(c){ return c.id === plant.cropType; });
+    if (!crop || !plant.planted) return null;
+    var planted = new Date(plant.planted + "T12:00:00");
+    var bed = beds.find(function(b){ return b.id === plant.bedId; });
+
+    // Calculate harvest based on days from transplant date in crop def
+    var daysToHarvest = crop.harvest ? Math.round((crop.harvest - (crop.transplant || crop.directSow || crop.startIndoor || LAST_FROST)) / 86400000) : null;
+    var harvestEst = daysToHarvest ? addDays(planted, daysToHarvest) : null;
+    var daysSincePlanted = Math.round((new Date() - planted) / 86400000);
+    var progressPct = daysToHarvest ? Math.min(100, Math.round(daysSincePlanted / daysToHarvest * 100)) : null;
+
+    return { crop:crop, bed:bed, planted:planted, harvestEst:harvestEst, progressPct:progressPct, daysSincePlanted:daysSincePlanted, daysToHarvest:daysToHarvest };
+  }
+
+  // ── GUIDE TAB ──
+  var filtered = filterCat === "All" ? CROPS : CROPS.filter(function(c){ return c.category === filterCat; });
+  var priority = { start:0, sow:0, transplant:0, harvest:0, upcoming_start:1, upcoming_sow:1, upcoming_transplant:1, none:2 };
+  var sorted = filtered.slice().sort(function(a,b){ return (priority[statusForCrop(a)]||2)-(priority[statusForCrop(b)]||2); });
+  var active   = sorted.filter(function(c){ return priority[statusForCrop(c)]===0; });
+  var upcoming = sorted.filter(function(c){ return priority[statusForCrop(c)]===1; });
+  var rest     = sorted.filter(function(c){ return priority[statusForCrop(c)]===2; });
+
+  return (
+    <div style={{margin:"4px 0"}}>
+      <div style={{fontSize:17,color:G,fontWeight:"bold",marginBottom:4}}>Planting Planner</div>
+      <div style={{fontSize:11,color:DIM,marginBottom:12}}>{locationLabel} · {frostLabel}</div>
+
+      {/* Tab switcher */}
+      <div style={{display:"flex",gap:6,marginBottom:14}}>
+        <button onClick={function(){setTab("myGarden");}} style={{flex:1,padding:"8px 0",borderRadius:8,cursor:"pointer",fontFamily:"inherit",fontSize:12,background:tab==="myGarden"?"rgba(212,168,83,0.18)":"rgba(255,255,255,0.05)",border:tab==="myGarden"?"1px solid rgba(212,168,83,0.38)":"1px solid rgba(255,255,255,0.1)",color:tab==="myGarden"?G:DIM}}>🪴 My Garden ({plants.length})</button>
+        <button onClick={function(){setTab("guide");}} style={{flex:1,padding:"8px 0",borderRadius:8,cursor:"pointer",fontFamily:"inherit",fontSize:12,background:tab==="guide"?"rgba(212,168,83,0.18)":"rgba(255,255,255,0.05)",border:tab==="guide"?"1px solid rgba(212,168,83,0.38)":"1px solid rgba(255,255,255,0.1)",color:tab==="guide"?G:DIM}}>📖 Crop Guide ({CROPS.length})</button>
+      </div>
+
+      {/* ── MY GARDEN ── */}
+      {tab === "myGarden" && (
+        <div>
+          {plants.length === 0 && (
+            <div style={{textAlign:"center",padding:"40px 0",color:DIM}}>
+              <div style={{fontSize:36,marginBottom:8}}>🌱</div>
+              <div style={{fontSize:14}}>No plants yet.</div>
+              <div style={{fontSize:12,marginTop:4}}>Add plants in the Beds tab to track them here.</div>
+            </div>
+          )}
+
+          {linkedPlants.length > 0 && (
+            <div style={{marginBottom:16}}>
+              <div style={{fontSize:11,color:G,textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Tracked Plants</div>
+              {linkedPlants.map(function(plant) {
+                var tl = plantTimeline(plant);
+                if (!tl) return null;
+                var sc = STATUS_CFG[plant.status] || STATUS_CFG.healthy;
+                return (
+                  <div key={plant.id} onClick={function(){setSelectedCrop(selectedCrop===plant.id?null:plant.id);}} style={{background:"rgba(255,255,255,0.045)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"11px 13px",marginBottom:8,cursor:"pointer"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:10}}>
+                      <span style={{fontSize:22,flexShrink:0}}>{plant.emoji}</span>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:14,color:"#e8e4dc",fontWeight:"bold"}}>{plant.name}</div>
+                        <div style={{fontSize:10,color:DIM}}>{tl.bed?tl.bed.name:"Unknown bed"} · planted {fmtSingle(tl.planted)}</div>
+                      </div>
+                      <Tag color={sc.color}>{sc.label}</Tag>
+                      <span style={{color:DIM,fontSize:11,flexShrink:0}}>{selectedCrop===plant.id?"▲":"▼"}</span>
+                    </div>
+
+                    {/* Progress bar */}
+                    {tl.progressPct !== null && (
+                      <div style={{marginTop:8}}>
+                        <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                          <span style={{fontSize:9,color:DIM}}>Day {tl.daysSincePlanted} of ~{tl.daysToHarvest}</span>
+                          <span style={{fontSize:9,color:"#fbbf24"}}>{tl.progressPct}% to harvest</span>
+                        </div>
+                        <div style={{height:4,background:"rgba(255,255,255,0.08)",borderRadius:3}}>
+                          <div style={{height:"100%",borderRadius:3,background:"linear-gradient(90deg,#d4a853,#f0c060)",width:tl.progressPct+"%",transition:"width 0.5s"}}/>
+                        </div>
+                        {tl.harvestEst && <div style={{fontSize:9,color:"#fbbf24",marginTop:3}}>Est. harvest: {fmtSingle(tl.harvestEst)}</div>}
+                      </div>
+                    )}
+
+                    {selectedCrop === plant.id && (
+                      <div style={{marginTop:10,paddingTop:10,borderTop:"1px solid rgba(255,255,255,0.07)"}}>
+                        <div style={{fontSize:10,color:DIM,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>Crop Info</div>
+                        <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:8}}>
+                          <div style={{background:"rgba(255,255,255,0.045)",borderRadius:6,padding:"4px 8px"}}>
+                            <div style={{fontSize:9,color:DIM}}>SPACING</div>
+                            <div style={{fontSize:11,color:"#d4cdb8"}}>{tl.crop.spacing}</div>
+                          </div>
+                          <div style={{background:"rgba(255,255,255,0.045)",borderRadius:6,padding:"4px 8px"}}>
+                            <div style={{fontSize:9,color:DIM}}>LIGHT</div>
+                            <div style={{fontSize:11,color:"#d4cdb8"}}>{tl.crop.sunlight}</div>
+                          </div>
+                          {tl.crop.frostTender && <div style={{background:"rgba(96,165,250,0.1)",borderRadius:6,padding:"4px 8px"}}><div style={{fontSize:11,color:"#60a5fa"}}>❄️ Frost tender</div></div>}
+                        </div>
+                        <div style={{background:"rgba(255,255,255,0.045)",borderRadius:8,padding:"8px 10px"}}>
+                          <div style={{fontSize:9,color:DIM,marginBottom:3}}>TIP</div>
+                          <div style={{fontSize:11,color:"#a0967e",lineHeight:1.6}}>{tl.crop.tip}</div>
+                        </div>
+                        {plant.notes && <div style={{marginTop:8,fontSize:11,color:"#6b6b52",fontStyle:"italic"}}>{plant.notes}</div>}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {unlinkedPlants.length > 0 && (
+            <div>
+              <div style={{fontSize:11,color:DIM,textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Not linked to crop guide</div>
+              {unlinkedPlants.map(function(plant) {
+                var bed = beds.find(function(b){ return b.id===plant.bedId; });
+                return (
+                  <div key={plant.id} style={{background:"rgba(255,255,255,0.035)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:10,padding:"10px 13px",marginBottom:6,display:"flex",alignItems:"center",gap:10}}>
+                    <span style={{fontSize:20}}>{plant.emoji}</span>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:13,color:"#d4cdb8"}}>{plant.name}</div>
+                      <div style={{fontSize:10,color:DIM}}>{bed?bed.name:"Unknown bed"}</div>
+                    </div>
+                    <div style={{fontSize:10,color:DIM}}>Edit plant → set crop type</div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── CROP GUIDE ── */}
+      {tab === "guide" && (
+        <div>
+          <div style={{display:"flex",gap:5,overflowX:"auto",paddingBottom:6,marginBottom:14}}>
+            {CATEGORIES.map(function(cat){
+              return <button key={cat} onClick={function(){setFilterCat(cat);}} style={{padding:"4px 10px",borderRadius:16,border:"none",cursor:"pointer",fontSize:10,fontFamily:"inherit",whiteSpace:"nowrap",background:filterCat===cat?"rgba(212,168,83,0.2)":"rgba(255,255,255,0.05)",color:filterCat===cat?G:DIM,outline:filterCat===cat?"1px solid rgba(212,168,83,0.4)":"1px solid rgba(255,255,255,0.08)",transition:"all 0.15s"}}>{cat}</button>;
+            })}
+          </div>
+
+          {active.length > 0 && (
+            <div style={{marginBottom:14}}>
+              <div style={{fontSize:11,color:G,textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>🌱 Action needed now</div>
+              {active.map(function(crop){ return <CropCard key={crop.id} crop={crop} onSelect={function(){setSelectedCrop(selectedCrop===crop.id?null:crop.id);}} expanded={selectedCrop===crop.id} />; })}
+            </div>
+          )}
+          {upcoming.length > 0 && (
+            <div style={{marginBottom:14}}>
+              <div style={{fontSize:11,color:"#fbbf24",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>⏰ Coming up within 30 days</div>
+              {upcoming.map(function(crop){ return <CropCard key={crop.id} crop={crop} onSelect={function(){setSelectedCrop(selectedCrop===crop.id?null:crop.id);}} expanded={selectedCrop===crop.id} />; })}
+            </div>
+          )}
+          {rest.length > 0 && (
+            <div>
+              <button onClick={function(){setShowAll(function(s){return !s;});}} style={{width:"100%",padding:"8px 0",background:"transparent",border:"1px dashed rgba(255,255,255,0.1)",borderRadius:8,color:DIM,fontSize:11,cursor:"pointer",fontFamily:"inherit",marginBottom:showAll?10:0}}>
+                {showAll ? "▲ Hide" : "▼ Show all "+rest.length+" crops"}
+              </button>
+              {showAll && rest.map(function(crop){ return <CropCard key={crop.id} crop={crop} onSelect={function(){setSelectedCrop(selectedCrop===crop.id?null:crop.id);}} expanded={selectedCrop===crop.id} />; })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CropCard(props) {
+  var crop = props.crop;
+  var expanded = props.expanded;
+  var status = statusForCrop(crop);
+  var sc = STATUS_LABELS[status];
+
+  return (
+    <div onClick={props.onSelect} style={{background:sc.bg,border:"1px solid "+(sc.color+"33"),borderRadius:12,padding:"11px 13px",marginBottom:8,cursor:"pointer",transition:"all 0.15s"}}>
+      <div style={{display:"flex",alignItems:"center",gap:10}}>
+        <span style={{fontSize:22,flexShrink:0}}>{crop.emoji}</span>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontSize:14,color:"#e8e4dc",fontWeight:"bold"}}>{crop.name}</div>
+          <div style={{fontSize:10,color:DIM,marginTop:1}}>{crop.category}</div>
+        </div>
+        {sc.label ? <span style={{fontSize:9,padding:"2px 7px",borderRadius:10,background:sc.color+"22",color:sc.color,border:"1px solid "+sc.color+"44",flexShrink:0,textAlign:"center",lineHeight:1.4}}>{sc.label}</span> : null}
+        <span style={{color:DIM,fontSize:11,flexShrink:0}}>{expanded?"▲":"▼"}</span>
+      </div>
+
+      {expanded && (
+        <div style={{marginTop:10,paddingTop:10,borderTop:"1px solid rgba(255,255,255,0.07)"}}>
+          {/* Timeline */}
+          <div style={{marginBottom:10}}>
+            <div style={{fontSize:10,color:DIM,textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>Timeline</div>
+            {crop.startIndoor && (
+              <div style={{display:"flex",gap:8,marginBottom:5,alignItems:"center"}}>
+                <span style={{fontSize:12,width:16,textAlign:"center"}}>🏠</span>
+                <div>
+                  <div style={{fontSize:11,color:"#a78bfa"}}>Start indoors</div>
+                  <div style={{fontSize:11,color:"#a0967e"}}>{fmtRange(crop.startIndoor, addDays(crop.startIndoor,14))}</div>
+                </div>
+                {isPast(addDays(crop.startIndoor,14)) && <span style={{fontSize:9,color:DIM,marginLeft:"auto"}}>✓ past</span>}
+              </div>
+            )}
+            {crop.directSow && (
+              <div style={{display:"flex",gap:8,marginBottom:5,alignItems:"center"}}>
+                <span style={{fontSize:12,width:16,textAlign:"center"}}>🌱</span>
+                <div>
+                  <div style={{fontSize:11,color:"#d4a853"}}>Direct sow</div>
+                  <div style={{fontSize:11,color:"#a0967e"}}>{fmtRange(crop.directSow, addDays(crop.directSow,14))}</div>
+                </div>
+                {isPast(addDays(crop.directSow,14)) && <span style={{fontSize:9,color:DIM,marginLeft:"auto"}}>✓ past</span>}
+              </div>
+            )}
+            {crop.transplant && (
+              <div style={{display:"flex",gap:8,marginBottom:5,alignItems:"center"}}>
+                <span style={{fontSize:12,width:16,textAlign:"center"}}>🪴</span>
+                <div>
+                  <div style={{fontSize:11,color:"#fb923c"}}>Transplant outside</div>
+                  <div style={{fontSize:11,color:"#a0967e"}}>{fmtRange(crop.transplant, addDays(crop.transplant,14))}</div>
+                </div>
+                {isPast(addDays(crop.transplant,14)) && <span style={{fontSize:9,color:DIM,marginLeft:"auto"}}>✓ past</span>}
+              </div>
+            )}
+            {crop.harvest && (
+              <div style={{display:"flex",gap:8,marginBottom:5,alignItems:"center"}}>
+                <span style={{fontSize:12,width:16,textAlign:"center"}}>🌾</span>
+                <div>
+                  <div style={{fontSize:11,color:"#fbbf24"}}>Harvest window</div>
+                  <div style={{fontSize:11,color:"#a0967e"}}>{fmtSingle(crop.harvest)} onwards</div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Details */}
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:8}}>
+            <div style={{background:"rgba(255,255,255,0.045)",borderRadius:6,padding:"4px 8px"}}>
+              <div style={{fontSize:9,color:DIM}}>SPACING</div>
+              <div style={{fontSize:11,color:"#d4cdb8"}}>{crop.spacing}</div>
+            </div>
+            <div style={{background:"rgba(255,255,255,0.045)",borderRadius:6,padding:"4px 8px"}}>
+              <div style={{fontSize:9,color:DIM}}>DEPTH</div>
+              <div style={{fontSize:11,color:"#d4cdb8"}}>{crop.depth}</div>
+            </div>
+            <div style={{background:"rgba(255,255,255,0.045)",borderRadius:6,padding:"4px 8px"}}>
+              <div style={{fontSize:9,color:DIM}}>LIGHT</div>
+              <div style={{fontSize:11,color:"#d4cdb8"}}>{crop.sunlight}</div>
+            </div>
+            {crop.frostTender && (
+              <div style={{background:"rgba(96,165,250,0.1)",borderRadius:6,padding:"4px 8px"}}>
+                <div style={{fontSize:11,color:"#60a5fa"}}>❄️ Frost tender</div>
+              </div>
+            )}
+          </div>
+
+          <div style={{background:"rgba(255,255,255,0.045)",borderRadius:8,padding:"8px 10px"}}>
+            <div style={{fontSize:9,color:DIM,marginBottom:3}}>TIP</div>
+            <div style={{fontSize:11,color:"#a0967e",lineHeight:1.6}}>{crop.tip}</div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── BED MAP ──────────────────────────────────────────────────────────────────
+function BedMap(props) {
+  var beds = props.beds;
+  var plants = props.plants;
+  var positions = props.positions;
+  var onUpdatePositions = props.onUpdatePositions;
+
+  // Map canvas is 370x320 logical units, scaled to fill the screen
+  var MAP_W = 370;
+  var MAP_H = 320;
+
+  var [selectedBed, setSelectedBed] = useState(null);
+  var [dragging, setDragging] = useState(null); // {bedId, startX, startY, origX, origY}
+  var [resizing, setResizing] = useState(null); // {bedId, startX, startY, origW, origH}
+  var [editBedId, setEditBedId] = useState(null);
+  var canvasRef = React.useRef(null);
+
+  function getPos(bedId) {
+    return positions[bedId] || { x:10, y:10, w:100, h:60 };
+  }
+
+  function getCanvasPoint(e) {
+    var canvas = canvasRef.current;
+    if (!canvas) return {x:0,y:0};
+    var rect = canvas.getBoundingClientRect();
+    var scaleX = MAP_W / rect.width;
+    var scaleY = MAP_H / rect.height;
+    var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top)  * scaleY,
+    };
+  }
+
+  function onPointerDown(e, bedId, mode) {
+    e.stopPropagation();
+    var pt = getCanvasPoint(e);
+    var pos = getPos(bedId);
+    setSelectedBed(bedId);
+    if (mode === "drag") {
+      setDragging({ bedId:bedId, startX:pt.x, startY:pt.y, origX:pos.x, origY:pos.y });
+    } else {
+      setResizing({ bedId:bedId, startX:pt.x, startY:pt.y, origW:pos.w, origH:pos.h });
+    }
+  }
+
+  function onPointerMove(e) {
+    var pt = getCanvasPoint(e);
+    if (dragging) {
+      var dx = pt.x - dragging.startX;
+      var dy = pt.y - dragging.startY;
+      var newX = Math.max(0, Math.min(MAP_W - 40, dragging.origX + dx));
+      var newY = Math.max(0, Math.min(MAP_H - 20, dragging.origY + dy));
+      var updated = Object.assign({}, positions);
+      updated[dragging.bedId] = Object.assign({}, getPos(dragging.bedId), { x:Math.round(newX), y:Math.round(newY) });
+      onUpdatePositions(updated);
+    }
+    if (resizing) {
+      var dw = pt.x - resizing.startX;
+      var dh = pt.y - resizing.startY;
+      var newW = Math.max(40, resizing.origW + dw);
+      var newH = Math.max(25, resizing.origH + dh);
+      var updated = Object.assign({}, positions);
+      updated[resizing.bedId] = Object.assign({}, getPos(resizing.bedId), { w:Math.round(newW), h:Math.round(newH) });
+      onUpdatePositions(updated);
+    }
+  }
+
+  function onPointerUp() {
+    setDragging(null);
+    setResizing(null);
+  }
+
+  var BED_TYPE_COLORS2 = {
+    vegetable:"#d4a853", berry:"#c084fc", fruit:"#fb923c",
+    perennial:"#34d399", ornamental:"#f472b6", other:"#94a3b8"
+  };
+
+  return (
+    <div style={{margin:"4px 0"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+        <div style={{fontSize:17,color:"#d4a853",fontWeight:"bold"}}>Yard Map</div>
+        <div style={{fontSize:10,color:DIM}}>Drag to move · corner to resize</div>
+      </div>
+
+      {/* Legend */}
+      <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:10}}>
+        {["vegetable","berry","fruit","perennial","ornamental"].map(function(type){
+          return (
+            <div key={type} style={{display:"flex",alignItems:"center",gap:4}}>
+              <div style={{width:10,height:10,borderRadius:2,background:BED_TYPE_COLORS2[type],opacity:0.7}}/>
+              <span style={{fontSize:9,color:DIM,textTransform:"capitalize"}}>{type}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Map canvas */}
+      <div
+        ref={canvasRef}
+        onMouseMove={onPointerMove}
+        onMouseUp={onPointerUp}
+        onMouseLeave={onPointerUp}
+        onTouchMove={function(e){e.preventDefault();onPointerMove(e);}}
+        onTouchEnd={onPointerUp}
+        style={{
+          position:"relative",
+          width:"100%",
+          paddingBottom: (MAP_H/MAP_W*100)+"%",
+          background:"rgba(0,0,0,0.3)",
+          border:"1px solid rgba(212,168,83,0.15)",
+          borderRadius:12,
+          overflow:"hidden",
+          touchAction:"none",
+          userSelect:"none",
+        }}
+      >
+        <div style={{position:"absolute",inset:0}}>
+          {/* Grid lines */}
+          <svg width="100%" height="100%" style={{position:"absolute",inset:0}} viewBox={"0 0 "+MAP_W+" "+MAP_H} preserveAspectRatio="none">
+            {[0,1,2,3,4,5,6,7,8,9].map(function(i){
+              return <line key={"v"+i} x1={MAP_W/10*i} y1={0} x2={MAP_W/10*i} y2={MAP_H} stroke="rgba(212,168,83,0.05)" strokeWidth="0.5"/>;
+            })}
+            {[0,1,2,3,4,5,6,7,8].map(function(i){
+              return <line key={"h"+i} x1={0} y1={MAP_H/8*i} x2={MAP_W} y2={MAP_H/8*i} stroke="rgba(212,168,83,0.05)" strokeWidth="0.5"/>;
+            })}
+            {/* House/structure placeholder */}
+            <rect x={290} y={220} width={75} height={95} fill="rgba(255,255,255,0.045)" stroke="rgba(255,255,255,0.1)" strokeWidth="1" rx="2"/>
+            <text x={327} y={272} textAnchor="middle" fill="rgba(255,255,255,0.2)" fontSize="9">🏠</text>
+            <text x={327} y={284} textAnchor="middle" fill="rgba(255,255,255,0.15)" fontSize="7">house</text>
+            {/* Compass */}
+            <text x={MAP_W-12} y={14} textAnchor="middle" fill="rgba(212,168,83,0.4)" fontSize="10">N</text>
+            <line x1={MAP_W-12} y1={16} x2={MAP_W-12} y2={28} stroke="rgba(212,168,83,0.3)" strokeWidth="1"/>
+          </svg>
+
+          {/* Beds */}
+          {beds.map(function(bed){
+            var pos = getPos(bed.id);
+            var color = BED_TYPE_COLORS2[bed.type] || "#94a3b8";
+            var bedPlants = plants.filter(function(p){return p.bedId===bed.id;});
+            var isSelected = selectedBed === bed.id;
+            var pct = function(val, total){ return (val/total*100)+"%"; };
+
+            return (
+              <div
+                key={bed.id}
+                style={{
+                  position:"absolute",
+                  left:pct(pos.x,MAP_W), top:pct(pos.y,MAP_H),
+                  width:pct(pos.w,MAP_W), height:pct(pos.h,MAP_H),
+                  background: color+"18",
+                  border:"1.5px solid "+(isSelected?color:color+"55"),
+                  borderRadius:4,
+                  boxShadow: isSelected?"0 0 0 1.5px "+color+"44":"none",
+                  cursor:"move",
+                  overflow:"hidden",
+                  boxSizing:"border-box",
+                }}
+                onMouseDown={function(e){onPointerDown(e,bed.id,"drag");}}
+                onTouchStart={function(e){e.preventDefault();onPointerDown(e,bed.id,"drag");}}
+                onClick={function(e){e.stopPropagation();setEditBedId(bed.id===editBedId?null:bed.id);}}
+              >
+                {/* Bed label */}
+                <div style={{padding:"2px 4px",fontSize:7,color:color,fontWeight:"bold",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",lineHeight:1.3}}>
+                  {bed.name}
+                </div>
+                {/* Plant emojis */}
+                {pos.h > 35 && (
+                  <div style={{padding:"0 3px",display:"flex",flexWrap:"wrap",gap:1}}>
+                    {bedPlants.slice(0,6).map(function(p){
+                      return <span key={p.id} style={{fontSize:8,lineHeight:1}}>{p.emoji}</span>;
+                    })}
+                    {bedPlants.length>6 && <span style={{fontSize:7,color:color,opacity:0.7}}>+{bedPlants.length-6}</span>}
+                  </div>
+                )}
+                {/* Irrigation indicator */}
+                {bed.irrigated && (
+                  <div style={{position:"absolute",top:2,right:3,fontSize:7,opacity:0.6}}>💧</div>
+                )}
+                {/* Resize handle */}
+                <div
+                  style={{position:"absolute",bottom:0,right:0,width:12,height:12,cursor:"nwse-resize",display:"flex",alignItems:"center",justifyContent:"center"}}
+                  onMouseDown={function(e){e.stopPropagation();onPointerDown(e,bed.id,"resize");}}
+                  onTouchStart={function(e){e.stopPropagation();e.preventDefault();onPointerDown(e,bed.id,"resize");}}
+                >
+                  <div style={{width:6,height:6,borderRight:"1.5px solid "+color+"88",borderBottom:"1.5px solid "+color+"88"}}/>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Selected bed detail */}
+      {editBedId && (function(){
+        var bed = beds.find(function(b){return b.id===editBedId;});
+        if (!bed) return null;
+        var bedPlants = plants.filter(function(p){return p.bedId===bed.id;});
+        var color = BED_TYPE_COLORS2[bed.type]||"#94a3b8";
+        return (
+          <div style={{background:"rgba(255,255,255,0.045)",border:"1px solid rgba(255,255,255,0.09)",borderRadius:12,padding:"12px 14px",marginTop:10}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+              <div style={{width:10,height:10,borderRadius:3,background:color,flexShrink:0}}/>
+              <div style={{fontSize:14,color:"#e8e4dc",fontWeight:"bold"}}>{bed.name}</div>
+              <div style={{marginLeft:"auto",fontSize:11,color:DIM}}>{bed.irrigated?(irrigLabel||"💧 Auto"):"🪣 Hand water"}</div>
+            </div>
+            {bed.notes && <div style={{fontSize:11,color:"#5a5844",marginBottom:8}}>{bed.notes}</div>}
+            <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+              {bedPlants.map(function(p){
+                return (
+                  <div key={p.id} style={{display:"flex",alignItems:"center",gap:4,background:"rgba(255,255,255,0.045)",borderRadius:6,padding:"3px 7px"}}>
+                    <span style={{fontSize:14}}>{p.emoji}</span>
+                    <span style={{fontSize:11,color:"#d4cdb8"}}>{p.name}</span>
+                  </div>
+                );
+              })}
+              {bedPlants.length===0 && <span style={{fontSize:11,color:DIM}}>No plants</span>}
+            </div>
+          </div>
+        );
+      })()}
+
+      <div style={{fontSize:10,color:DIM,marginTop:10,textAlign:"center"}}>
+        Tap a bed to see its plants · Drag to reposition · Corner handle to resize
+      </div>
+    </div>
+  );
+}
+
+// ─── SETTINGS ────────────────────────────────────────────────────────────────
+
+var ZONE_FROST_DEFAULTS = {
+  "3a":{"last":"05-30","first":"09-01"}, "3b":{"last":"05-25","first":"09-10"},
+  "4a":{"last":"05-15","first":"09-20"}, "4b":{"last":"05-10","first":"09-25"},
+  "5a":{"last":"05-01","first":"10-01"}, "5b":{"last":"04-25","first":"10-10"},
+  "6a":{"last":"04-20","first":"10-15"}, "6b":{"last":"04-15","first":"10-20"},
+  "7a":{"last":"05-15","first":"10-15"}, "7b":{"last":"04-01","first":"11-01"},
+  "8a":{"last":"03-25","first":"11-10"}, "8b":{"last":"03-15","first":"11-20"},
+  "9a":{"last":"03-01","first":"12-01"}, "9b":{"last":"02-15","first":"12-15"},
+  "10a":{"last":"01-30","first":"12-20"},"10b":{"last":"01-15","first":"12-30"},
+};
+
+async function lookupZoneFromLocation(locationText) {
+  // Step 1: geocode with Nominatim
+  var geoUrl = "https://nominatim.openstreetmap.org/search?q="
+    + encodeURIComponent(locationText)
+    + "&format=json&limit=1&countrycodes=us";
+  var geoResp = await fetch(geoUrl, {
+    headers: { "Accept": "application/json", "User-Agent": "garden-manager/1.0" }
+  });
+  if (!geoResp.ok) throw new Error("Geocoding failed (" + geoResp.status + ")");
+  var geoData = await geoResp.json();
+  if (!geoData || !geoData.length) throw new Error("Location not found — try ZIP code or City, State");
+  var lat = parseFloat(geoData[0].lat);
+  var lon = parseFloat(geoData[0].lon);
+
+  // Step 2: USDA zone from phzmapi.org
+  var zoneResp = await fetch("https://phzmapi.org/" + lat + "/" + lon + ".json");
+  if (!zoneResp.ok) throw new Error("Zone API failed (" + zoneResp.status + ")");
+  var zoneData = await zoneResp.json();
+  if (!zoneData || !zoneData.zone) throw new Error("Zone not found for coordinates");
+  return { zone: zoneData.zone, lat: lat, lon: lon };
+}
+
+function SettingsView(props) {
+  var s = props.settings || {};
+  var [form, setForm] = useState({
+    gardenName:      s.gardenName      || "",
+    location:        s.location        || "",
+    zone:            s.zone            || "",
+    irrigationLabel: s.irrigationLabel || "",
+    lastFrost:       s.lastFrost       || "05-15",
+    firstFrost:      s.firstFrost      || "10-15",
+  });
+  var [saved, setSaved]       = useState(false);
+  var [zoneStatus, setZoneStatus] = useState(null);
+  var [zoneMsg, setZoneMsg]   = useState("");
+
+  function upd(k,v) { setForm(function(p){ return Object.assign({},p,{[k]:v}); }); setSaved(false); }
+
+  async function doLookup() {
+    var input = form.location.trim();
+    if (!input) { setZoneStatus("error"); setZoneMsg("Enter a location first"); return; }
+    setZoneStatus("loading"); setZoneMsg("");
+    try {
+      var result = await lookupZoneFromLocation(input);
+      var zoneKey = result.zone.toLowerCase();
+      var frosts = ZONE_FROST_DEFAULTS[zoneKey];
+      setForm(function(p){ return Object.assign({}, p, {
+        zone: result.zone,
+        lat:  result.lat,
+        lon:  result.lon,
+        lastFrost:  frosts ? frosts.last  : p.lastFrost,
+        firstFrost: frosts ? frosts.first : p.firstFrost,
+      });});
+      setZoneStatus("found");
+      setZoneMsg("Zone " + result.zone + " found" + (frosts ? " — frost dates updated" : ""));
+      setTimeout(function(){ setZoneStatus(null); setZoneMsg(""); }, 5000);
+    } catch(e) {
+      setZoneStatus("error");
+      setZoneMsg(e.message || "Lookup failed");
+    }
+  }
+
+  function save() {
+    props.onSave(form);
+    setSaved(true);
+    setTimeout(function(){ setSaved(false); }, 2000);
+  }
+
+  return (
+    <div style={{margin:"4px 0"}}>
+      <div style={{fontSize:17,color:G,fontWeight:"700",marginBottom:4}}>Settings</div>
+      <div style={{fontSize:11,color:DIM,marginBottom:18}}>Customize your garden app</div>
+
+      <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:14,padding:"16px 14px",marginBottom:12}}>
+        <div style={{fontSize:12,color:G,fontWeight:"600",marginBottom:2}}>Identity</div>
+
+        <Label>Garden Name</Label>
+        <input style={INP} value={form.gardenName} onChange={function(e){upd("gardenName",e.target.value);}} placeholder="e.g. The Johnson Garden" />
+
+        <Label>Location</Label>
+        <div style={{display:"flex",gap:8,marginTop:4}}>
+          <input style={Object.assign({},INP,{flex:1,marginTop:0})} value={form.location}
+            onChange={function(e){ upd("location",e.target.value); setZoneStatus(null); setZoneMsg(""); }}
+            placeholder="ZIP code or City, State" />
+          <button onClick={doLookup} disabled={zoneStatus==="loading"} style={{padding:"0 12px",background:"rgba(212,168,83,0.15)",border:"1px solid rgba(212,168,83,0.35)",borderRadius:10,color:G,fontSize:11,cursor:zoneStatus==="loading"?"not-allowed":"pointer",fontFamily:"inherit",whiteSpace:"nowrap",flexShrink:0,fontWeight:"600"}}>
+            {zoneStatus==="loading"
+              ? <span style={{display:"inline-block",width:12,height:12,border:"1.5px solid rgba(212,168,83,0.3)",borderTop:"1.5px solid #d4a853",borderRadius:"50%",animation:"spin 0.8s linear infinite"}}/>
+              : "Lookup Zone"}
+          </button>
+        </div>
+        {zoneMsg && <div style={{fontSize:11,marginTop:6,color:zoneStatus==="found"?"#7ec87e":"#e07070"}}>{zoneStatus==="found"?"✓ ":"⚠ "}{zoneMsg}</div>}
+
+        <Label>Hardiness Zone</Label>
+        <input style={INP} value={form.zone} onChange={function(e){upd("zone",e.target.value);}} placeholder="Auto-filled or enter manually (e.g. 7a)" />
+
+        <Label>Irrigation System (optional)</Label>
+        <input style={INP} value={form.irrigationLabel} onChange={function(e){upd("irrigationLabel",e.target.value);}} placeholder="e.g. Rachio, Drip system, Hand watered" />
+      </div>
+
+      <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:14,padding:"16px 14px",marginBottom:18}}>
+        <div style={{fontSize:12,color:G,fontWeight:"600",marginBottom:2}}>Frost Dates</div>
+        <div style={{fontSize:11,color:DIM,marginBottom:8}}>Auto-filled by zone lookup · or set manually (MM-DD)</div>
+
+        <Label>Last Spring Frost</Label>
+        <input style={INP} value={form.lastFrost} onChange={function(e){upd("lastFrost",e.target.value);}} placeholder="05-15" />
+
+        <Label>First Fall Frost</Label>
+        <input style={INP} value={form.firstFrost} onChange={function(e){upd("firstFrost",e.target.value);}} placeholder="10-15" />
+      </div>
+
+      <button onClick={save} style={{width:"100%",padding:"13px 0",background:saved?"rgba(100,200,100,0.18)":"linear-gradient(135deg,rgba(212,168,83,0.22),rgba(212,168,83,0.12))",border:"1px solid "+(saved?"rgba(100,200,100,0.4)":"rgba(212,168,83,0.4)"),borderRadius:12,color:saved?"#7ec87e":G,fontSize:14,cursor:"pointer",fontFamily:"inherit",fontWeight:"600",letterSpacing:"0.3px",transition:"all 0.3s"}}>
+        {saved ? "✓ Saved!" : "Save Settings"}
+      </button>
+
+      <div style={{marginTop:24,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.06)"}}>
+        <div style={{fontSize:11,color:DIM,textAlign:"center"}}>All data stored locally on this device</div>
+      </div>
+    </div>
+  );
+}
+
+export default function GardenApp() {
+  var [data, setData]       = useState(function(){return loadData();});
+  var [view, setView]       = useState("dashboard");
+  var [modal, setModal]     = useState(null);
+  var [expandedBed, setExpandedBed] = useState(null);
+  var [selMonth, setSelMonth]       = useState(CURRENT_MONTH);
+  var [plantDetail, setPlantDetail] = useState(null);
+
+  useEffect(function(){ saveData(data); }, [data]);
+
+  var beds      = data.beds      || [];
+  var plants    = data.plants    || [];
+  var chemicals = data.chemicals || [];
+  var tasks     = data.tasks     || [];
+  var harvests  = data.harvests  || [];
+  var journal   = data.journal   || [];
+
+  function upd(k,v) { setData(function(d){return Object.assign({},d,{[k]:v});}); }
+
+  function saveBed(b)    { upd("beds",      b.id ? beds.map(function(x){return x.id===b.id?b:x;}) : beds.concat([Object.assign({},b,{id:uid()})])); setModal(null); }
+  function delBed(id)    { upd("beds", beds.filter(function(b){return b.id!==id;})); upd("plants", plants.filter(function(p){return p.bedId!==id;})); setModal(null); }
+  function savePlant(p)  { upd("plants",    p.id ? plants.map(function(x){return x.id===p.id?p:x;}) : plants.concat([Object.assign({},p,{id:uid()})])); setModal(null); }
+  function delPlant(id)  { upd("plants", plants.filter(function(p){return p.id!==id;})); setModal(null); }
+  function saveChem(c)   { upd("chemicals", c.id ? chemicals.map(function(x){return x.id===c.id?c:x;}) : chemicals.concat([Object.assign({},c,{id:uid()})])); setModal(null); }
+  function delChem(id)   { upd("chemicals", chemicals.filter(function(c){return c.id!==id;})); setModal(null); }
+  function markApplied(id) { upd("chemicals", chemicals.map(function(c){return c.id===id?Object.assign({},c,{lastApplied:TODAY_STR}):c;})); }
+  function saveTask(t)   { upd("tasks",     t.id ? tasks.map(function(x){return x.id===t.id?t:x;}) : tasks.concat([Object.assign({},t,{id:uid()})])); setModal(null); }
+  function delTask(id)   { upd("tasks", tasks.filter(function(t){return t.id!==id;})); setModal(null); }
+  function toggleTask(id){ upd("tasks", tasks.map(function(t){return t.id===id?Object.assign({},t,{done:!t.done}):t;})); }
+  function saveHarvest(h){ upd("harvests",  h.id ? harvests.map(function(x){return x.id===h.id?h:x;}) : harvests.concat([Object.assign({},h,{id:uid()})])); setModal(null); }
+  function delHarvest(id){ upd("harvests", harvests.filter(function(h){return h.id!==id;})); setModal(null); }
+  function saveJournal(j){ upd("journal",   j.id ? journal.map(function(x){return x.id===j.id?j:x;}) : journal.concat([Object.assign({},j,{id:uid()})])); setModal(null); }
+  function delJournal(id){ upd("journal", journal.filter(function(j){return j.id!==id;})); setModal(null); }
+
+  // Auto-suggest tasks based on plants in beds
+  function getSuggestedTasks(plants) {
+    var now = new Date();
+    var month = now.getMonth() + 1;
+    var suggestions = [];
+    var categories = plants.map(function(p){ return (p.category||"").toLowerCase(); });
+    var cropTypes = plants.map(function(p){ return p.cropType||""; });
+
+    var hasTomatoes   = categories.some(function(c){ return c.includes("tomato"); });
+    var hasBlueberry  = categories.some(function(c){ return c.includes("blueberry"); });
+    var hasFig        = categories.some(function(c){ return c.includes("fig"); });
+    var hasPear       = categories.some(function(c){ return c.includes("pear"); }) || cropTypes.includes("c1");
+    var hasStrawberry = categories.some(function(c){ return c.includes("strawberry"); });
+    var hasRaspberry  = categories.some(function(c){ return c.includes("raspberry"); });
+    var hasBlackberry = categories.some(function(c){ return c.includes("blackberry"); });
+    var hasPersimmon  = categories.some(function(c){ return c.includes("persimmon"); });
+
+    if (hasTomatoes && month >= 5 && month <= 8)
+      suggestions.push({ text:"Pinch tomato suckers — check weekly", icon:"🍅", color:"#f87171" });
+    if (hasTomatoes && month >= 6 && month <= 8)
+      suggestions.push({ text:"Apply copper fungicide to tomatoes — every 7-10 days", icon:"🧪", color:"#fb923c" });
+    if (hasBlueberry && month >= 6 && month <= 7)
+      suggestions.push({ text:"Net blueberries before they ripen", icon:"🫐", color:"#c084fc" });
+    if (hasBlueberry && month >= 7 && month <= 8)
+      suggestions.push({ text:"Harvest blueberries — check daily", icon:"🫐", color:"#fbbf24" });
+    if (hasPear && month === 6)
+      suggestions.push({ text:"Thin Asian pear clusters — 1 fruit per cluster", icon:"🍐", color:"#fb923c" });
+    if (hasStrawberry && month >= 6 && month <= 8)
+      suggestions.push({ text:"Check strawberry tower daily — water if dry", icon:"🍓", color:"#f87171" });
+    if (hasRaspberry && month >= 7 && month <= 8)
+      suggestions.push({ text:"Cut raspberry floricanes after harvest", icon:"🍓", color:"#d4a853" });
+    if (hasBlackberry && month >= 7 && month <= 9)
+      suggestions.push({ text:"Harvest blackberries when deep black", icon:"🫐", color:"#fbbf24" });
+    if (hasFig && month === 11)
+      suggestions.push({ text:"Wrap fig in burlap for winter", icon:"🫐", color:"#60a5fa" });
+    if (hasPersimmon && month >= 10 && month <= 11)
+      suggestions.push({ text:"Harvest persimmon — fully orange is fine", icon:"🟠", color:"#fbbf24" });
+    if (plants.length > 0 && month >= 6 && month <= 9)
+      suggestions.push({ text:"Mulch beds if not done — 3 inch layer", icon:"🌿", color:"#d4a853" });
+
+    return suggestions;
+  }
+
+  var suggestedTasks = getSuggestedTasks(plants);
+  var dueChem  = chemicals.filter(function(c){return c.active && isDue(c.lastApplied,c.interval);});
+  var soonChem = chemicals.filter(function(c){return c.active && !isDue(c.lastApplied,c.interval) && isSoon(c.lastApplied,c.interval);});
+  var curTasks = tasks.filter(function(t){return t.month===CURRENT_MONTH;});
+  var openCur  = curTasks.filter(function(t){return !t.done;});
+  var doneCur  = curTasks.filter(function(t){return t.done;});
+
+  var settings = data.settings || {};
+  var gardenName = settings.gardenName || "My Garden";
+  var locationLine = [settings.location, settings.zone ? "Zone "+settings.zone : ""].filter(Boolean).join(" · ");
+  var irrigLine = settings.irrigationLabel || "";
+  var irrigLabel = settings.irrigationLabel ? "💧 "+settings.irrigationLabel : "💧 Auto";
+
+  var NAV_TABS = [
+    { key:"dashboard", icon:"⬡",  label:"Home"     },
+    { key:"beds",      icon:"🪴", label:"Beds"     },
+    { key:"map",       icon:"🗺", label:"Map"      },
+    { key:"planner",   icon:"🌱", label:"Planner"  },
+    { key:"chemicals", icon:"🧪", label:"Inputs"   },
+    { key:"journal",   icon:"📓", label:"Journal"  },
+    { key:"tasks",     icon:"🗓", label:"Cal"      },
+    { key:"settings",  icon:"⚙️", label:"Settings" },
+  ];
+
+  return (
+    <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#0e0e0a 0%,#141410 50%,#0c0c08 100%)",fontFamily:"'Inter','SF Pro Display',-apple-system,BlinkMacSystemFont,sans-serif",color:"#e8e4dc"}}>
+      <style>{"@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'); @keyframes spin{to{transform:rotate(360deg)}} ::-webkit-scrollbar{width:3px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:rgba(212,168,83,0.2);border-radius:3px}"}</style>
+
+      <div style={{background:"rgba(0,0,0,0.5)",borderBottom:"1px solid rgba(212,168,83,0.12)",padding:"16px 16px 0",position:"sticky",top:0,zIndex:50,backdropFilter:"blur(20px)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}>
+          <div style={{width:34,height:34,borderRadius:10,background:"linear-gradient(135deg,rgba(212,168,83,0.3),rgba(212,168,83,0.1))",border:"1px solid rgba(212,168,83,0.3)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>🌿</div>
+          <div>
+            <div style={{fontSize:17,fontWeight:"700",color:"#f0ede8",letterSpacing:"-0.3px"}}>{gardenName}</div>
+            {(locationLine || irrigLine) && <div style={{fontSize:9,color:DIM,letterSpacing:"1.5px",textTransform:"uppercase"}}>{[locationLine,irrigLine].filter(Boolean).join(" · ")}</div>}
+          </div>
+          <div style={{marginLeft:"auto",fontSize:10,color:DIM,fontVariantNumeric:"tabular-nums"}}>{TODAY.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}</div>
+        </div>
+        <div style={{display:"flex"}}>
+          {NAV_TABS.map(function(tab){
+            return (
+              <button key={tab.key} onClick={function(){setView(tab.key);}} style={{flex:1,padding:"8px 2px",border:"none",cursor:"pointer",background:"transparent",color:view===tab.key?G:DIM,fontFamily:"inherit",borderBottom:view===tab.key?"2px solid "+G:"2px solid transparent",fontSize:9,letterSpacing:"0.5px",fontWeight:view===tab.key?"600":"400",transition:"all 0.2s"}}>
+                <div style={{fontSize:14,marginBottom:2}}>{tab.icon}</div>
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div style={{padding:14,maxWidth:480,margin:"0 auto",paddingBottom:32}}>
+
+        {view === "dashboard" && (
+          <div>
+            <WeatherWidget settings={settings} />
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:7,margin:"4px 0 14px"}}>
+              {[{label:"Beds",val:beds.length,icon:"🪴",color:"#60a5fa"},{label:"Plants",val:plants.length,icon:"🌱",color:"#d4a853"},{label:"Inputs",val:chemicals.filter(function(c){return c.active;}).length,icon:"🧪",color:"#c084fc"},{label:"Harvests",val:harvests.length,icon:"🌾",color:"#fbbf24"}].map(function(stat){
+                return (
+                  <div key={stat.label} style={{background:"rgba(255,255,255,0.045)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"10px 6px",textAlign:"center"}}>
+                    <div style={{fontSize:16}}>{stat.icon}</div>
+                    <div style={{fontSize:20,fontWeight:"bold",color:stat.color,lineHeight:1.1}}>{stat.val}</div>
+                    <div style={{fontSize:8,color:DIM,letterSpacing:1,textTransform:"uppercase"}}>{stat.label}</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div style={{background:"rgba(255,255,255,0.045)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"12px 14px",marginBottom:12}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:7}}>
+                <div style={{fontSize:13,color:"#d4a853"}}>📋 {MONTHS_L[CURRENT_MONTH-1]} Tasks</div>
+                <div style={{fontSize:12,color:"#fbbf24"}}>{doneCur.length} / {curTasks.length} done</div>
+              </div>
+              <div style={{height:5,background:"rgba(255,255,255,0.08)",borderRadius:3}}>
+                <div style={{height:"100%",borderRadius:3,background:"linear-gradient(90deg,#d4a853,#e8c878)",width:(curTasks.length ? Math.round(doneCur.length/curTasks.length*100) : 0)+"%",transition:"width 0.5s"}} />
+              </div>
+            </div>
+
+            {(dueChem.length > 0 || soonChem.length > 0) && (
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:11,color:"#f87171",marginBottom:7}}>⚠️ Chemical / Fertilizer Alerts</div>
+                {dueChem.concat(soonChem).map(function(c){
+                  var over = isDue(c.lastApplied,c.interval);
+                  var dl = daysLeft(c.lastApplied,c.interval);
+                  return (
+                    <div key={c.id} style={{background:over?"rgba(248,113,113,0.08)":"rgba(251,191,36,0.07)",border:"1px solid "+(over?"rgba(248,113,113,0.22)":"rgba(251,191,36,0.2)"),borderRadius:10,padding:"10px 12px",marginBottom:7,display:"flex",alignItems:"center",gap:10}}>
+                      <div style={{flex:1}}>
+                        <div style={{fontSize:13,color:"#f0ede8"}}>{c.name}</div>
+                        <div style={{fontSize:11,color:over?"#f87171":"#fbbf24"}}>{over ? "Overdue "+Math.abs(dl)+"d" : "Due in "+dl+"d"}<span style={{color:DIM}}> · {c.target}</span></div>
+                      </div>
+                      <button onClick={function(){markApplied(c.id);}} style={{background:"rgba(74,222,128,0.14)",border:"1px solid rgba(212,168,83,0.3)",borderRadius:7,color:G,padding:"5px 10px",fontSize:11,cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap",flexShrink:0}}>Done</button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {openCur.length > 0 && (
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:11,color:"#d4a853",marginBottom:7}}>🗓 Open Tasks This Month</div>
+                {openCur.slice(0,4).map(function(t){
+                  return (
+                    <div key={t.id} style={{background:"rgba(255,255,255,0.035)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:10,padding:"9px 12px",marginBottom:6,display:"flex",alignItems:"center",gap:9}}>
+                      <button onClick={function(){toggleTask(t.id);}} style={{width:18,height:18,borderRadius:4,border:"1.5px solid rgba(74,222,128,0.32)",background:"transparent",cursor:"pointer",flexShrink:0}} />
+                      <div style={{flex:1}}><div style={{fontSize:13,color:"#e8e4dc"}}>{t.title}</div></div>
+                      <Tag color={TASK_COLORS[t.category]||"#94a3b8"}>{t.category}</Tag>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {harvests.length > 0 && (
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:11,color:"#fbbf24",marginBottom:7}}>🌾 Recent Harvests</div>
+                {harvests.slice().sort(function(a,b){return b.date.localeCompare(a.date);}).slice(0,4).map(function(h){
+                  var p = plants.find(function(pl){return pl.id===h.plantId;});
+                  return (
+                    <div key={h.id} style={{display:"flex",alignItems:"center",gap:9,padding:"7px 0",borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
+                      <span style={{fontSize:18}}>{p?p.emoji:"🌱"}</span>
+                      <div style={{flex:1}}><div style={{fontSize:13,color:"#e8e4dc"}}>{p?p.name:"Unknown"}</div><div style={{fontSize:11,color:DIM}}>{fmtDateShort(h.date)}</div></div>
+                      <div style={{fontSize:13,color:"#fbbf24",fontWeight:"bold"}}>{h.amount} {h.unit}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <div style={{display:"flex",gap:8}}>
+              <button onClick={function(){setModal({type:"harvest",payload:{}});}} style={{flex:1,padding:"10px 0",background:"rgba(251,191,36,0.12)",border:"1px solid rgba(251,191,36,0.28)",borderRadius:10,color:"#fbbf24",fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>🌾 Harvest</button>
+              <button onClick={function(){setModal({type:"journal",payload:{}});}} style={{flex:1,padding:"10px 0",background:"rgba(96,165,250,0.1)",border:"1px solid rgba(96,165,250,0.25)",borderRadius:10,color:"#60a5fa",fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>📝 Note</button>
+            </div>
+
+            {suggestedTasks.length > 0 && (
+              <div style={{marginTop:14}}>
+                <div style={{fontSize:11,color:"#d4a853",marginBottom:7}}>💡 Suggested for your plants</div>
+                {suggestedTasks.map(function(task, i){
+                  return (
+                    <div key={i} style={{background:"rgba(255,255,255,0.035)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:10,padding:"9px 12px",marginBottom:6,display:"flex",alignItems:"center",gap:9}}>
+                      <span style={{fontSize:16,flexShrink:0}}>{task.icon}</span>
+                      <div style={{flex:1,fontSize:12,color:"#d4cdb8",lineHeight:1.4}}>{task.text}</div>
+                      <div style={{width:6,height:6,borderRadius:"50%",background:task.color,flexShrink:0}}/>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {view === "beds" && (
+          <div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",margin:"4px 0 14px"}}>
+              <div style={{fontSize:17,color:"#d4a853",fontWeight:"bold"}}>Garden Beds</div>
+              <button onClick={function(){setModal({type:"bed",payload:{} });}} style={{background:"rgba(74,222,128,0.14)",border:"1px solid rgba(212,168,83,0.3)",borderRadius:8,color:G,padding:"5px 12px",fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>+ Bed</button>
+            </div>
+            {beds.map(function(bed){
+              var bp = plants.filter(function(p){return p.bedId===bed.id;});
+              var open = expandedBed===bed.id;
+              var tc = BED_COLORS[bed.type]||"#94a3b8";
+              return (
+                <div key={bed.id} style={{background:"rgba(255,255,255,0.035)",border:"1px solid rgba(255,255,255,"+(open?"0.1":"0.06")+")",borderRadius:12,marginBottom:8,overflow:"hidden"}}>
+                  <div onClick={function(){setExpandedBed(open?null:bed.id);}} style={{padding:"12px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>
+                    <div style={{width:9,height:9,borderRadius:3,background:tc,flexShrink:0}} />
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:14,color:"#e8e4dc",fontWeight:"bold"}}>{bed.name}</div>
+                      <div style={{fontSize:11,color:DIM,marginTop:1}}>{bed.type} · {bp.length} plant{bp.length!==1?"s":""} · {bed.irrigated?(irrigLabel||"💧 Auto"):"🪣 Hand water"}</div>
+                    </div>
+                    <div style={{display:"flex",gap:8,alignItems:"center",flexShrink:0}}>
+                      <button onClick={function(e){e.stopPropagation();setModal({type:"bed",payload:bed});}} style={{background:"transparent",border:"none",color:DIM,cursor:"pointer",fontSize:14,padding:2}}>✏️</button>
+                      <span style={{color:DIM,fontSize:11}}>{open?"▲":"▼"}</span>
+                    </div>
+                  </div>
+                  {open && (
+                    <div style={{borderTop:"1px solid rgba(255,255,255,0.06)",padding:"0 14px 14px"}}>
+                      {bed.notes && <div style={{fontSize:11,color:"#5a5844",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,0.05)",marginBottom:8}}>{bed.notes}</div>}
+                      {bp.length===0 && <div style={{fontSize:12,color:DIM,padding:"6px 0",textAlign:"center"}}>No plants yet</div>}
+                      {bp.map(function(p){
+                        var sc = STATUS_CFG[p.status]||STATUS_CFG.healthy;
+                        return (
+                          <div key={p.id} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,0.04)",cursor:"pointer"}} onClick={function(){setPlantDetail(p);}}>
+                            <PlantImage plantId={p.id} plantName={p.name} plantEmoji={p.emoji} size={48} radius={8} />
+                            <div style={{flex:1,minWidth:0}}>
+                              <div style={{fontSize:13,color:"#e8e4dc"}}>{p.name}</div>
+                              <div style={{fontSize:11,color:DIM}}>{p.category}</div>
+                            </div>
+                            <div style={{display:"flex",flexDirection:"column",gap:4,alignItems:"flex-end"}}>
+                              <Tag color={sc.color}>{sc.label}</Tag>
+                              <button onClick={function(e){e.stopPropagation();setModal({type:"plant",payload:p});}} style={{background:"transparent",border:"none",color:DIM,cursor:"pointer",fontSize:11,padding:0}}>edit</button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <button onClick={function(){setModal({type:"plant",payload:{bedId:bed.id}});}} style={{marginTop:10,width:"100%",padding:"7px 0",background:"transparent",border:"1px dashed rgba(212,168,83,0.18)",borderRadius:8,color:DIM,fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>+ Add plant to {bed.name}</button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {view === "chemicals" && (
+          <div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",margin:"4px 0 14px"}}>
+              <div style={{fontSize:17,color:"#d4a853",fontWeight:"bold"}}>Fertilizers and Inputs</div>
+              <button onClick={function(){setModal({type:"chem",payload:{}});}} style={{background:"rgba(74,222,128,0.14)",border:"1px solid rgba(212,168,83,0.3)",borderRadius:8,color:G,padding:"5px 12px",fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>+ Add</button>
+            </div>
+            <div style={{fontSize:10,color:DIM,textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Active</div>
+            {chemicals.filter(function(c){return c.active;}).map(function(c){
+              var due  = isDue(c.lastApplied,c.interval);
+              var soon = isSoon(c.lastApplied,c.interval);
+              var dl   = daysLeft(c.lastApplied,c.interval);
+              var tc   = CHEM_COLORS[c.type]||"#94a3b8";
+              return (
+                <div key={c.id} style={{background:"rgba(255,255,255,0.035)",border:"1px solid "+(due?"rgba(248,113,113,0.24)":soon?"rgba(251,191,36,0.2)":"rgba(255,255,255,0.07)"),borderRadius:12,padding:"12px 14px",marginBottom:8}}>
+                  <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:4,flexWrap:"wrap"}}><Tag color={tc}>{c.type}</Tag><span style={{fontSize:13,color:"#e8e4dc",fontWeight:"bold"}}>{c.name}</span></div>
+                      <div style={{fontSize:11,color:"#5a5844",marginBottom:3}}>Target: {c.target}</div>
+                      <div style={{fontSize:11,color:due?"#f87171":soon?"#fbbf24":DIM}}>{due?"Overdue "+Math.abs(dl)+"d":soon?"Due in "+dl+"d":"OK — "+dl+"d left"}<span style={{color:DIM}}> · every {c.interval}d</span></div>
+                      {c.notes && <div style={{fontSize:11,color:"#5a5844",marginTop:5,paddingTop:5,borderTop:"1px solid rgba(255,255,255,0.05)"}}>{c.notes}</div>}
+                    </div>
+                    <div style={{display:"flex",flexDirection:"column",gap:5,flexShrink:0,alignItems:"flex-end"}}>
+                      <button onClick={function(){markApplied(c.id);}} style={{background:"rgba(212,168,83,0.12)",border:"1px solid rgba(212,168,83,0.25)",borderRadius:7,color:G,padding:"4px 9px",fontSize:11,cursor:"pointer",fontFamily:"inherit",whiteSpace:"nowrap"}}>Applied</button>
+                      <button onClick={function(){setModal({type:"chem",payload:c});}} style={{background:"transparent",border:"none",color:DIM,cursor:"pointer",fontSize:11,fontFamily:"inherit"}}>Edit</button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            {chemicals.filter(function(c){return !c.active;}).length > 0 && (
+              <div>
+                <div style={{fontSize:10,color:DIM,textTransform:"uppercase",letterSpacing:1,margin:"14px 0 8px"}}>Archived</div>
+                {chemicals.filter(function(c){return !c.active;}).map(function(c){
+                  return <div key={c.id} onClick={function(){setModal({type:"chem",payload:c});}} style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.05)",borderRadius:10,padding:"10px 14px",marginBottom:6,opacity:0.5,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center"}}><div style={{fontSize:13,color:"#a0967e"}}>{c.name}</div><div style={{fontSize:11,color:DIM}}>{c.type}</div></div>;
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {view === "journal" && (
+          <div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",margin:"4px 0 14px"}}>
+              <div style={{fontSize:17,color:"#d4a853",fontWeight:"bold"}}>Garden Journal</div>
+              <div style={{display:"flex",gap:7}}>
+                <button onClick={function(){setModal({type:"harvest",payload:{}});}} style={{background:"rgba(251,191,36,0.12)",border:"1px solid rgba(251,191,36,0.28)",borderRadius:8,color:"#fbbf24",padding:"5px 10px",fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>🌾 Harvest</button>
+                <button onClick={function(){setModal({type:"journal",payload:{}});}} style={{background:"rgba(96,165,250,0.1)",border:"1px solid rgba(96,165,250,0.25)",borderRadius:8,color:"#60a5fa",padding:"5px 10px",fontSize:11,cursor:"pointer",fontFamily:"inherit"}}>📝 Note</button>
+              </div>
+            </div>
+
+            {harvests.length > 0 && (
+              <div>
+                <div style={{fontSize:11,color:"#fbbf24",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Harvest Log</div>
+                {harvests.slice().sort(function(a,b){return b.date.localeCompare(a.date);}).map(function(h){
+                  var p = plants.find(function(pl){return pl.id===h.plantId;});
+                  return (
+                    <div key={h.id} onClick={function(){setModal({type:"harvest",payload:h});}} style={{background:"rgba(251,191,36,0.05)",border:"1px solid rgba(251,191,36,0.14)",borderRadius:10,padding:"10px 12px",marginBottom:6,display:"flex",alignItems:"center",gap:10,cursor:"pointer"}}>
+                      <span style={{fontSize:22}}>{p?p.emoji:"🌱"}</span>
+                      <div style={{flex:1}}><div style={{fontSize:13,color:"#e8e4dc"}}>{p?p.name:"Unknown"}</div><div style={{fontSize:11,color:"#5a5844"}}>{fmtDateShort(h.date)}{h.notes?" · "+h.notes:""}</div></div>
+                      <div style={{fontSize:15,color:"#fbbf24",fontWeight:"bold",flexShrink:0}}>{h.amount} {h.unit}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {journal.length > 0 && (
+              <div>
+                <div style={{fontSize:11,color:"#60a5fa",textTransform:"uppercase",letterSpacing:1,margin:"14px 0 8px"}}>Observations and Notes</div>
+                {journal.slice().sort(function(a,b){return b.date.localeCompare(a.date);}).map(function(j){
+                  var p   = plants.find(function(pl){return pl.id===j.plantId;});
+                  var bed = beds.find(function(b){return b.id===j.bedId;});
+                  var hasDx = !!(j.diagnosisData);
+                  var dxSev = hasDx ? (SEV_CFG[j.diagnosisData.severity]||SEV_CFG.moderate) : null;
+                  return (
+                    <div key={j.id} onClick={function(){setModal({type:"journal",payload:j});}} style={{background:hasDx?dxSev.bg:"rgba(255,255,255,0.035)",border:"1px solid "+(hasDx?dxSev.border:"rgba(255,255,255,0.07)"),borderRadius:10,padding:"10px 12px",marginBottom:6,cursor:"pointer"}}>
+                      <div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
+                        {j.imagePreview ? <img src={j.imagePreview} alt="journal" style={{width:44,height:44,borderRadius:8,objectFit:"cover",flexShrink:0}} /> : <span style={{fontSize:18,flexShrink:0}}>{JOURNAL_ICONS[j.type]||"📝"}</span>}
+                        <div style={{flex:1,minWidth:0}}>
+                          {hasDx && <div style={{fontSize:12,fontWeight:"bold",color:dxSev.color,marginBottom:3}}>{dxSev.icon} {j.diagnosisData.identified}</div>}
+                          <div style={{fontSize:12,color:"#e8e4dc",lineHeight:1.5,whiteSpace:"pre-line"}}>{hasDx ? j.diagnosisData.summary : j.text}</div>
+                          <div style={{fontSize:10,color:DIM,marginTop:4,display:"flex",gap:8,flexWrap:"wrap"}}>
+                            <span>{fmtDateShort(j.date)}</span>
+                            {bed && <span>{bed.name}</span>}
+                            {p && <span>{p.emoji} {p.name}</span>}
+                            {hasDx ? <Tag color={dxSev.color}>AI Diagnosis</Tag> : <Tag color="#60a5fa">{j.type}</Tag>}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {harvests.length===0 && journal.length===0 && (
+              <div style={{textAlign:"center",padding:"48px 0",color:DIM}}>
+                <div style={{fontSize:40,marginBottom:10}}>📓</div>
+                <div style={{fontSize:14}}>Your journal is empty.</div>
+                <div style={{fontSize:12,marginTop:4}}>Log your first harvest or observation above.</div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {view === "tasks" && (
+          <div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",margin:"4px 0 12px"}}>
+              <div style={{fontSize:17,color:"#d4a853",fontWeight:"bold"}}>Seasonal Calendar</div>
+              <button onClick={function(){setModal({type:"task",payload:{month:selMonth}});}} style={{background:"rgba(74,222,128,0.14)",border:"1px solid rgba(212,168,83,0.3)",borderRadius:8,color:G,padding:"5px 12px",fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>+ Task</button>
+            </div>
+            <div style={{display:"flex",gap:4,overflowX:"auto",paddingBottom:4,marginBottom:14}}>
+              {MONTHS_S.map(function(m,i){
+                var mn  = i+1;
+                var cnt = tasks.filter(function(t){return t.month===mn&&!t.done;}).length;
+                return (
+                  <button key={m} onClick={function(){setSelMonth(mn);}} style={{minWidth:38,padding:"6px 3px",borderRadius:8,border:"none",cursor:"pointer",fontSize:10,fontFamily:"inherit",position:"relative",background:selMonth===mn?"rgba(212,168,83,0.18)":mn===CURRENT_MONTH?"rgba(251,191,36,0.1)":"rgba(255,255,255,0.045)",color:selMonth===mn?G:mn===CURRENT_MONTH?"#fbbf24":DIM,outline:selMonth===mn?"1px solid rgba(212,168,83,0.38)":mn===CURRENT_MONTH?"1px solid rgba(251,191,36,0.2)":"1px solid rgba(255,255,255,0.06)",transition:"all 0.15s"}}>
+                    {m}
+                    {cnt>0 && <div style={{position:"absolute",top:-3,right:-3,width:13,height:13,borderRadius:"50%",background:"#f87171",fontSize:8,display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontWeight:"bold"}}>{cnt}</div>}
+                  </button>
+                );
+              })}
+            </div>
+            <div style={{fontSize:15,color:"#e8e4dc",marginBottom:10,display:"flex",alignItems:"center",gap:8}}>
+              {MONTHS_L[selMonth-1]}
+              {selMonth===CURRENT_MONTH && <span style={{fontSize:10,color:"#fbbf24",background:"rgba(251,191,36,0.1)",border:"1px solid rgba(251,191,36,0.2)",borderRadius:4,padding:"1px 7px"}}>current</span>}
+            </div>
+            {tasks.filter(function(t){return t.month===selMonth;}).length===0 ? (
+              <div style={{textAlign:"center",padding:"30px 0",color:DIM,fontSize:13}}>No tasks for {MONTHS_L[selMonth-1]}. Tap + to add one.</div>
+            ) : (
+              tasks.filter(function(t){return t.month===selMonth;}).map(function(t){
+                return (
+                  <div key={t.id} style={{background:t.done?"rgba(212,168,83,0.04)":"rgba(255,255,255,0.035)",border:"1px solid "+(t.done?"rgba(212,168,83,0.18)":"rgba(255,255,255,0.07)"),borderRadius:12,padding:"11px 14px",marginBottom:7,opacity:t.done?0.55:1}}>
+                    <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                      <button onClick={function(){toggleTask(t.id);}} style={{width:20,height:20,borderRadius:5,flexShrink:0,marginTop:1,border:"1.5px solid "+(t.done?"#d4a853":"rgba(212,168,83,0.35)"),background:t.done?"#d4a853":"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#0a1a0b",fontSize:12}}>{t.done?"✓":""}</button>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:13,color:t.done?"#5a5844":"#e8e4dc",textDecoration:t.done?"line-through":"none",marginBottom:4}}>{t.title}</div>
+                        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                          <Tag color={TASK_COLORS[t.category]||"#94a3b8"}>{t.category}</Tag>
+                          {t.priority==="high" && <Tag color="#f87171">high</Tag>}
+                        </div>
+                        {t.detail && <div style={{fontSize:11,color:"#5a5844",marginTop:5}}>{t.detail}</div>}
+                      </div>
+                      <button onClick={function(){setModal({type:"task",payload:t});}} style={{background:"transparent",border:"none",color:DIM,cursor:"pointer",fontSize:14,padding:2,flexShrink:0}}>✏️</button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
+
+        {view === "planner" && <PlantingCalendar plants={plants} beds={beds} settings={settings} />}
+
+        {view === "settings" && (
+          <SettingsView settings={settings} onSave={function(s){ upd("settings",s); }} />
+        )}
+
+        {view === "map" && (
+          <BedMap
+            beds={beds}
+            plants={plants}
+            positions={data.bedPositions || {}}
+            onUpdatePositions={function(pos){ upd("bedPositions", pos); }}
+          />
+        )}
+
+      </div>
+
+      {modal && modal.type==="bed"     && <Modal title={modal.payload.id?"Edit Bed":"New Bed"}         onClose={function(){setModal(null);}}><BedForm     bed={modal.payload}     onSave={saveBed}     onDelete={delBed}    /></Modal>}
+      {modal && modal.type==="plant"   && <Modal title={modal.payload.id?"Edit Plant":"Add Plant"}     onClose={function(){setModal(null);}}><PlantForm   plant={modal.payload}   beds={beds} onSave={savePlant} onDelete={delPlant} /></Modal>}
+      {modal && modal.type==="chem"    && <Modal title={modal.payload.id?"Edit Input":"Add Input"}     onClose={function(){setModal(null);}}><ChemForm    chem={modal.payload}    onSave={saveChem}    onDelete={delChem}   /></Modal>}
+      {modal && modal.type==="task"    && <Modal title={modal.payload.id?"Edit Task":"Add Task"}       onClose={function(){setModal(null);}}><TaskForm    task={modal.payload}    onSave={saveTask}    onDelete={delTask}   /></Modal>}
+      {modal && modal.type==="harvest" && <Modal title={modal.payload.id?"Edit Harvest":"Log Harvest"} onClose={function(){setModal(null);}}><HarvestForm plants={plants} harvest={modal.payload} onSave={saveHarvest} onDelete={delHarvest} /></Modal>}
+      {modal && modal.type==="journal" && <Modal title={modal.payload.id?"Edit Entry":"New Entry"}     onClose={function(){setModal(null);}}><JournalForm beds={beds} plants={plants} entry={modal.payload} onSave={saveJournal} onDelete={delJournal} /></Modal>}
+
+      {plantDetail && (
+        <Modal title={plantDetail.name} onClose={function(){setPlantDetail(null);}}>
+          <div style={{display:"flex",gap:14,marginBottom:16,alignItems:"flex-start"}}>
+            <PlantImage plantId={plantDetail.id} plantName={plantDetail.name} plantEmoji={plantDetail.emoji} size={100} radius={12} />
+            <div style={{flex:1}}>
+              <div style={{fontSize:12,color:"#5a5844",marginBottom:4}}>{plantDetail.category} · {(beds.find(function(b){return b.id===plantDetail.bedId;})||{}).name}</div>
+              <Tag color={(STATUS_CFG[plantDetail.status]||STATUS_CFG.healthy).color}>{(STATUS_CFG[plantDetail.status]||STATUS_CFG.healthy).label}</Tag>
+              {plantDetail.planted && <div style={{fontSize:11,color:"#5a5844",marginTop:6}}>Planted {fmtDate(plantDetail.planted)}</div>}
+              {plantDetail.notes && <div style={{fontSize:12,color:"#a0967e",marginTop:6,lineHeight:1.5}}>{plantDetail.notes}</div>}
+            </div>
+          </div>
+          <button onClick={function(){setModal({type:"plant",payload:plantDetail}); setPlantDetail(null);}} style={{width:"100%",padding:"10px 0",background:"rgba(212,168,83,0.1)",border:"1px solid rgba(212,168,83,0.25)",borderRadius:10,color:G,fontSize:13,cursor:"pointer",fontFamily:"inherit",marginTop:8}}>Edit Plant</button>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    React.createElement(GardenApp)
+  );
+  </script>
+
+  <script>
+  // Register service worker for offline/installable PWA support
+  if ('serviceWorker' in navigator) {
+    var swCode = [
+      'var CACHE = "garden-v2";',
+      'self.addEventListener("install", function(e) {',
+      '  self.skipWaiting();',
+      '});',
+      'self.addEventListener("activate", function(e) {',
+      '  e.waitUntil(clients.claim());',
+      '});',
+      'self.addEventListener("fetch", function(e) {',
+      '  if (e.request.method !== "GET") return;',
+      '  e.respondWith(',
+      '    caches.open(CACHE).then(function(cache) {',
+      '      return fetch(e.request).then(function(resp) {',
+      '        cache.put(e.request, resp.clone());',
+      '        return resp;',
+      '      }).catch(function() {',
+      '        return caches.match(e.request);',
+      '      });',
+      '    })',
+      '  );',
+      '});'
+    ].join('\n');
+
+    var blob = new Blob([swCode], { type: 'application/javascript' });
+    navigator.serviceWorker.register(URL.createObjectURL(blob))
+      .catch(function(e) { console.log('SW:', e.message); });
+  }
+  </script>
+</body>
+</html>
