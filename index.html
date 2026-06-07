@@ -2218,14 +2218,44 @@ function ChemForm(props) {
       upd("interval", parseInt(e.target.value) || 1);
     },
     min: 1
-  }), /*#__PURE__*/React.createElement(Label, null, "Last Applied"), /*#__PURE__*/React.createElement("input", {
+  }), /*#__PURE__*/React.createElement(Label, null, "Last Applied"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
     type: "date",
-    style: INP,
+    style: Object.assign({}, INP, {
+      flex: 1
+    }),
     value: form.lastApplied,
     onChange: function onChange(e) {
       upd("lastApplied", e.target.value);
     }
-  }), /*#__PURE__*/React.createElement(Label, null, "Notes"), /*#__PURE__*/React.createElement("textarea", {
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      upd("lastApplied", "");
+    },
+    style: {
+      padding: "10px 14px",
+      background: "rgba(255,255,255,0.06)",
+      border: "1px solid rgba(255,255,255,0.12)",
+      borderRadius: 10,
+      color: DIM,
+      fontSize: 12,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      whiteSpace: "nowrap",
+      flexShrink: 0
+    }
+  }, "Reset")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: DIM,
+      marginTop: 4
+    }
+  }, "Reset clears the date so this input shows as never applied."), /*#__PURE__*/React.createElement(Label, null, "Notes"), /*#__PURE__*/React.createElement("textarea", {
     style: Object.assign({}, INP, {
       height: 72,
       resize: "none"
@@ -2605,7 +2635,7 @@ var ZONE7A_ADVISORIES = {
     icon: "🌤",
     season: "Late Spring",
     temp: "55-75degF",
-    alerts: ["Transplant tomatoes after May 15  -  bury 2/3 of stem", "Set up stakes, cages, Florida weave", "Plant strawberry tower  -  water daily until established", "Set up Rachio schedule for new plantings"],
+    alerts: ["Transplant tomatoes after May 15  -  bury 2/3 of stem", "Set up stakes, cages, Florida weave", "Plant strawberry tower  -  water daily until established", "Set up irrigation schedule for new plantings"],
     spray: "Start preventive copper fungicide on tomatoes once transplanted"
   },
   6: {
@@ -5444,7 +5474,7 @@ function SettingsView(props) {
     onChange: function onChange(e) {
       upd("irrigationLabel", e.target.value);
     },
-    placeholder: "e.g. Rachio, Drip system, Hand watered"
+    placeholder: "e.g. Drip system, Sprinklers, Hand watered"
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       background: "rgba(255,255,255,0.04)",
@@ -6032,7 +6062,7 @@ function GardenApp() {
         fontSize: 11,
         color: over ? "#f87171" : "#fbbf24"
       }
-    }, over ? "Overdue " + Math.abs(dl) + "d" : "Due in " + dl + "d", /*#__PURE__*/React.createElement("span", {
+    }, !c.lastApplied ? "Never applied" : over ? "Overdue " + Math.abs(dl) + "d" : "Due in " + dl + "d", /*#__PURE__*/React.createElement("span", {
       style: {
         color: DIM
       }
@@ -6541,7 +6571,7 @@ function GardenApp() {
         fontSize: 11,
         color: due ? "#f87171" : soon ? "#fbbf24" : DIM
       }
-    }, due ? "Overdue " + Math.abs(dl) + "d" : soon ? "Due in " + dl + "d" : "OK  -  " + dl + "d left", /*#__PURE__*/React.createElement("span", {
+    }, !c.lastApplied ? "Never applied" : due ? "Overdue " + Math.abs(dl) + "d" : soon ? "Due in " + dl + "d" : "OK  -  " + dl + "d left", /*#__PURE__*/React.createElement("span", {
       style: {
         color: DIM
       }
@@ -6893,6 +6923,8 @@ function GardenApp() {
       display: "flex",
       gap: 4,
       overflowX: "auto",
+      overflowY: "visible",
+      paddingTop: 8,
       paddingBottom: 4,
       marginBottom: 14
     }
@@ -6923,10 +6955,10 @@ function GardenApp() {
     }, m, cnt > 0 && /*#__PURE__*/React.createElement("div", {
       style: {
         position: "absolute",
-        top: -3,
-        right: -3,
-        width: 13,
-        height: 13,
+        top: -5,
+        right: -2,
+        width: 14,
+        height: 14,
         borderRadius: "50%",
         background: "#f87171",
         fontSize: 8,
@@ -6934,7 +6966,8 @@ function GardenApp() {
         alignItems: "center",
         justifyContent: "center",
         color: "white",
-        fontWeight: "bold"
+        fontWeight: "bold",
+        border: "1.5px solid #0e0e0a"
       }
     }, cnt));
   })), /*#__PURE__*/React.createElement("div", {
