@@ -339,10 +339,6 @@ function(a,b,c){if(!Vd(b))throw Error(n(200));return Wd(null,a,b,!1,c)};Q.unmoun
   var useRef    = React.useRef;
   </script>
   <script>function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i.return) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
-function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
-function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
-function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
@@ -423,6 +419,48 @@ var DEFAULT_DATA = {
     type: "berry",
     notes: "Hand watered  -  check daily in heat",
     irrigated: false
+  }, {
+    id: "b9",
+    name: "Front Walk Beds",
+    type: "ornamental",
+    notes: "Roses, peonies, foundation plantings",
+    irrigated: true
+  }, {
+    id: "b10",
+    name: "Perennial Borders",
+    type: "ornamental",
+    notes: "Mixed perennials and grasses",
+    irrigated: true
+  }, {
+    id: "b11",
+    name: "Foundation Beds",
+    type: "ornamental",
+    notes: "Evergreens, shrubs, hydrangeas",
+    irrigated: true
+  }, {
+    id: "b12",
+    name: "Shade Garden",
+    type: "ornamental",
+    notes: "Hosta, astilbe, ligularia",
+    irrigated: true
+  }, {
+    id: "b13",
+    name: "Privacy Screen",
+    type: "ornamental",
+    notes: "Arborvitae, spruce",
+    irrigated: false
+  }, {
+    id: "b14",
+    name: "Specimen Trees",
+    type: "ornamental",
+    notes: "Flowering and weeping trees",
+    irrigated: false
+  }, {
+    id: "b15",
+    name: "Bulb Beds",
+    type: "ornamental",
+    notes: "Fall-planted tulips and alliums",
+    irrigated: true
   }],
   plants: [{
     id: "p1",
@@ -577,6 +615,414 @@ var DEFAULT_DATA = {
     planted: "2024-04-20",
     notes: "Everbearing  -  runner control needed",
     emoji: "🍓"
+  }, {
+    id: "o1",
+    bedId: "b9",
+    name: "Cathedral Bells Rose",
+    category: "Rose",
+    status: "healthy",
+    bloom: "Jun-Oct",
+    sun: "Full sun",
+    color: "Apricot/pink",
+    deerResistant: false,
+    notes: "Repeat bloomer  -  deadhead spent blooms, feed monthly in season",
+    emoji: "🌹"
+  }, {
+    id: "o2",
+    bedId: "b9",
+    name: "Shrub Roses (front walk)",
+    category: "Rose",
+    status: "healthy",
+    bloom: "Jun-Sep",
+    sun: "Full sun",
+    color: "Red",
+    deerResistant: false,
+    notes: "Existing shrubs  -  prune in early spring before bud break",
+    emoji: "🌹"
+  }, {
+    id: "o3",
+    bedId: "b9",
+    name: "Itoh Peony",
+    category: "Peony",
+    status: "healthy",
+    bloom: "May-Jun",
+    sun: "Full sun",
+    color: "Mixed",
+    deerResistant: true,
+    notes: "Intersectional  -  cut back to ground in late fall, do not mulch crown",
+    emoji: "🌸"
+  }, {
+    id: "o4",
+    bedId: "b11",
+    name: "Bigleaf Hydrangea",
+    category: "Hydrangea",
+    status: "healthy",
+    bloom: "Jun-Aug",
+    sun: "Part shade",
+    color: "Blue/pink",
+    deerResistant: false,
+    notes: "Mophead  -  blooms on old wood, prune right after flowering only. Soil pH sets color",
+    emoji: "🌸"
+  }, {
+    id: "o5",
+    bedId: "b10",
+    name: "Catmint (Nepeta)",
+    category: "Perennial",
+    status: "healthy",
+    bloom: "May-Sep",
+    sun: "Full sun",
+    color: "Purple",
+    deerResistant: true,
+    notes: "Shear by half after first flush for rebloom",
+    emoji: "🌿"
+  }, {
+    id: "o6",
+    bedId: "b10",
+    name: "Purple Coneflower",
+    category: "Perennial",
+    status: "healthy",
+    bloom: "Jul-Sep",
+    sun: "Full sun",
+    color: "Pink",
+    deerResistant: true,
+    notes: "Echinacea  -  leave seed heads for birds in winter",
+    emoji: "🌸"
+  }, {
+    id: "o7",
+    bedId: "b10",
+    name: "Gaura (Beeblossom)",
+    category: "Perennial",
+    status: "healthy",
+    bloom: "Jun-Oct",
+    sun: "Full sun",
+    color: "White/pink",
+    deerResistant: true,
+    notes: "Airy  -  cut back hard in late spring for bushier habit",
+    emoji: "🌸"
+  }, {
+    id: "o8",
+    bedId: "b10",
+    name: "Yarrow",
+    category: "Perennial",
+    status: "healthy",
+    bloom: "Jun-Sep",
+    sun: "Full sun",
+    color: "Yellow",
+    deerResistant: true,
+    notes: "Achillea  -  divide every 2-3 years, deadhead for rebloom",
+    emoji: "🌼"
+  }, {
+    id: "o9",
+    bedId: "b10",
+    name: "Butterfly Milkweed",
+    category: "Perennial",
+    status: "healthy",
+    bloom: "Jun-Aug",
+    sun: "Full sun",
+    color: "Orange",
+    deerResistant: true,
+    notes: "Asclepias  -  host plant for monarchs, slow to emerge in spring",
+    emoji: "🧡"
+  }, {
+    id: "o10",
+    bedId: "b10",
+    name: "Lanceleaf Tickseed",
+    category: "Perennial",
+    status: "healthy",
+    bloom: "Jun-Aug",
+    sun: "Full sun",
+    color: "Yellow",
+    deerResistant: true,
+    notes: "Coreopsis  -  deadhead often to extend bloom",
+    emoji: "🌼"
+  }, {
+    id: "o11",
+    bedId: "b10",
+    name: "Armeria (Sea Thrift)",
+    category: "Perennial",
+    status: "healthy",
+    bloom: "Apr-Jun",
+    sun: "Full sun",
+    color: "Pink",
+    deerResistant: true,
+    notes: "Tidy mounds  -  good edging, well-drained soil",
+    emoji: "🌸"
+  }, {
+    id: "o12",
+    bedId: "b12",
+    name: "Hosta (variegated)",
+    category: "Perennial",
+    status: "healthy",
+    bloom: "Jul-Aug",
+    sun: "Shade",
+    color: "Lavender",
+    deerResistant: false,
+    notes: "Grown for foliage  -  watch for slugs, deer love it",
+    emoji: "🌿"
+  }, {
+    id: "o13",
+    bedId: "b12",
+    name: "Ligularia",
+    category: "Perennial",
+    status: "healthy",
+    bloom: "Jul-Aug",
+    sun: "Shade",
+    color: "Yellow",
+    deerResistant: true,
+    notes: "Green and dark-leaved forms  -  needs consistent moisture, wilts in sun",
+    emoji: "🌿"
+  }, {
+    id: "o14",
+    bedId: "b12",
+    name: "Liriope",
+    category: "Perennial",
+    status: "healthy",
+    bloom: "Aug-Sep",
+    sun: "Part shade",
+    color: "Purple",
+    deerResistant: true,
+    notes: "Variegated and green  -  cut to ground in late winter before new growth",
+    emoji: "🌿"
+  }, {
+    id: "o15",
+    bedId: "b10",
+    name: "Daylily",
+    category: "Perennial",
+    status: "healthy",
+    bloom: "Jun-Aug",
+    sun: "Full sun",
+    color: "Mixed",
+    deerResistant: false,
+    notes: "Hemerocallis  -  divide every few years, remove spent scapes",
+    emoji: "🌼"
+  }, {
+    id: "o16",
+    bedId: "b12",
+    name: "Astilbe",
+    category: "Perennial",
+    status: "healthy",
+    bloom: "Jun-Jul",
+    sun: "Part shade",
+    color: "Pink",
+    deerResistant: true,
+    notes: "Plume flowers  -  needs moisture, never let dry out",
+    emoji: "🌸"
+  }, {
+    id: "o17",
+    bedId: "b12",
+    name: "Creeping Jenny",
+    category: "Groundcover",
+    status: "healthy",
+    bloom: "Jun-Jul",
+    sun: "Part shade",
+    color: "Gold",
+    deerResistant: true,
+    notes: "Lysimachia  -  gold foliage groundcover, spreads vigorously",
+    emoji: "🌿"
+  }, {
+    id: "o18",
+    bedId: "b10",
+    name: "Maiden Grass (Miscanthus)",
+    category: "Ornamental Grass",
+    status: "healthy",
+    bloom: "Sep-Oct",
+    sun: "Full sun",
+    color: "Tan plumes",
+    deerResistant: true,
+    notes: "Cut back to 6 inches in early spring before new growth",
+    emoji: "🌾"
+  }, {
+    id: "o19",
+    bedId: "b12",
+    name: "Variegated Sedge (Carex)",
+    category: "Ornamental Grass",
+    status: "healthy",
+    bloom: "May-Jun",
+    sun: "Part shade",
+    color: "Foliage",
+    deerResistant: true,
+    notes: "Comb out dead blades in spring, do not cut hard",
+    emoji: "🌾"
+  }, {
+    id: "o20",
+    bedId: "b14",
+    name: "Crabapple Tree",
+    category: "Flowering Tree",
+    status: "healthy",
+    bloom: "Apr-May",
+    sun: "Full sun",
+    color: "Pink/white",
+    deerResistant: false,
+    notes: "Spring bloom + fall fruit for birds. Prune after flowering",
+    emoji: "🌸"
+  }, {
+    id: "o21",
+    bedId: "b14",
+    name: "Weeping Katsura Tree",
+    category: "Flowering Tree",
+    status: "healthy",
+    bloom: "none",
+    sun: "Full sun",
+    color: "Foliage",
+    deerResistant: true,
+    notes: "Heart-shaped leaves smell of cotton candy in fall  -  minimal pruning",
+    emoji: "🌳"
+  }, {
+    id: "o22",
+    bedId: "b14",
+    name: "Crape Myrtle",
+    category: "Flowering Tree",
+    status: "healthy",
+    bloom: "Jul-Sep",
+    sun: "Full sun",
+    color: "Pink",
+    deerResistant: true,
+    notes: "Blooms on new wood  -  prune lightly in late winter, avoid topping",
+    emoji: "🌸"
+  }, {
+    id: "o23",
+    bedId: "b13",
+    name: "Spruce Trees",
+    category: "Evergreen",
+    status: "healthy",
+    bloom: "none",
+    sun: "Full sun",
+    color: "Green",
+    deerResistant: true,
+    notes: "No routine pruning  -  watch for needlecast and spider mites",
+    emoji: "🌲"
+  }, {
+    id: "o24",
+    bedId: "b13",
+    name: "Arborvitae Privacy Screen",
+    category: "Evergreen",
+    status: "healthy",
+    bloom: "none",
+    sun: "Full sun",
+    color: "Green",
+    deerResistant: false,
+    notes: "Deer browse heavily in winter  -  consider repellent or burlap",
+    emoji: "🌲"
+  }, {
+    id: "o25",
+    bedId: "b11",
+    name: "Dwarf Alberta Spruce",
+    category: "Evergreen",
+    status: "healthy",
+    bloom: "none",
+    sun: "Full sun",
+    color: "Green",
+    deerResistant: true,
+    notes: "Cone-shaped by house  -  watch for spider mites in heat, hose off",
+    emoji: "🌲"
+  }, {
+    id: "o26",
+    bedId: "b11",
+    name: "Japanese Spirea",
+    category: "Shrub",
+    status: "healthy",
+    bloom: "Jun-Jul",
+    sun: "Full sun",
+    color: "Pink",
+    deerResistant: true,
+    notes: "Gold foliage  -  shear after bloom for rebloom and shape",
+    emoji: "🌿"
+  }, {
+    id: "o27",
+    bedId: "b11",
+    name: "Boxwood",
+    category: "Shrub",
+    status: "healthy",
+    bloom: "none",
+    sun: "Part shade",
+    color: "Green",
+    deerResistant: true,
+    notes: "Shear to shape late spring  -  watch for boxwood blight and leafminer",
+    emoji: "🌿"
+  }, {
+    id: "o28",
+    bedId: "b11",
+    name: "Rhododendron",
+    category: "Shrub",
+    status: "healthy",
+    bloom: "May-Jun",
+    sun: "Part shade",
+    color: "Pink/purple",
+    deerResistant: false,
+    notes: "Acid soil  -  deadhead spent trusses, do not prune late",
+    emoji: "🌸"
+  }, {
+    id: "o29",
+    bedId: "b11",
+    name: "Pieris (Andromeda)",
+    category: "Shrub",
+    status: "healthy",
+    bloom: "Mar-Apr",
+    sun: "Part shade",
+    color: "White",
+    deerResistant: true,
+    notes: "Early bloom, drooping flower clusters  -  acid soil, well-drained",
+    emoji: "🌸"
+  }, {
+    id: "o30",
+    bedId: "b15",
+    name: "Tulip 'Violet Symphony'",
+    category: "Bulb",
+    status: "dormant",
+    bloom: "Apr-May",
+    sun: "Full sun",
+    color: "Purple",
+    deerResistant: false,
+    notes: "Fall-planted  -  plant Oct-Nov, 6-8 inches deep",
+    emoji: "🌷"
+  }, {
+    id: "o31",
+    bedId: "b15",
+    name: "Tulip 'Don Quichotte'",
+    category: "Bulb",
+    status: "dormant",
+    bloom: "Apr-May",
+    sun: "Full sun",
+    color: "Pink",
+    deerResistant: false,
+    notes: "Fall-planted  -  triumph type, good for naturalizing",
+    emoji: "🌷"
+  }, {
+    id: "o32",
+    bedId: "b15",
+    name: "Allium 'Gladiator'",
+    category: "Bulb",
+    status: "dormant",
+    bloom: "May-Jun",
+    sun: "Full sun",
+    color: "Purple",
+    deerResistant: true,
+    notes: "Fall-planted  -  tall globes, deer/rodent resistant",
+    emoji: "🌸"
+  }, {
+    id: "o33",
+    bedId: "b15",
+    name: "Allium 'Globemaster'",
+    category: "Bulb",
+    status: "dormant",
+    bloom: "May-Jun",
+    sun: "Full sun",
+    color: "Purple",
+    deerResistant: true,
+    notes: "Fall-planted  -  largest flower heads, leave foliage to die back",
+    emoji: "🌸"
+  }, {
+    id: "o34",
+    bedId: "b9",
+    name: "Meyer Lemon",
+    category: "Citrus",
+    status: "healthy",
+    bloom: "Mar-May",
+    sun: "Full sun",
+    color: "White",
+    deerResistant: false,
+    notes: "Potted  -  overwinter indoors below 50F, fragrant blooms",
+    emoji: "🍋"
   }],
   chemicals: [{
     id: "c1",
@@ -851,6 +1297,118 @@ var DEFAULT_DATA = {
     done: false,
     priority: "low",
     detail: "Replace towers every 3-4 years."
+  }, {
+    id: "o-t1",
+    month: 3,
+    title: "Cut back maiden grass and liriope",
+    category: "Pruning",
+    done: false,
+    priority: "medium",
+    detail: "Cut Miscanthus to 6in, liriope to ground before new growth shows."
+  }, {
+    id: "o-t2",
+    month: 3,
+    title: "Prune roses before bud break",
+    category: "Pruning",
+    done: false,
+    priority: "high",
+    detail: "Remove dead/crossing canes, cut to outward-facing buds."
+  }, {
+    id: "o-t3",
+    month: 4,
+    title: "Fertilize rhododendron and pieris",
+    category: "Fertilizing",
+    done: false,
+    priority: "medium",
+    detail: "Holly-tone or acid fertilizer after bloom. Acid lovers."
+  }, {
+    id: "o-t4",
+    month: 4,
+    title: "Divide overgrown perennials",
+    category: "Maintenance",
+    done: false,
+    priority: "low",
+    detail: "Daylily, hosta, yarrow as they emerge. Share or expand beds."
+  }, {
+    id: "o-t5",
+    month: 5,
+    title: "Deadhead alliums and tulips, leave foliage",
+    category: "Maintenance",
+    done: false,
+    priority: "low",
+    detail: "Let bulb foliage die back naturally to feed next year."
+  }, {
+    id: "o-t6",
+    month: 5,
+    title: "Apply deer repellent to arborvitae/rhody",
+    category: "Pest Control",
+    done: false,
+    priority: "medium",
+    detail: "Reapply after rain. Heaviest browse pressure spring/winter."
+  }, {
+    id: "o-t7",
+    month: 6,
+    title: "Shear catmint and spirea after first bloom",
+    category: "Pruning",
+    done: false,
+    priority: "medium",
+    detail: "Cut catmint by half for rebloom. Shear spirea for shape."
+  }, {
+    id: "o-t8",
+    month: 6,
+    title: "Deadhead peonies and roses",
+    category: "Maintenance",
+    done: false,
+    priority: "low",
+    detail: "Remove spent blooms. Do not cut peony foliage."
+  }, {
+    id: "o-t9",
+    month: 7,
+    title: "Deadhead coneflower, coreopsis, daylily",
+    category: "Maintenance",
+    done: false,
+    priority: "low",
+    detail: "Keeps perennials blooming. Leave some coneflower for birds later."
+  }, {
+    id: "o-t10",
+    month: 8,
+    title: "Stop deadheading coneflower for winter seed",
+    category: "Maintenance",
+    done: false,
+    priority: "low",
+    detail: "Let seed heads form for goldfinches and winter interest."
+  }, {
+    id: "o-t11",
+    month: 9,
+    title: "Prune hydrangea ONLY if needed (old wood)",
+    category: "Pruning",
+    done: false,
+    priority: "low",
+    detail: "Bigleaf blooms on old wood  -  avoid heavy fall pruning."
+  }, {
+    id: "o-t12",
+    month: 10,
+    title: "Plant fall bulbs: tulips and alliums",
+    category: "Planting",
+    done: false,
+    priority: "high",
+    detail: "6-8in deep, after soil cools. Alliums deter rodents."
+  }, {
+    id: "o-t13",
+    month: 11,
+    title: "Cut back peony to ground",
+    category: "Pruning",
+    done: false,
+    priority: "medium",
+    detail: "Prevents botrytis. Do NOT mulch over Itoh crown."
+  }, {
+    id: "o-t14",
+    month: 11,
+    title: "Burlap arborvitae against deer/snow",
+    category: "Infrastructure",
+    done: false,
+    priority: "medium",
+    detail: "Protect privacy screen from winter browse and snow load."
   }],
   harvests: [],
   journal: [],
@@ -918,7 +1476,23 @@ var DEFAULT_DATA = {
 function loadData() {
   try {
     var raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      var saved = JSON.parse(raw);
+      // Merge in any new default beds/plants/tasks by id, without overwriting user edits
+      ["beds", "plants", "tasks", "chemicals"].forEach(function (key) {
+        if (!Array.isArray(saved[key])) saved[key] = (DEFAULT_DATA[key] || []).slice();
+        var have = {};
+        saved[key].forEach(function (item) {
+          if (item && item.id) have[item.id] = true;
+        });
+        (DEFAULT_DATA[key] || []).forEach(function (def) {
+          if (def && def.id && !have[def.id]) saved[key].push(def);
+        });
+      });
+      // Ensure settings object exists
+      if (!saved.settings) saved.settings = Object.assign({}, DEFAULT_DATA.settings);
+      return saved;
+    }
   } catch (e) {}
   return DEFAULT_DATA;
 }
@@ -1017,6 +1591,44 @@ var TASK_COLORS = {
   "Pruning": "#f472b6",
   "Planning": "#818cf8"
 };
+
+// Ornamental category colors (edibles fall back to gold)
+var CAT_COLORS = {
+  "Rose": "#f472b6",
+  "Peony": "#f9a8d4",
+  "Hydrangea": "#93c5fd",
+  "Perennial": "#c4b5fd",
+  "Groundcover": "#86efac",
+  "Ornamental Grass": "#fcd34d",
+  "Flowering Tree": "#f9a8d4",
+  "Evergreen": "#6ee7b7",
+  "Shrub": "#a3e635",
+  "Bulb": "#fda4af",
+  "Citrus": "#fde047"
+};
+function catColor(cat) {
+  return CAT_COLORS[cat] || "#d4a853";
+}
+
+// Month abbreviations for bloom parsing
+var MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+function bloomMonths(bloom) {
+  // Parse "Jun-Oct" or "May-Jun" into array of month numbers (1-12)
+  if (!bloom || bloom === "none") return [];
+  var parts = bloom.split("-");
+  var start = MONTH_ABBR.indexOf(parts[0]) + 1;
+  var end = parts.length > 1 ? MONTH_ABBR.indexOf(parts[1]) + 1 : start;
+  if (start < 1) return [];
+  var months = [];
+  var m = start;
+  while (true) {
+    months.push(m);
+    if (m === end) break;
+    m = m === 12 ? 1 : m + 1;
+    if (months.length > 12) break;
+  }
+  return months;
+}
 var JOURNAL_ICONS = {
   observation: "👁",
   pest: "🐛",
@@ -1262,13 +1874,13 @@ function BedForm(props) {
       return Object.assign({}, p, _defineProperty({}, k, v));
     });
   }
-  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Label, null, "Bed Name"), /*#__PURE__*/React.createElement("input", {
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Label, null, "Area Name"), /*#__PURE__*/React.createElement("input", {
     style: INP,
     value: form.name,
     onChange: function onChange(e) {
       upd("name", e.target.value);
     },
-    placeholder: "e.g. Raised Bed A"
+    placeholder: "e.g. Front Walk Beds"
   }), /*#__PURE__*/React.createElement(Label, null, "Type"), /*#__PURE__*/React.createElement("select", {
     style: SEL,
     value: form.type,
@@ -1318,7 +1930,7 @@ function BedForm(props) {
       border: form.irrigated ? "1px solid rgba(212,168,83,0.38)" : "1px solid rgba(255,255,255,0.1)",
       color: form.irrigated ? G : DIM
     }
-  }, "\uD83D\uDCA7 Rachio (auto)"), /*#__PURE__*/React.createElement("button", {
+  }, "\uD83D\uDCA7 Auto-irrigated"), /*#__PURE__*/React.createElement("button", {
     onClick: function onClick() {
       upd("irrigated", false);
     },
@@ -1337,16 +1949,16 @@ function BedForm(props) {
     onClick: function onClick() {
       props.onSave(form);
     }
-  }, "Save Bed"), bed.id && /*#__PURE__*/React.createElement(DBtn, {
+  }, "Save Area"), bed.id && /*#__PURE__*/React.createElement(DBtn, {
     onClick: function onClick() {
       props.onDelete(bed.id);
     }
-  }, "Delete Bed and Its Plants"));
+  }, "Delete Area and Its Plants"));
 }
 function PlantForm(props) {
   var plant = props.plant;
   var beds = props.beds;
-  var EMOJIS = ["🌱", "🍅", "🫐", "🍓", "🍐", "🟠", "🍎", "🌿", "🌸", "🌻", "🥬", "🫛", "🌶️", "🥒", "🧅", "🧄"];
+  var EMOJIS = ["🌱", "🍅", "🫐", "🍓", "🍐", "🟠", "🍎", "🌿", "🌸", "🌻", "🥬", "🫛", "🌶️", "🥒", "🧅", "🧄", "🌹", "🌷", "🌼", "🌾", "🌳", "🌲", "🧡", "🍋"];
   var _useState7 = useState(_objectSpread({
       name: "",
       category: "",
@@ -1355,7 +1967,11 @@ function PlantForm(props) {
       notes: "",
       emoji: "🌱",
       bedId: "",
-      cropType: ""
+      cropType: "",
+      bloom: "",
+      sun: "",
+      color: "",
+      deerResistant: false
     }, plant)),
     _useState8 = _slicedToArray(_useState7, 2),
     form = _useState8[0],
@@ -1430,7 +2046,7 @@ function PlantForm(props) {
       upd("category", e.target.value);
     },
     placeholder: "e.g. Tomato, Blueberry, Fig"
-  }), /*#__PURE__*/React.createElement(Label, null, "Garden Bed"), /*#__PURE__*/React.createElement("select", {
+  }), /*#__PURE__*/React.createElement(Label, null, "Area"), /*#__PURE__*/React.createElement("select", {
     style: SEL,
     value: form.bedId,
     onChange: function onChange(e) {
@@ -1438,7 +2054,7 @@ function PlantForm(props) {
     }
   }, /*#__PURE__*/React.createElement("option", {
     value: ""
-  }, "Select a bed..."), beds.map(function (b) {
+  }, "Select an area..."), beds.map(function (b) {
     return /*#__PURE__*/React.createElement("option", {
       key: b.id,
       value: b.id
@@ -1476,7 +2092,66 @@ function PlantForm(props) {
     onChange: function onChange(e) {
       upd("planted", e.target.value);
     }
-  }), /*#__PURE__*/React.createElement(Label, null, "Notes"), /*#__PURE__*/React.createElement("textarea", {
+  }), /*#__PURE__*/React.createElement(Label, null, "Bloom Time (optional, e.g. Jun-Sep)"), /*#__PURE__*/React.createElement("input", {
+    style: INP,
+    value: form.bloom,
+    onChange: function onChange(e) {
+      upd("bloom", e.target.value);
+    },
+    placeholder: "e.g. May-Jun, or leave blank"
+  }), /*#__PURE__*/React.createElement(Label, null, "Sun / Color (optional)"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    style: Object.assign({}, INP, {
+      flex: 1
+    }),
+    value: form.sun,
+    onChange: function onChange(e) {
+      upd("sun", e.target.value);
+    },
+    placeholder: "Full sun"
+  }), /*#__PURE__*/React.createElement("input", {
+    style: Object.assign({}, INP, {
+      flex: 1
+    }),
+    value: form.color,
+    onChange: function onChange(e) {
+      upd("color", e.target.value);
+    },
+    placeholder: "Color"
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      marginTop: 12,
+      cursor: "pointer"
+    },
+    onClick: function onClick() {
+      upd("deerResistant", !form.deerResistant);
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 20,
+      height: 20,
+      borderRadius: 6,
+      border: "1px solid " + (form.deerResistant ? "rgba(126,200,126,0.6)" : "rgba(255,255,255,0.2)"),
+      background: form.deerResistant ? "rgba(126,200,126,0.25)" : "transparent",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: 12,
+      color: "#7ec87e"
+    }
+  }, form.deerResistant ? "✓" : ""), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      color: "#c4bdaa"
+    }
+  }, "Deer resistant")), /*#__PURE__*/React.createElement(Label, null, "Notes"), /*#__PURE__*/React.createElement("textarea", {
     style: Object.assign({}, INP, {
       height: 72,
       resize: "none"
@@ -2840,12 +3515,27 @@ function PlantingCalendar(props) {
       borderRadius: 8,
       cursor: "pointer",
       fontFamily: "inherit",
-      fontSize: 12,
+      fontSize: 11,
       background: tab === "myGarden" ? "rgba(212,168,83,0.18)" : "rgba(255,255,255,0.05)",
       border: tab === "myGarden" ? "1px solid rgba(212,168,83,0.38)" : "1px solid rgba(255,255,255,0.1)",
       color: tab === "myGarden" ? G : DIM
     }
-  }, "\uD83E\uDEB4 My Garden (", plants.length, ")"), /*#__PURE__*/React.createElement("button", {
+  }, "\uD83E\uDEB4 Garden"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      setTab("bloom");
+    },
+    style: {
+      flex: 1,
+      padding: "8px 0",
+      borderRadius: 8,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontSize: 11,
+      background: tab === "bloom" ? "rgba(212,168,83,0.18)" : "rgba(255,255,255,0.05)",
+      border: tab === "bloom" ? "1px solid rgba(212,168,83,0.38)" : "1px solid rgba(255,255,255,0.1)",
+      color: tab === "bloom" ? G : DIM
+    }
+  }, "\uD83C\uDF38 Bloom"), /*#__PURE__*/React.createElement("button", {
     onClick: function onClick() {
       setTab("guide");
     },
@@ -2855,12 +3545,124 @@ function PlantingCalendar(props) {
       borderRadius: 8,
       cursor: "pointer",
       fontFamily: "inherit",
-      fontSize: 12,
+      fontSize: 11,
       background: tab === "guide" ? "rgba(212,168,83,0.18)" : "rgba(255,255,255,0.05)",
       border: tab === "guide" ? "1px solid rgba(212,168,83,0.38)" : "1px solid rgba(255,255,255,0.1)",
       color: tab === "guide" ? G : DIM
     }
-  }, "\uD83D\uDCD6 Crop Guide (", CROPS.length, ")")), tab === "myGarden" && /*#__PURE__*/React.createElement("div", null, plants.length === 0 && /*#__PURE__*/React.createElement("div", {
+  }, "\uD83D\uDCD6 Guide")), tab === "bloom" && function () {
+    var bloomers = plants.filter(function (p) {
+      return p.bloom && p.bloom !== "none" && bloomMonths(p.bloom).length > 0;
+    });
+    bloomers.sort(function (a, b) {
+      return bloomMonths(a.bloom)[0] - bloomMonths(b.bloom)[0];
+    });
+    var nowMonth = new Date().getMonth() + 1;
+    var bloomingNow = bloomers.filter(function (p) {
+      return bloomMonths(p.bloom).indexOf(nowMonth) !== -1;
+    });
+    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: DIM,
+        marginBottom: 12
+      }
+    }, bloomers.length, " flowering plants \xB7 ", bloomingNow.length, " in bloom this month"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 1,
+        marginBottom: 6,
+        paddingLeft: 96
+      }
+    }, MONTH_ABBR.map(function (m, i) {
+      return /*#__PURE__*/React.createElement("div", {
+        key: m,
+        style: {
+          flex: 1,
+          textAlign: "center",
+          fontSize: 7,
+          color: i + 1 === nowMonth ? G : DIM,
+          fontWeight: i + 1 === nowMonth ? "700" : "400"
+        }
+      }, m[0]);
+    })), bloomers.map(function (p) {
+      var months = bloomMonths(p.bloom);
+      var col = catColor(p.category);
+      return /*#__PURE__*/React.createElement("div", {
+        key: p.id,
+        style: {
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+          marginBottom: 4
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          width: 92,
+          flexShrink: 0,
+          fontSize: 10,
+          color: "#c4bdaa",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis"
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          marginRight: 3
+        }
+      }, p.emoji), p.name), /*#__PURE__*/React.createElement("div", {
+        style: {
+          flex: 1,
+          display: "flex",
+          gap: 1
+        }
+      }, MONTH_ABBR.map(function (m, i) {
+        var on = months.indexOf(i + 1) !== -1;
+        var isNow = i + 1 === nowMonth;
+        return /*#__PURE__*/React.createElement("div", {
+          key: m,
+          style: {
+            flex: 1,
+            height: 14,
+            borderRadius: 2,
+            background: on ? col : isNow ? "rgba(212,168,83,0.08)" : "rgba(255,255,255,0.03)",
+            border: isNow ? "1px solid rgba(212,168,83,0.3)" : "none",
+            boxSizing: "border-box"
+          }
+        });
+      })));
+    }), bloomers.length === 0 && /*#__PURE__*/React.createElement("div", {
+      style: {
+        textAlign: "center",
+        padding: "40px 0",
+        color: DIM
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 36,
+        marginBottom: 8
+      }
+    }, "\uD83C\uDF38"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 13
+      }
+    }, "No flowering plants with bloom times yet."), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        marginTop: 4
+      }
+    }, "Add a bloom time to a plant in the Beds tab.")), bloomers.length > 0 && /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 14,
+        padding: "10px 12px",
+        background: "rgba(255,255,255,0.03)",
+        borderRadius: 10,
+        fontSize: 10,
+        color: DIM,
+        lineHeight: 1.6
+      }
+    }, "Each bar shows the months a plant is in flower. The highlighted column is the current month. Plan for continuous color by filling gaps where few bars overlap."));
+  }(), tab === "myGarden" && /*#__PURE__*/React.createElement("div", null, plants.length === 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
       padding: "40px 0",
@@ -2936,7 +3738,7 @@ function PlantingCalendar(props) {
         fontSize: 10,
         color: DIM
       }
-    }, tl.bed ? tl.bed.name : "Unknown bed", "  \xB7  planted ", fmtSingle(tl.planted))), /*#__PURE__*/React.createElement(Tag, {
+    }, tl.bed ? tl.bed.name : "Unknown area", "  \xB7  planted ", fmtSingle(tl.planted))), /*#__PURE__*/React.createElement(Tag, {
       color: sc.color
     }, sc.label), /*#__PURE__*/React.createElement("span", {
       style: {
@@ -3116,7 +3918,7 @@ function PlantingCalendar(props) {
         fontSize: 10,
         color: DIM
       }
-    }, bed ? bed.name : "Unknown bed")), /*#__PURE__*/React.createElement("div", {
+    }, bed ? bed.name : "Unknown area")), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 10,
         color: DIM
@@ -3498,459 +4300,6 @@ function CropCard(props) {
   }, crop.tip))));
 }
 
-// --- BED MAP ------------------------------------------------------------------
-function BedMap(props) {
-  var beds = props.beds;
-  var plants = props.plants;
-  var positions = props.positions;
-  var onUpdatePositions = props.onUpdatePositions;
-
-  // Map canvas is 370x320 logical units, scaled to fill the screen
-  var MAP_W = 370;
-  var MAP_H = 320;
-  var _useState29 = useState(null),
-    _useState30 = _slicedToArray(_useState29, 2),
-    selectedBed = _useState30[0],
-    setSelectedBed = _useState30[1];
-  var _useState31 = useState(null),
-    _useState32 = _slicedToArray(_useState31, 2),
-    dragging = _useState32[0],
-    setDragging = _useState32[1]; // {bedId, startX, startY, origX, origY}
-  var _useState33 = useState(null),
-    _useState34 = _slicedToArray(_useState33, 2),
-    resizing = _useState34[0],
-    setResizing = _useState34[1]; // {bedId, startX, startY, origW, origH}
-  var _useState35 = useState(null),
-    _useState36 = _slicedToArray(_useState35, 2),
-    editBedId = _useState36[0],
-    setEditBedId = _useState36[1];
-  var canvasRef = React.useRef(null);
-  function getPos(bedId) {
-    return positions[bedId] || {
-      x: 10,
-      y: 10,
-      w: 100,
-      h: 60
-    };
-  }
-  function getCanvasPoint(e) {
-    var canvas = canvasRef.current;
-    if (!canvas) return {
-      x: 0,
-      y: 0
-    };
-    var rect = canvas.getBoundingClientRect();
-    var scaleX = MAP_W / rect.width;
-    var scaleY = MAP_H / rect.height;
-    var clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    var clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return {
-      x: (clientX - rect.left) * scaleX,
-      y: (clientY - rect.top) * scaleY
-    };
-  }
-  function onPointerDown(e, bedId, mode) {
-    e.stopPropagation();
-    var pt = getCanvasPoint(e);
-    var pos = getPos(bedId);
-    setSelectedBed(bedId);
-    if (mode === "drag") {
-      setDragging({
-        bedId: bedId,
-        startX: pt.x,
-        startY: pt.y,
-        origX: pos.x,
-        origY: pos.y
-      });
-    } else {
-      setResizing({
-        bedId: bedId,
-        startX: pt.x,
-        startY: pt.y,
-        origW: pos.w,
-        origH: pos.h
-      });
-    }
-  }
-  function onPointerMove(e) {
-    var pt = getCanvasPoint(e);
-    if (dragging) {
-      var dx = pt.x - dragging.startX;
-      var dy = pt.y - dragging.startY;
-      var newX = Math.max(0, Math.min(MAP_W - 40, dragging.origX + dx));
-      var newY = Math.max(0, Math.min(MAP_H - 20, dragging.origY + dy));
-      var updated = Object.assign({}, positions);
-      updated[dragging.bedId] = Object.assign({}, getPos(dragging.bedId), {
-        x: Math.round(newX),
-        y: Math.round(newY)
-      });
-      onUpdatePositions(updated);
-    }
-    if (resizing) {
-      var dw = pt.x - resizing.startX;
-      var dh = pt.y - resizing.startY;
-      var newW = Math.max(40, resizing.origW + dw);
-      var newH = Math.max(25, resizing.origH + dh);
-      var updated = Object.assign({}, positions);
-      updated[resizing.bedId] = Object.assign({}, getPos(resizing.bedId), {
-        w: Math.round(newW),
-        h: Math.round(newH)
-      });
-      onUpdatePositions(updated);
-    }
-  }
-  function onPointerUp() {
-    setDragging(null);
-    setResizing(null);
-  }
-  var BED_TYPE_COLORS2 = {
-    vegetable: "#d4a853",
-    berry: "#c084fc",
-    fruit: "#fb923c",
-    perennial: "#34d399",
-    ornamental: "#f472b6",
-    other: "#94a3b8"
-  };
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      margin: "4px 0"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 12
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 17,
-      color: "#d4a853",
-      fontWeight: "bold"
-    }
-  }, "Yard Map"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: DIM
-    }
-  }, "Drag to move  \xB7  corner to resize")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      flexWrap: "wrap",
-      gap: 8,
-      marginBottom: 10
-    }
-  }, ["vegetable", "berry", "fruit", "perennial", "ornamental"].map(function (type) {
-    return /*#__PURE__*/React.createElement("div", {
-      key: type,
-      style: {
-        display: "flex",
-        alignItems: "center",
-        gap: 4
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        width: 10,
-        height: 10,
-        borderRadius: 2,
-        background: BED_TYPE_COLORS2[type],
-        opacity: 0.7
-      }
-    }), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 9,
-        color: DIM,
-        textTransform: "capitalize"
-      }
-    }, type));
-  })), /*#__PURE__*/React.createElement("div", {
-    ref: canvasRef,
-    onMouseMove: onPointerMove,
-    onMouseUp: onPointerUp,
-    onMouseLeave: onPointerUp,
-    onTouchMove: function onTouchMove(e) {
-      e.preventDefault();
-      onPointerMove(e);
-    },
-    onTouchEnd: onPointerUp,
-    style: {
-      position: "relative",
-      width: "100%",
-      paddingBottom: MAP_H / MAP_W * 100 + "%",
-      background: "rgba(0,0,0,0.3)",
-      border: "1px solid rgba(212,168,83,0.15)",
-      borderRadius: 12,
-      overflow: "hidden",
-      touchAction: "none",
-      userSelect: "none"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "absolute",
-      inset: 0
-    }
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: "100%",
-    height: "100%",
-    style: {
-      position: "absolute",
-      inset: 0
-    },
-    viewBox: "0 0 " + MAP_W + " " + MAP_H,
-    preserveAspectRatio: "none"
-  }, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (i) {
-    return /*#__PURE__*/React.createElement("line", {
-      key: "v" + i,
-      x1: MAP_W / 10 * i,
-      y1: 0,
-      x2: MAP_W / 10 * i,
-      y2: MAP_H,
-      stroke: "rgba(212,168,83,0.05)",
-      strokeWidth: "0.5"
-    });
-  }), [0, 1, 2, 3, 4, 5, 6, 7, 8].map(function (i) {
-    return /*#__PURE__*/React.createElement("line", {
-      key: "h" + i,
-      x1: 0,
-      y1: MAP_H / 8 * i,
-      x2: MAP_W,
-      y2: MAP_H / 8 * i,
-      stroke: "rgba(212,168,83,0.05)",
-      strokeWidth: "0.5"
-    });
-  }), /*#__PURE__*/React.createElement("rect", {
-    x: 290,
-    y: 220,
-    width: 75,
-    height: 95,
-    fill: "rgba(255,255,255,0.045)",
-    stroke: "rgba(255,255,255,0.1)",
-    strokeWidth: "1",
-    rx: "2"
-  }), /*#__PURE__*/React.createElement("text", {
-    x: 327,
-    y: 272,
-    textAnchor: "middle",
-    fill: "rgba(255,255,255,0.2)",
-    fontSize: "9"
-  }, "\uD83C\uDFE0"), /*#__PURE__*/React.createElement("text", {
-    x: 327,
-    y: 284,
-    textAnchor: "middle",
-    fill: "rgba(255,255,255,0.15)",
-    fontSize: "7"
-  }, "house"), /*#__PURE__*/React.createElement("text", {
-    x: MAP_W - 12,
-    y: 14,
-    textAnchor: "middle",
-    fill: "rgba(212,168,83,0.4)",
-    fontSize: "10"
-  }, "N"), /*#__PURE__*/React.createElement("line", {
-    x1: MAP_W - 12,
-    y1: 16,
-    x2: MAP_W - 12,
-    y2: 28,
-    stroke: "rgba(212,168,83,0.3)",
-    strokeWidth: "1"
-  })), beds.map(function (bed) {
-    var pos = getPos(bed.id);
-    var color = BED_TYPE_COLORS2[bed.type] || "#94a3b8";
-    var bedPlants = plants.filter(function (p) {
-      return p.bedId === bed.id;
-    });
-    var isSelected = selectedBed === bed.id;
-    var pct = function pct(val, total) {
-      return val / total * 100 + "%";
-    };
-    return /*#__PURE__*/React.createElement("div", {
-      key: bed.id,
-      style: {
-        position: "absolute",
-        left: pct(pos.x, MAP_W),
-        top: pct(pos.y, MAP_H),
-        width: pct(pos.w, MAP_W),
-        height: pct(pos.h, MAP_H),
-        background: color + "18",
-        border: "1.5px solid " + (isSelected ? color : color + "55"),
-        borderRadius: 4,
-        boxShadow: isSelected ? "0 0 0 1.5px " + color + "44" : "none",
-        cursor: "move",
-        overflow: "hidden",
-        boxSizing: "border-box"
-      },
-      onMouseDown: function onMouseDown(e) {
-        onPointerDown(e, bed.id, "drag");
-      },
-      onTouchStart: function onTouchStart(e) {
-        e.preventDefault();
-        onPointerDown(e, bed.id, "drag");
-      },
-      onClick: function onClick(e) {
-        e.stopPropagation();
-        setEditBedId(bed.id === editBedId ? null : bed.id);
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        padding: "2px 4px",
-        fontSize: 7,
-        color: color,
-        fontWeight: "bold",
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        lineHeight: 1.3
-      }
-    }, bed.name), pos.h > 35 && /*#__PURE__*/React.createElement("div", {
-      style: {
-        padding: "0 3px",
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 1
-      }
-    }, bedPlants.slice(0, 6).map(function (p) {
-      return /*#__PURE__*/React.createElement("span", {
-        key: p.id,
-        style: {
-          fontSize: 8,
-          lineHeight: 1
-        }
-      }, p.emoji);
-    }), bedPlants.length > 6 && /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 7,
-        color: color,
-        opacity: 0.7
-      }
-    }, "+", bedPlants.length - 6)), bed.irrigated && /*#__PURE__*/React.createElement("div", {
-      style: {
-        position: "absolute",
-        top: 2,
-        right: 3,
-        fontSize: 7,
-        opacity: 0.6
-      }
-    }, "\uD83D\uDCA7"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        position: "absolute",
-        bottom: 0,
-        right: 0,
-        width: 12,
-        height: 12,
-        cursor: "nwse-resize",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
-      },
-      onMouseDown: function onMouseDown(e) {
-        e.stopPropagation();
-        onPointerDown(e, bed.id, "resize");
-      },
-      onTouchStart: function onTouchStart(e) {
-        e.stopPropagation();
-        e.preventDefault();
-        onPointerDown(e, bed.id, "resize");
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        width: 6,
-        height: 6,
-        borderRight: "1.5px solid " + color + "88",
-        borderBottom: "1.5px solid " + color + "88"
-      }
-    })));
-  }))), editBedId && function () {
-    var bed = beds.find(function (b) {
-      return b.id === editBedId;
-    });
-    if (!bed) return null;
-    var bedPlants = plants.filter(function (p) {
-      return p.bedId === bed.id;
-    });
-    var color = BED_TYPE_COLORS2[bed.type] || "#94a3b8";
-    return /*#__PURE__*/React.createElement("div", {
-      style: {
-        background: "rgba(255,255,255,0.045)",
-        border: "1px solid rgba(255,255,255,0.09)",
-        borderRadius: 12,
-        padding: "12px 14px",
-        marginTop: 10
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        marginBottom: 8
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        width: 10,
-        height: 10,
-        borderRadius: 3,
-        background: color,
-        flexShrink: 0
-      }
-    }), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 14,
-        color: "#e8e4dc",
-        fontWeight: "bold"
-      }
-    }, bed.name), /*#__PURE__*/React.createElement("div", {
-      style: {
-        marginLeft: "auto",
-        fontSize: 11,
-        color: DIM
-      }
-    }, bed.irrigated ? irrigLabel || "💧 Auto" : "🪣 Hand water")), bed.notes && /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 11,
-        color: "#5a5844",
-        marginBottom: 8
-      }
-    }, bed.notes), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 6
-      }
-    }, bedPlants.map(function (p) {
-      return /*#__PURE__*/React.createElement("div", {
-        key: p.id,
-        style: {
-          display: "flex",
-          alignItems: "center",
-          gap: 4,
-          background: "rgba(255,255,255,0.045)",
-          borderRadius: 6,
-          padding: "3px 7px"
-        }
-      }, /*#__PURE__*/React.createElement("span", {
-        style: {
-          fontSize: 14
-        }
-      }, p.emoji), /*#__PURE__*/React.createElement("span", {
-        style: {
-          fontSize: 11,
-          color: "#d4cdb8"
-        }
-      }, p.name));
-    }), bedPlants.length === 0 && /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 11,
-        color: DIM
-      }
-    }, "No plants")));
-  }(), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: DIM,
-      marginTop: 10,
-      textAlign: "center"
-    }
-  }, "Tap a bed to see its plants  \xB7  Drag to reposition  \xB7  Corner handle to resize"));
-}
-
 // --- SETTINGS ----------------------------------------------------------------
 
 var ZONE_FROST_DEFAULTS = {
@@ -4019,77 +4368,916 @@ var ZONE_FROST_DEFAULTS = {
     "first": "12-30"
   }
 };
-function lookupZoneFromLocation(_x) {
-  return _lookupZoneFromLocation.apply(this, arguments);
-}
-function _lookupZoneFromLocation() {
-  _lookupZoneFromLocation = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(locationText) {
-    var geoUrl, geoResp, geoData, lat, lon, zoneResp, zoneData;
-    return _regenerator().w(function (_context2) {
-      while (1) switch (_context2.n) {
-        case 0:
-          // Step 1: geocode with Nominatim
-          geoUrl = "https://nominatim.openstreetmap.org/search?q=" + encodeURIComponent(locationText) + "&format=json&limit=1&countrycodes=us";
-          _context2.n = 1;
-          return fetch(geoUrl, {
-            headers: {
-              "Accept": "application/json",
-              "User-Agent": "garden-manager/1.0"
-            }
-          });
-        case 1:
-          geoResp = _context2.v;
-          if (geoResp.ok) {
-            _context2.n = 2;
-            break;
-          }
-          throw new Error("Geocoding failed (" + geoResp.status + ")");
-        case 2:
-          _context2.n = 3;
-          return geoResp.json();
-        case 3:
-          geoData = _context2.v;
-          if (!(!geoData || !geoData.length)) {
-            _context2.n = 4;
-            break;
-          }
-          throw new Error("Location not found  -  try ZIP code or City, State");
-        case 4:
-          lat = parseFloat(geoData[0].lat);
-          lon = parseFloat(geoData[0].lon); // Step 2: USDA zone from phzmapi.org
-          _context2.n = 5;
-          return fetch("https://phzmapi.org/" + lat + "/" + lon + ".json");
-        case 5:
-          zoneResp = _context2.v;
-          if (zoneResp.ok) {
-            _context2.n = 6;
-            break;
-          }
-          throw new Error("Zone API failed (" + zoneResp.status + ")");
-        case 6:
-          _context2.n = 7;
-          return zoneResp.json();
-        case 7:
-          zoneData = _context2.v;
-          if (!(!zoneData || !zoneData.zone)) {
-            _context2.n = 8;
-            break;
-          }
-          throw new Error("Zone not found for coordinates");
-        case 8:
-          return _context2.a(2, {
-            zone: zoneData.zone,
-            lat: lat,
-            lon: lon
-          });
-      }
-    }, _callee2);
-  }));
-  return _lookupZoneFromLocation.apply(this, arguments);
+
+// Built-in ZIP prefix (first 3 digits) -> USDA hardiness zone. No network needed.
+var ZIP_ZONES = {
+  "010": "5b",
+  "011": "5b",
+  "012": "5b",
+  "013": "5b",
+  "014": "5b",
+  "015": "5b",
+  "016": "5b",
+  "017": "5b",
+  "018": "6a",
+  "019": "6a",
+  "020": "6a",
+  "021": "6b",
+  "022": "6b",
+  "023": "6b",
+  "024": "6b",
+  "025": "6b",
+  "026": "6b",
+  "027": "6b",
+  "028": "6b",
+  "029": "7a",
+  "030": "5b",
+  "031": "5b",
+  "032": "5b",
+  "033": "6a",
+  "034": "6a",
+  "035": "5b",
+  "036": "5b",
+  "037": "5a",
+  "038": "5b",
+  "039": "5b",
+  "040": "5a",
+  "041": "5a",
+  "042": "5a",
+  "043": "5a",
+  "044": "5a",
+  "045": "5a",
+  "046": "5a",
+  "047": "5b",
+  "048": "5b",
+  "049": "5a",
+  "050": "4b",
+  "051": "4b",
+  "052": "4b",
+  "053": "5a",
+  "054": "4b",
+  "056": "4b",
+  "057": "4b",
+  "058": "4a",
+  "059": "4a",
+  "060": "6a",
+  "061": "6a",
+  "062": "6a",
+  "063": "6a",
+  "064": "6a",
+  "065": "6a",
+  "066": "6b",
+  "067": "6a",
+  "068": "6b",
+  "069": "6b",
+  "070": "6b",
+  "071": "7a",
+  "072": "7a",
+  "073": "6b",
+  "074": "7a",
+  "075": "7a",
+  "076": "7a",
+  "077": "7a",
+  "078": "6b",
+  "079": "6b",
+  "080": "7a",
+  "081": "7a",
+  "082": "7a",
+  "083": "7a",
+  "084": "7a",
+  "085": "7a",
+  "086": "7a",
+  "087": "7a",
+  "088": "7a",
+  "089": "7a",
+  "100": "7b",
+  "101": "7b",
+  "102": "7b",
+  "103": "7b",
+  "104": "7a",
+  "105": "6b",
+  "106": "6b",
+  "107": "6b",
+  "108": "6b",
+  "109": "6b",
+  "110": "7a",
+  "111": "7a",
+  "112": "7b",
+  "113": "7b",
+  "114": "7b",
+  "115": "7a",
+  "116": "7a",
+  "117": "7a",
+  "118": "7a",
+  "119": "7a",
+  "120": "5b",
+  "121": "5b",
+  "122": "6a",
+  "123": "5b",
+  "124": "6a",
+  "125": "6a",
+  "126": "6a",
+  "127": "6a",
+  "128": "4b",
+  "129": "5a",
+  "130": "5b",
+  "131": "5b",
+  "132": "5b",
+  "133": "5a",
+  "134": "5b",
+  "135": "5b",
+  "136": "5a",
+  "137": "5b",
+  "138": "5b",
+  "139": "5b",
+  "140": "6a",
+  "141": "6a",
+  "142": "6a",
+  "143": "6a",
+  "144": "6a",
+  "145": "6a",
+  "146": "6a",
+  "147": "6a",
+  "148": "5b",
+  "149": "5b",
+  "150": "6a",
+  "151": "6a",
+  "152": "6b",
+  "153": "6a",
+  "154": "6a",
+  "155": "6a",
+  "156": "6a",
+  "157": "6a",
+  "158": "5b",
+  "159": "5b",
+  "160": "6a",
+  "161": "6a",
+  "162": "6a",
+  "163": "5b",
+  "164": "6a",
+  "165": "6a",
+  "166": "6a",
+  "167": "5b",
+  "168": "5b",
+  "169": "5b",
+  "170": "6a",
+  "171": "6a",
+  "172": "6a",
+  "173": "6b",
+  "174": "6a",
+  "175": "6b",
+  "176": "6b",
+  "177": "6b",
+  "178": "6b",
+  "179": "6b",
+  "180": "6b",
+  "181": "6b",
+  "182": "6b",
+  "183": "6b",
+  "184": "6b",
+  "185": "6b",
+  "186": "6a",
+  "187": "6a",
+  "188": "6a",
+  "189": "6b",
+  "190": "7a",
+  "191": "7b",
+  "192": "7a",
+  "193": "7a",
+  "194": "7a",
+  "195": "6b",
+  "196": "6b",
+  "200": "7b",
+  "201": "7a",
+  "202": "7b",
+  "203": "7b",
+  "204": "7b",
+  "205": "7b",
+  "206": "7a",
+  "207": "7b",
+  "208": "7b",
+  "209": "7b",
+  "210": "7b",
+  "211": "7b",
+  "212": "7b",
+  "214": "7b",
+  "215": "7a",
+  "216": "7b",
+  "217": "7a",
+  "218": "7b",
+  "219": "7b",
+  "220": "7b",
+  "221": "7b",
+  "222": "7b",
+  "223": "7b",
+  "224": "7a",
+  "225": "7a",
+  "226": "7a",
+  "227": "7a",
+  "228": "7b",
+  "229": "7a",
+  "230": "7b",
+  "231": "7b",
+  "232": "7b",
+  "233": "8a",
+  "234": "8a",
+  "235": "7b",
+  "236": "8a",
+  "237": "8a",
+  "238": "7b",
+  "239": "7b",
+  "240": "7a",
+  "241": "7b",
+  "242": "6b",
+  "243": "6b",
+  "244": "7a",
+  "245": "7a",
+  "246": "6b",
+  "247": "6b",
+  "248": "6b",
+  "249": "6b",
+  "250": "6b",
+  "251": "6b",
+  "252": "6a",
+  "253": "6b",
+  "254": "6a",
+  "255": "6b",
+  "256": "6b",
+  "257": "6b",
+  "258": "6a",
+  "259": "6a",
+  "260": "6b",
+  "261": "6b",
+  "262": "6a",
+  "263": "6b",
+  "264": "6a",
+  "265": "6a",
+  "266": "6a",
+  "267": "6b",
+  "268": "6a",
+  "270": "7b",
+  "271": "7b",
+  "272": "7b",
+  "273": "7b",
+  "274": "7b",
+  "275": "7b",
+  "276": "7b",
+  "277": "7b",
+  "278": "7b",
+  "279": "7b",
+  "280": "7b",
+  "281": "7b",
+  "282": "8a",
+  "283": "7b",
+  "284": "8a",
+  "285": "8a",
+  "286": "7a",
+  "287": "7a",
+  "288": "7a",
+  "289": "7a",
+  "290": "8a",
+  "291": "8a",
+  "292": "8a",
+  "293": "8a",
+  "294": "8b",
+  "295": "8a",
+  "296": "7b",
+  "297": "7b",
+  "298": "8a",
+  "299": "8b",
+  "300": "7b",
+  "301": "7b",
+  "302": "8a",
+  "303": "7b",
+  "304": "7b",
+  "305": "8a",
+  "306": "7b",
+  "307": "7b",
+  "308": "8a",
+  "309": "8a",
+  "310": "8b",
+  "311": "8a",
+  "312": "8a",
+  "313": "8a",
+  "314": "8b",
+  "315": "8a",
+  "316": "8b",
+  "317": "8a",
+  "318": "8a",
+  "319": "8a",
+  "320": "9a",
+  "321": "9b",
+  "322": "9a",
+  "323": "9a",
+  "324": "9a",
+  "325": "9a",
+  "326": "9a",
+  "327": "9b",
+  "328": "9b",
+  "329": "10a",
+  "330": "10a",
+  "331": "10b",
+  "333": "10b",
+  "334": "10a",
+  "335": "10a",
+  "336": "9b",
+  "337": "9b",
+  "338": "9b",
+  "339": "10a",
+  "340": "9b",
+  "341": "9b",
+  "342": "9b",
+  "344": "9b",
+  "346": "9b",
+  "347": "9b",
+  "349": "9b",
+  "350": "8a",
+  "351": "8a",
+  "352": "8a",
+  "354": "8a",
+  "355": "8a",
+  "356": "7b",
+  "357": "7b",
+  "358": "7b",
+  "359": "8a",
+  "360": "8a",
+  "361": "8a",
+  "362": "8a",
+  "363": "8a",
+  "364": "8a",
+  "365": "8b",
+  "366": "8a",
+  "367": "8a",
+  "368": "8a",
+  "369": "8a",
+  "370": "7a",
+  "371": "7a",
+  "372": "7a",
+  "373": "7b",
+  "374": "7a",
+  "375": "7b",
+  "376": "7b",
+  "377": "7a",
+  "378": "7a",
+  "379": "7a",
+  "380": "7b",
+  "381": "7b",
+  "382": "7b",
+  "383": "7b",
+  "384": "7b",
+  "385": "7b",
+  "386": "8a",
+  "387": "7b",
+  "388": "8a",
+  "389": "8a",
+  "390": "8a",
+  "391": "8a",
+  "392": "8a",
+  "393": "8a",
+  "394": "8b",
+  "395": "8b",
+  "396": "8b",
+  "397": "8a",
+  "400": "6b",
+  "401": "6b",
+  "402": "6b",
+  "403": "6b",
+  "404": "6b",
+  "405": "6b",
+  "406": "6b",
+  "407": "6b",
+  "408": "6b",
+  "409": "6b",
+  "410": "6b",
+  "411": "6b",
+  "412": "6b",
+  "413": "6b",
+  "414": "6b",
+  "415": "6b",
+  "416": "6b",
+  "417": "6b",
+  "418": "6b",
+  "420": "6b",
+  "421": "6b",
+  "422": "6b",
+  "423": "6b",
+  "424": "7a",
+  "425": "7a",
+  "426": "6b",
+  "427": "6b",
+  "430": "6a",
+  "431": "6a",
+  "432": "6a",
+  "433": "6a",
+  "434": "6a",
+  "435": "6a",
+  "436": "6a",
+  "437": "6a",
+  "438": "6a",
+  "439": "6a",
+  "440": "6a",
+  "441": "6b",
+  "442": "6a",
+  "443": "6a",
+  "444": "6a",
+  "445": "6a",
+  "446": "6a",
+  "447": "6a",
+  "448": "6a",
+  "449": "6a",
+  "450": "6b",
+  "451": "6b",
+  "452": "6b",
+  "453": "6a",
+  "454": "6b",
+  "455": "6b",
+  "456": "6a",
+  "457": "6b",
+  "458": "6a",
+  "460": "6a",
+  "461": "6a",
+  "462": "6a",
+  "463": "5b",
+  "464": "5b",
+  "465": "6a",
+  "466": "5b",
+  "467": "5b",
+  "468": "5b",
+  "469": "5b",
+  "470": "6b",
+  "471": "6b",
+  "472": "6b",
+  "473": "6a",
+  "474": "6a",
+  "475": "6a",
+  "476": "6a",
+  "477": "6b",
+  "478": "6a",
+  "479": "6a",
+  "480": "6a",
+  "481": "6a",
+  "482": "6a",
+  "483": "6a",
+  "484": "6a",
+  "485": "6a",
+  "486": "5b",
+  "487": "5b",
+  "488": "5b",
+  "489": "5b",
+  "490": "6a",
+  "491": "6a",
+  "492": "5b",
+  "493": "6a",
+  "494": "5b",
+  "495": "6a",
+  "496": "5b",
+  "497": "5a",
+  "498": "4b",
+  "499": "5a",
+  "500": "5a",
+  "501": "5a",
+  "502": "5a",
+  "503": "5a",
+  "504": "5a",
+  "505": "5a",
+  "506": "5a",
+  "507": "5a",
+  "508": "5a",
+  "509": "5a",
+  "510": "5a",
+  "511": "5a",
+  "512": "5a",
+  "513": "5a",
+  "514": "5b",
+  "515": "5b",
+  "516": "5a",
+  "520": "5a",
+  "521": "5b",
+  "522": "4b",
+  "523": "5a",
+  "524": "5a",
+  "525": "5a",
+  "526": "5a",
+  "527": "5a",
+  "528": "5a",
+  "530": "5b",
+  "531": "5b",
+  "532": "5a",
+  "534": "5a",
+  "535": "4b",
+  "537": "4b",
+  "538": "4b",
+  "539": "4b",
+  "540": "4b",
+  "541": "4b",
+  "542": "4a",
+  "543": "4a",
+  "544": "4a",
+  "545": "4a",
+  "546": "4b",
+  "547": "4a",
+  "548": "3b",
+  "549": "4b",
+  "550": "4b",
+  "551": "4b",
+  "553": "4b",
+  "554": "4b",
+  "556": "3b",
+  "557": "3b",
+  "558": "4a",
+  "559": "4a",
+  "560": "4a",
+  "561": "4a",
+  "562": "4a",
+  "563": "4a",
+  "564": "3b",
+  "565": "4a",
+  "566": "3b",
+  "567": "4a",
+  "570": "4b",
+  "571": "4b",
+  "572": "4a",
+  "573": "4b",
+  "574": "4a",
+  "575": "4a",
+  "576": "4a",
+  "577": "4a",
+  "580": "4a",
+  "581": "4a",
+  "582": "4a",
+  "583": "3b",
+  "584": "3b",
+  "585": "4a",
+  "586": "4a",
+  "587": "4a",
+  "588": "4a",
+  "590": "4a",
+  "591": "4a",
+  "592": "4a",
+  "593": "4b",
+  "594": "4a",
+  "595": "4a",
+  "596": "4a",
+  "597": "4b",
+  "598": "4b",
+  "599": "5a",
+  "600": "5b",
+  "601": "5b",
+  "602": "5b",
+  "603": "5b",
+  "604": "5b",
+  "605": "5b",
+  "606": "6a",
+  "607": "5b",
+  "608": "5b",
+  "609": "5b",
+  "610": "5b",
+  "611": "5b",
+  "612": "5a",
+  "613": "5b",
+  "614": "5b",
+  "615": "5b",
+  "616": "5b",
+  "617": "5b",
+  "618": "6a",
+  "619": "6a",
+  "620": "6a",
+  "622": "6b",
+  "623": "6a",
+  "624": "6b",
+  "625": "6a",
+  "626": "6a",
+  "627": "6a",
+  "628": "6b",
+  "629": "6b",
+  "630": "6a",
+  "631": "6b",
+  "633": "6a",
+  "634": "6a",
+  "635": "6a",
+  "636": "6a",
+  "637": "6b",
+  "638": "6b",
+  "639": "6b",
+  "640": "6a",
+  "641": "6a",
+  "644": "6a",
+  "645": "5b",
+  "646": "6a",
+  "647": "6a",
+  "648": "6b",
+  "649": "6a",
+  "650": "6a",
+  "651": "6a",
+  "652": "6a",
+  "653": "6a",
+  "654": "6b",
+  "655": "6b",
+  "656": "6b",
+  "657": "6b",
+  "658": "6a",
+  "660": "6a",
+  "661": "6a",
+  "662": "6a",
+  "664": "6a",
+  "665": "6a",
+  "666": "6a",
+  "667": "6a",
+  "668": "6a",
+  "669": "5b",
+  "670": "6b",
+  "671": "6b",
+  "672": "6b",
+  "673": "6b",
+  "674": "6b",
+  "675": "6b",
+  "676": "6b",
+  "677": "6a",
+  "678": "6a",
+  "679": "6b",
+  "680": "5a",
+  "681": "5a",
+  "683": "5a",
+  "684": "5a",
+  "685": "5a",
+  "686": "5a",
+  "687": "5a",
+  "688": "5a",
+  "689": "5a",
+  "690": "5a",
+  "691": "5a",
+  "692": "5a",
+  "693": "4b",
+  "700": "9a",
+  "701": "9a",
+  "703": "9a",
+  "704": "9a",
+  "705": "9a",
+  "706": "9a",
+  "707": "8b",
+  "708": "9a",
+  "710": "8b",
+  "711": "8b",
+  "712": "8b",
+  "713": "8b",
+  "714": "8b",
+  "716": "8a",
+  "717": "8a",
+  "718": "8a",
+  "719": "7b",
+  "720": "8a",
+  "721": "7b",
+  "722": "7b",
+  "723": "7a",
+  "724": "7b",
+  "725": "7a",
+  "726": "7a",
+  "727": "7b",
+  "728": "8a",
+  "729": "8a",
+  "730": "7a",
+  "731": "7a",
+  "733": "7b",
+  "734": "7b",
+  "735": "7a",
+  "736": "7a",
+  "737": "7a",
+  "738": "7a",
+  "739": "6b",
+  "740": "7a",
+  "741": "7a",
+  "743": "7a",
+  "744": "7a",
+  "745": "7a",
+  "746": "7a",
+  "747": "7b",
+  "748": "7a",
+  "749": "7b",
+  "750": "8a",
+  "751": "8a",
+  "752": "8a",
+  "753": "8a",
+  "754": "8a",
+  "755": "8a",
+  "756": "8a",
+  "757": "8a",
+  "758": "8a",
+  "759": "8b",
+  "760": "7b",
+  "761": "7b",
+  "762": "7b",
+  "763": "7b",
+  "764": "8a",
+  "765": "8a",
+  "766": "8b",
+  "767": "8a",
+  "768": "7b",
+  "769": "7b",
+  "770": "9a",
+  "772": "9a",
+  "773": "9a",
+  "774": "9a",
+  "775": "9a",
+  "776": "8b",
+  "777": "9a",
+  "778": "8b",
+  "779": "9a",
+  "780": "8b",
+  "781": "8b",
+  "782": "8b",
+  "783": "9a",
+  "784": "9a",
+  "785": "8b",
+  "786": "8b",
+  "787": "8b",
+  "788": "8b",
+  "789": "8b",
+  "790": "7b",
+  "791": "7b",
+  "792": "7b",
+  "793": "7b",
+  "794": "7b",
+  "795": "8a",
+  "796": "8a",
+  "797": "8a",
+  "798": "8b",
+  "799": "8a",
+  "800": "5b",
+  "801": "5b",
+  "802": "5b",
+  "803": "5a",
+  "804": "5b",
+  "805": "5a",
+  "806": "4b",
+  "807": "5a",
+  "808": "5a",
+  "809": "5a",
+  "810": "5b",
+  "811": "5a",
+  "812": "5a",
+  "813": "5a",
+  "814": "6a",
+  "815": "5b",
+  "816": "5b",
+  "820": "4b",
+  "821": "4a",
+  "822": "4a",
+  "823": "4b",
+  "824": "5a",
+  "825": "4b",
+  "826": "4a",
+  "827": "4a",
+  "828": "5a",
+  "829": "4b",
+  "830": "5b",
+  "831": "5b",
+  "832": "5a",
+  "833": "4b",
+  "834": "5a",
+  "835": "6b",
+  "836": "6a",
+  "837": "6a",
+  "838": "6b",
+  "840": "6b",
+  "841": "6b",
+  "842": "6b",
+  "843": "6a",
+  "844": "6b",
+  "845": "6b",
+  "846": "6b",
+  "847": "6b",
+  "850": "9b",
+  "851": "9a",
+  "852": "9b",
+  "853": "9b",
+  "855": "8b",
+  "856": "9a",
+  "857": "9a",
+  "859": "8a",
+  "860": "7a",
+  "863": "7b",
+  "864": "8a",
+  "865": "7b",
+  "870": "7b",
+  "871": "7b",
+  "873": "7a",
+  "874": "6b",
+  "875": "7b",
+  "877": "6b",
+  "878": "7a",
+  "879": "7b",
+  "880": "8a",
+  "881": "8a",
+  "882": "8b",
+  "883": "8a",
+  "884": "7b",
+  "885": "8a",
+  "889": "9b",
+  "890": "9a",
+  "891": "9a",
+  "893": "7a",
+  "894": "9a",
+  "895": "9a",
+  "897": "7a",
+  "898": "6b",
+  "900": "10b",
+  "901": "10b",
+  "902": "10b",
+  "903": "10b",
+  "904": "10b",
+  "905": "10b",
+  "906": "10a",
+  "907": "10b",
+  "908": "10b",
+  "910": "9b",
+  "911": "9b",
+  "912": "9b",
+  "913": "9b",
+  "914": "9b",
+  "915": "9b",
+  "916": "9b",
+  "917": "9b",
+  "918": "9b",
+  "919": "10a",
+  "920": "10a",
+  "921": "10a",
+  "922": "9a",
+  "923": "9b",
+  "924": "9b",
+  "925": "9b",
+  "926": "10a",
+  "927": "10a",
+  "928": "10a",
+  "930": "9b",
+  "931": "9b",
+  "932": "9a",
+  "933": "9a",
+  "934": "10a",
+  "935": "8b",
+  "936": "9a",
+  "937": "9a",
+  "938": "8b",
+  "939": "9b",
+  "940": "10a",
+  "941": "10b",
+  "942": "9b",
+  "943": "10a",
+  "944": "10a",
+  "945": "9b",
+  "946": "9b",
+  "947": "9b",
+  "948": "9b",
+  "949": "10a",
+  "950": "9b",
+  "951": "9b",
+  "952": "9a",
+  "953": "9a",
+  "954": "9b",
+  "955": "9a",
+  "956": "9a",
+  "957": "9a",
+  "958": "9a",
+  "959": "9a",
+  "960": "9a",
+  "961": "7b",
+  "970": "8b",
+  "971": "8b",
+  "972": "8b",
+  "973": "8b",
+  "974": "8a",
+  "975": "7b",
+  "976": "6b",
+  "977": "6b",
+  "978": "6b",
+  "979": "8b",
+  "980": "8b",
+  "981": "8b",
+  "982": "8a",
+  "983": "8a",
+  "984": "8b",
+  "985": "8a",
+  "986": "8b",
+  "988": "8a",
+  "989": "7b",
+  "990": "6b",
+  "991": "6b",
+  "992": "6a",
+  "993": "6b",
+  "994": "5b",
+  "995": "4b",
+  "996": "2a",
+  "997": "2b",
+  "998": "6a",
+  "999": "5b"
+};
+function lookupZoneByZip(zip) {
+  var clean = (zip || "").replace(/\D/g, "");
+  if (clean.length < 3) return null;
+  return ZIP_ZONES[clean.slice(0, 3)] || null;
 }
 function SettingsView(props) {
   var s = props.settings || {};
-  var _useState37 = useState({
+  var _useState29 = useState({
       gardenName: s.gardenName || "",
       location: s.location || "",
       zone: s.zone || "",
@@ -4097,21 +5285,21 @@ function SettingsView(props) {
       lastFrost: s.lastFrost || "05-15",
       firstFrost: s.firstFrost || "10-15"
     }),
-    _useState38 = _slicedToArray(_useState37, 2),
-    form = _useState38[0],
-    setForm = _useState38[1];
-  var _useState39 = useState(false),
-    _useState40 = _slicedToArray(_useState39, 2),
-    saved = _useState40[0],
-    setSaved = _useState40[1];
-  var _useState41 = useState(null),
-    _useState42 = _slicedToArray(_useState41, 2),
-    zoneStatus = _useState42[0],
-    setZoneStatus = _useState42[1];
-  var _useState43 = useState(""),
-    _useState44 = _slicedToArray(_useState43, 2),
-    zoneMsg = _useState44[0],
-    setZoneMsg = _useState44[1];
+    _useState30 = _slicedToArray(_useState29, 2),
+    form = _useState30[0],
+    setForm = _useState30[1];
+  var _useState31 = useState(false),
+    _useState32 = _slicedToArray(_useState31, 2),
+    saved = _useState32[0],
+    setSaved = _useState32[1];
+  var _useState33 = useState(null),
+    _useState34 = _slicedToArray(_useState33, 2),
+    zoneStatus = _useState34[0],
+    setZoneStatus = _useState34[1];
+  var _useState35 = useState(""),
+    _useState36 = _slicedToArray(_useState35, 2),
+    zoneMsg = _useState36[0],
+    setZoneMsg = _useState36[1];
   function upd(k, v) {
     setForm(function (p) {
       return Object.assign({}, p, _defineProperty({}, k, v));
@@ -4119,60 +5307,38 @@ function SettingsView(props) {
     setSaved(false);
   }
   function doLookup() {
-    return _doLookup.apply(this, arguments);
-  }
-  function _doLookup() {
-    _doLookup = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-      var input, result, zoneKey, frosts, _t;
-      return _regenerator().w(function (_context) {
-        while (1) switch (_context.p = _context.n) {
-          case 0:
-            input = form.location.trim();
-            if (input) {
-              _context.n = 1;
-              break;
-            }
-            setZoneStatus("error");
-            setZoneMsg("Enter a location first");
-            return _context.a(2);
-          case 1:
-            setZoneStatus("loading");
-            setZoneMsg("");
-            _context.p = 2;
-            _context.n = 3;
-            return lookupZoneFromLocation(input);
-          case 3:
-            result = _context.v;
-            zoneKey = result.zone.toLowerCase();
-            frosts = ZONE_FROST_DEFAULTS[zoneKey];
-            setForm(function (p) {
-              return Object.assign({}, p, {
-                zone: result.zone,
-                lat: result.lat,
-                lon: result.lon,
-                lastFrost: frosts ? frosts.last : p.lastFrost,
-                firstFrost: frosts ? frosts.first : p.firstFrost
-              });
-            });
-            setZoneStatus("found");
-            setZoneMsg("Zone " + result.zone + " found" + (frosts ? "  -  frost dates updated" : ""));
-            setTimeout(function () {
-              setZoneStatus(null);
-              setZoneMsg("");
-            }, 5000);
-            _context.n = 5;
-            break;
-          case 4:
-            _context.p = 4;
-            _t = _context.v;
-            setZoneStatus("error");
-            setZoneMsg(_t.message || "Lookup failed");
-          case 5:
-            return _context.a(2);
-        }
-      }, _callee, null, [[2, 4]]);
-    }));
-    return _doLookup.apply(this, arguments);
+    var input = form.location.trim();
+    if (!input) {
+      setZoneStatus("error");
+      setZoneMsg("Enter a ZIP code first");
+      return;
+    }
+    var zipMatch = input.match(/\d{3,5}/);
+    if (!zipMatch) {
+      setZoneStatus("error");
+      setZoneMsg("Enter a 5-digit US ZIP code (e.g. 11747)");
+      return;
+    }
+    var zone = lookupZoneByZip(zipMatch[0]);
+    if (!zone) {
+      setZoneStatus("error");
+      setZoneMsg("ZIP not recognized  -  enter zone manually below");
+      return;
+    }
+    var frosts = ZONE_FROST_DEFAULTS[zone];
+    setForm(function (p) {
+      return Object.assign({}, p, {
+        zone: zone,
+        lastFrost: frosts ? frosts.last : p.lastFrost,
+        firstFrost: frosts ? frosts.first : p.firstFrost
+      });
+    });
+    setZoneStatus("found");
+    setZoneMsg("Zone " + zone + " found" + (frosts ? "  -  frost dates updated" : ""));
+    setTimeout(function () {
+      setZoneStatus(null);
+      setZoneMsg("");
+    }, 5000);
   }
   function save() {
     props.onSave(form);
@@ -4237,10 +5403,9 @@ function SettingsView(props) {
       setZoneStatus(null);
       setZoneMsg("");
     },
-    placeholder: "ZIP code or City, State"
+    placeholder: "e.g. Melville, NY 11747"
   }), /*#__PURE__*/React.createElement("button", {
     onClick: doLookup,
-    disabled: zoneStatus === "loading",
     style: {
       padding: "0 12px",
       background: "rgba(212,168,83,0.15)",
@@ -4248,23 +5413,19 @@ function SettingsView(props) {
       borderRadius: 10,
       color: G,
       fontSize: 11,
-      cursor: zoneStatus === "loading" ? "not-allowed" : "pointer",
+      cursor: "pointer",
       fontFamily: "inherit",
       whiteSpace: "nowrap",
       flexShrink: 0,
       fontWeight: "600"
     }
-  }, zoneStatus === "loading" ? /*#__PURE__*/React.createElement("span", {
+  }, "Lookup Zone")), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "inline-block",
-      width: 12,
-      height: 12,
-      border: "1.5px solid rgba(212,168,83,0.3)",
-      borderTop: "1.5px solid #d4a853",
-      borderRadius: "50%",
-      animation: "spin 0.8s linear infinite"
+      fontSize: 10,
+      color: DIM,
+      marginTop: 4
     }
-  }) : "Lookup Zone")), zoneMsg && /*#__PURE__*/React.createElement("div", {
+  }, "Include your ZIP code, then tap Lookup to auto-fill zone and frost dates."), zoneMsg && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       marginTop: 6,
@@ -4350,32 +5511,32 @@ function SettingsView(props) {
   }, "All data stored locally on this device")));
 }
 function GardenApp() {
-  var _useState45 = useState(function () {
+  var _useState37 = useState(function () {
       return loadData();
     }),
+    _useState38 = _slicedToArray(_useState37, 2),
+    data = _useState38[0],
+    setData = _useState38[1];
+  var _useState39 = useState("dashboard"),
+    _useState40 = _slicedToArray(_useState39, 2),
+    view = _useState40[0],
+    setView = _useState40[1];
+  var _useState41 = useState(null),
+    _useState42 = _slicedToArray(_useState41, 2),
+    modal = _useState42[0],
+    setModal = _useState42[1];
+  var _useState43 = useState(null),
+    _useState44 = _slicedToArray(_useState43, 2),
+    expandedBed = _useState44[0],
+    setExpandedBed = _useState44[1];
+  var _useState45 = useState(CURRENT_MONTH),
     _useState46 = _slicedToArray(_useState45, 2),
-    data = _useState46[0],
-    setData = _useState46[1];
-  var _useState47 = useState("dashboard"),
+    selMonth = _useState46[0],
+    setSelMonth = _useState46[1];
+  var _useState47 = useState(null),
     _useState48 = _slicedToArray(_useState47, 2),
-    view = _useState48[0],
-    setView = _useState48[1];
-  var _useState49 = useState(null),
-    _useState50 = _slicedToArray(_useState49, 2),
-    modal = _useState50[0],
-    setModal = _useState50[1];
-  var _useState51 = useState(null),
-    _useState52 = _slicedToArray(_useState51, 2),
-    expandedBed = _useState52[0],
-    setExpandedBed = _useState52[1];
-  var _useState53 = useState(CURRENT_MONTH),
-    _useState54 = _slicedToArray(_useState53, 2),
-    selMonth = _useState54[0],
-    setSelMonth = _useState54[1];
-  var _useState55 = useState(null),
-    _useState56 = _slicedToArray(_useState55, 2),
-    plantDetail = _useState56[0],
-    setPlantDetail = _useState56[1];
+    plantDetail = _useState48[0],
+    setPlantDetail = _useState48[1];
   useEffect(function () {
     saveData(data);
   }, [data]);
@@ -4612,11 +5773,7 @@ function GardenApp() {
   }, {
     key: "beds",
     icon: "🪴",
-    label: "Beds"
-  }, {
-    key: "map",
-    icon: "🗺",
-    label: "Map"
+    label: "Areas"
   }, {
     key: "planner",
     icon: "🌱",
@@ -4747,7 +5904,7 @@ function GardenApp() {
       margin: "4px 0 14px"
     }
   }, [{
-    label: "Beds",
+    label: "Areas",
     val: beds.length,
     icon: "🪴",
     color: "#60a5fa"
@@ -5092,7 +6249,7 @@ function GardenApp() {
       color: "#d4a853",
       fontWeight: "bold"
     }
-  }, "Garden Beds"), /*#__PURE__*/React.createElement("button", {
+  }, "Areas"), /*#__PURE__*/React.createElement("button", {
     onClick: function onClick() {
       setModal({
         type: "bed",
@@ -5109,7 +6266,7 @@ function GardenApp() {
       cursor: "pointer",
       fontFamily: "inherit"
     }
-  }, "+ Bed")), beds.map(function (bed) {
+  }, "+ Area")), beds.map(function (bed) {
     var bp = plants.filter(function (p) {
       return p.bedId === bed.id;
     });
@@ -5899,15 +7056,8 @@ function GardenApp() {
     onSave: function onSave(s) {
       upd("settings", s);
     }
-  }), view === "map" && /*#__PURE__*/React.createElement(BedMap, {
-    beds: beds,
-    plants: plants,
-    positions: data.bedPositions || {},
-    onUpdatePositions: function onUpdatePositions(pos) {
-      upd("bedPositions", pos);
-    }
   })), modal && modal.type === "bed" && /*#__PURE__*/React.createElement(Modal, {
-    title: modal.payload.id ? "Edit Bed" : "New Bed",
+    title: modal.payload.id ? "Edit Area" : "New Area",
     onClose: function onClose() {
       setModal(null);
     }
@@ -5996,7 +7146,31 @@ function GardenApp() {
     return b.id === plantDetail.bedId;
   }) || {}).name), /*#__PURE__*/React.createElement(Tag, {
     color: (STATUS_CFG[plantDetail.status] || STATUS_CFG.healthy).color
-  }, (STATUS_CFG[plantDetail.status] || STATUS_CFG.healthy).label), plantDetail.planted && /*#__PURE__*/React.createElement("div", {
+  }, (STATUS_CFG[plantDetail.status] || STATUS_CFG.healthy).label), plantDetail.category && /*#__PURE__*/React.createElement("span", {
+    style: {
+      marginLeft: 5
+    }
+  }, /*#__PURE__*/React.createElement(Tag, {
+    color: catColor(plantDetail.category)
+  }, plantDetail.category)), plantDetail.deerResistant && /*#__PURE__*/React.createElement("span", {
+    style: {
+      marginLeft: 5
+    }
+  }, /*#__PURE__*/React.createElement(Tag, {
+    color: "#7ec87e"
+  }, "\uD83E\uDD8C resistant")), plantDetail.bloom && plantDetail.bloom !== "none" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "#c4bdaa",
+      marginTop: 6
+    }
+  }, "\uD83C\uDF38 Blooms ", plantDetail.bloom, plantDetail.color ? " · " + plantDetail.color : ""), plantDetail.sun && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "#c4bdaa",
+      marginTop: 3
+    }
+  }, "\u2600\uFE0F ", plantDetail.sun), plantDetail.planted && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: "#5a5844",
