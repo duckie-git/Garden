@@ -1540,75 +1540,291 @@ function fmtDate(s) {
 var MONTHS_S = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 var MONTHS_L = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 var BED_COLORS = {
-  vegetable: "#d4a853",
-  berry: "#c084fc",
-  fruit: "#fb923c",
-  perennial: "#34d399",
-  ornamental: "#f472b6",
-  other: "#94a3b8"
+  vegetable: "#3f5c3a",
+  berry: "#9d6bc4",
+  fruit: "#c87d56",
+  perennial: "#3f8c6e",
+  ornamental: "#c2649a",
+  other: "#9a9079"
 };
 var STATUS_CFG = {
   growing: {
-    color: "#d4a853",
+    color: "#3f5c3a",
     label: "Growing"
   },
   healthy: {
-    color: "#60a5fa",
+    color: "#3b7ea1",
     label: "Healthy"
   },
   fruiting: {
-    color: "#fb923c",
+    color: "#c87d56",
     label: "Fruiting"
   },
   harvesting: {
-    color: "#fbbf24",
+    color: "#d9a441",
     label: "Harvesting"
   },
   dormant: {
-    color: "#64748b",
+    color: "#9a9079",
     label: "Dormant"
   },
   struggling: {
-    color: "#f87171",
+    color: "#c0524a",
     label: "Struggling"
   }
 };
 var CHEM_COLORS = {
-  Fertilizer: "#d4a853",
-  Fungicide: "#fb923c",
-  "Pest Control": "#f87171",
-  Herbicide: "#fbbf24",
-  Other: "#94a3b8"
+  Fertilizer: "#3f5c3a",
+  Fungicide: "#c87d56",
+  "Pest Control": "#c0524a",
+  Herbicide: "#d9a441",
+  Other: "#9a9079"
 };
+
+// Product catalog grouped by category. Each: name, type, interval (days), target, notes.
+// "interval" is a sensible default reapplication cadence; users can edit after selecting.
+var PRODUCT_CATALOG = [{
+  group: "Nutrients & Fertilizers",
+  items: [{
+    name: "Dr. Earth Pure Gold All Purpose",
+    type: "Fertilizer",
+    interval: 60,
+    target: "All plants, beds, containers",
+    notes: "5-5-5 organic. Feeds ~2 months. Scratch into top inch of soil and water in. Probiotic + mycorrhizae."
+  }, {
+    name: "Dr. Earth Tomato, Vegetable & Herb",
+    type: "Fertilizer",
+    interval: 14,
+    target: "Tomatoes, vegetables, herbs",
+    notes: "4-6-3 organic. 4 tbsp per plant at transplant, then every 2 weeks during fruiting."
+  }, {
+    name: "Dr. Earth Acid Lovers",
+    type: "Fertilizer",
+    interval: 30,
+    target: "Blueberries, azalea, rhododendron, fig",
+    notes: "3-4-3 organic. Lowers pH. Top-dress at drip line. Great for acid-loving plants."
+  }, {
+    name: "Dr. Earth Fruit Tree",
+    type: "Fertilizer",
+    interval: 30,
+    target: "Pear, persimmon, crabapple, citrus",
+    notes: "5-5-2 organic. Apply at drip line, NOT against trunk. Spring through summer."
+  }, {
+    name: "Dr. Earth Fertilizer Tea",
+    type: "Fertilizer",
+    interval: 21,
+    target: "All beds and containers",
+    notes: "Steep 24h, strain, apply as root drench. Fast-acting gentle feed."
+  }, {
+    name: "Espoma Holly-tone",
+    type: "Fertilizer",
+    interval: 180,
+    target: "Blueberries, azalea, holly, evergreens",
+    notes: "4-3-4 acidifying organic. Apply early spring and late fall. 2x/year is plenty."
+  }, {
+    name: "Espoma Garden-tone",
+    type: "Fertilizer",
+    interval: 30,
+    target: "Vegetables and herbs",
+    notes: "3-4-4 organic all-purpose veg food. Every 30 days during growing season."
+  }, {
+    name: "Espoma Plant-tone",
+    type: "Fertilizer",
+    interval: 60,
+    target: "All flowers, trees, shrubs, vegetables",
+    notes: "5-3-3 organic all-purpose. Slow release, feeds 6-8 weeks."
+  }, {
+    name: "Impact Organics Earthworm Castings",
+    type: "Fertilizer",
+    interval: 45,
+    target: "All plants, seedlings, containers",
+    notes: "Gentle, won't burn. Top-dress 1/2 inch or mix into soil. Microbe-rich, great for seedlings."
+  }, {
+    name: "Miracle-Gro Quick Start",
+    type: "Fertilizer",
+    interval: 7,
+    target: "New transplants, seedlings",
+    notes: "4-12-4 starter. Use at planting and weekly for first 3 weeks to establish roots."
+  }, {
+    name: "Espoma Bone Meal",
+    type: "Fertilizer",
+    interval: 365,
+    target: "Bulbs, roses, flowering plants",
+    notes: "6-8-0. Work into soil at planting. Phosphorus for roots and blooms. Once per season."
+  }, {
+    name: "Fish Emulsion (generic)",
+    type: "Fertilizer",
+    interval: 14,
+    target: "Leafy greens, vegetables, containers",
+    notes: "5-1-1 fast nitrogen. Dilute per label, foliar or root. Smells strong - water in."
+  }]
+}, {
+  group: "Pest Control",
+  items: [{
+    name: "Monterey Sluggo Plus",
+    type: "Pest Control",
+    interval: 14,
+    target: "Slugs, snails, earwigs, cutworms, pillbugs",
+    notes: "Iron phosphate + spinosad. Pet/wildlife safe. Scatter on soil at dusk, reapply after heavy rain."
+  }, {
+    name: "Monterey B.t. (Bacillus thuringiensis)",
+    type: "Pest Control",
+    interval: 7,
+    target: "Caterpillars, hornworms, cabbage loopers",
+    notes: "Biological. Spray foliage where caterpillars feed. Reapply weekly and after rain. Harmless to bees."
+  }, {
+    name: "Monterey Horticultural Oil",
+    type: "Pest Control",
+    interval: 14,
+    target: "Aphids, mites, scale, whitefly; dormant trees",
+    notes: "Smothers insects + eggs. Dormant spray before bud break, or growing season every 2 weeks. Not above 90°F."
+  }, {
+    name: "Bonide Neem Max (Neem Oil)",
+    type: "Pest Control",
+    interval: 7,
+    target: "Aphids, mites, whitefly, plus fungal issues",
+    notes: "Cold-pressed neem. Evening spray only, avoid open blooms. Insecticide + fungicide + miticide. Every 7-14 days."
+  }, {
+    name: "Captain Jack's Deadbug (Spinosad)",
+    type: "Pest Control",
+    interval: 10,
+    target: "Caterpillars, thrips, beetles, leafminers",
+    notes: "Spinosad. Apply at dusk to protect bees. Effective on chewing pests. Reapply every 7-10 days."
+  }, {
+    name: "Insecticidal Soap (generic)",
+    type: "Pest Control",
+    interval: 7,
+    target: "Soft-bodied: aphids, mites, whitefly",
+    notes: "Contact kill - must coat the insect. Spray undersides of leaves. Reapply weekly. Safe up to harvest."
+  }, {
+    name: "Bonide Mosquito Beater / Repellents",
+    type: "Pest Control",
+    interval: 30,
+    target: "Mosquitoes, outdoor living areas",
+    notes: "Granular repellent. Apply to beds and borders monthly during mosquito season."
+  }, {
+    name: "Tomato & Vegetable Insect Spray (Pyrethrin)",
+    type: "Pest Control",
+    interval: 7,
+    target: "Broad insect control on edibles",
+    notes: "Fast knockdown. Short residual. Evening application. Check days-to-harvest on label."
+  }]
+}, {
+  group: "Disease & Fungus Control",
+  items: [{
+    name: "Monterey Complete Disease Control",
+    type: "Fungicide",
+    interval: 14,
+    target: "Powdery mildew, blight, leaf spot, root rot",
+    notes: "Bacillus biofungicide. Broad spectrum, OMRI listed. Preventive every 14 days; weekly under heavy pressure."
+  }, {
+    name: "Monterey Liqui-Cop (Copper)",
+    type: "Fungicide",
+    interval: 10,
+    target: "Peach leaf curl, blight, bacterial spot, fire blight",
+    notes: "Copper fungicide. Dormant + early season. Preventive only. 7-10 day cycle in wet weather. Don't spray above 85°F."
+  }, {
+    name: "Bonide Copper Fungicide",
+    type: "Fungicide",
+    interval: 10,
+    target: "Tomatoes, fruit; blight, leaf spot, mildew",
+    notes: "Copper soap. Start preventive once tomatoes transplanted. Every 7-10 days through humid stretches."
+  }, {
+    name: "Daconil (Chlorothalonil)",
+    type: "Fungicide",
+    interval: 10,
+    target: "Tomato/potato blight, leaf spot, anthracnose",
+    notes: "Synthetic broad-spectrum. Strong preventive. Rotate with copper to avoid resistance. Follow PHI on label."
+  }, {
+    name: "Bonide Sulfur Plant Fungicide",
+    type: "Fungicide",
+    interval: 10,
+    target: "Powdery mildew, rust, scab",
+    notes: "Sulfur dust/spray. Do NOT use within 2 weeks of oil sprays or above 85°F (can burn). Acidifying."
+  }, {
+    name: "BioAdvanced Rose & Flower Care",
+    type: "Fungicide",
+    interval: 42,
+    target: "Roses: blackspot, aphids, Japanese beetles",
+    notes: "Systemic 3-in-1 (feed + insect + disease). Soil drench every 6 weeks. NOT for edibles."
+  }, {
+    name: "Serenade Garden Disease Control",
+    type: "Fungicide",
+    interval: 7,
+    target: "Mildew, blight, leaf spot on edibles",
+    notes: "Bacillus biofungicide. OMRI listed, safe up to harvest. Weekly preventive, good rotation partner."
+  }]
+}, {
+  group: "Misc & Soil",
+  items: [{
+    name: "Garden Lime (pH raise)",
+    type: "Other",
+    interval: 365,
+    target: "Lawns, vegetable beds needing higher pH",
+    notes: "Raises soil pH. Apply per soil test. Slow-acting - work in fall for spring. Don't use near acid lovers."
+  }, {
+    name: "Elemental Sulfur (pH lower)",
+    type: "Other",
+    interval: 365,
+    target: "Blueberries, beds needing lower pH",
+    notes: "Lowers soil pH gradually over months. Apply per soil test. Pairs with acid-loving plants."
+  }, {
+    name: "Compost / Top Dressing",
+    type: "Other",
+    interval: 120,
+    target: "All beds",
+    notes: "Top-dress 1-2 inches a few times a year. Builds soil, feeds microbes, improves moisture retention."
+  }, {
+    name: "Liquid Kelp / Seaweed",
+    type: "Other",
+    interval: 21,
+    target: "All plants, transplants, stress recovery",
+    notes: "Micronutrients + growth hormones. Foliar or root. Great after transplant shock or heat stress."
+  }, {
+    name: "Cal-Mag Supplement",
+    type: "Other",
+    interval: 14,
+    target: "Tomatoes, peppers (blossom end rot)",
+    notes: "Calcium + magnesium. Prevents blossom end rot. Foliar or root drench during fruit set."
+  }]
+}];
+
+// Flat lookup by name for prefill
+var PRODUCT_BY_NAME = {};
+PRODUCT_CATALOG.forEach(function (g) {
+  g.items.forEach(function (it) {
+    PRODUCT_BY_NAME[it.name] = it;
+  });
+});
 var TASK_COLORS = {
-  "Seed Starting": "#a78bfa",
-  "Pest Control": "#f87171",
-  "Fertilizing": "#d4a853",
-  "Planting": "#34d399",
-  "Fruit Trees": "#fb923c",
-  "Infrastructure": "#60a5fa",
-  "Maintenance": "#94a3b8",
-  "Harvest": "#fbbf24",
-  "Pruning": "#f472b6",
-  "Planning": "#818cf8"
+  "Seed Starting": "#8b6fc4",
+  "Pest Control": "#c0524a",
+  "Fertilizing": "#3f5c3a",
+  "Planting": "#3f8c6e",
+  "Fruit Trees": "#c87d56",
+  "Infrastructure": "#3b7ea1",
+  "Maintenance": "#9a9079",
+  "Harvest": "#d9a441",
+  "Pruning": "#c2649a",
+  "Planning": "#6b76d4"
 };
 
 // Ornamental category colors (edibles fall back to gold)
 var CAT_COLORS = {
-  "Rose": "#f472b6",
-  "Peony": "#f9a8d4",
-  "Hydrangea": "#93c5fd",
-  "Perennial": "#c4b5fd",
-  "Groundcover": "#86efac",
-  "Ornamental Grass": "#fcd34d",
-  "Flowering Tree": "#f9a8d4",
-  "Evergreen": "#6ee7b7",
-  "Shrub": "#a3e635",
-  "Bulb": "#fda4af",
-  "Citrus": "#fde047"
+  "Rose": "#c2649a",
+  "Peony": "#d98ab8",
+  "Hydrangea": "#6b9cc4",
+  "Perennial": "#9d8bd4",
+  "Groundcover": "#5a9c6e",
+  "Ornamental Grass": "#d9a441",
+  "Flowering Tree": "#d98ab8",
+  "Evergreen": "#4f9c7a",
+  "Shrub": "#7a9c3a",
+  "Bulb": "#d98a96",
+  "Citrus": "#d9a441"
 };
 function catColor(cat) {
-  return CAT_COLORS[cat] || "#d4a853";
+  return CAT_COLORS[cat] || "#3f5c3a";
 }
 
 // Month abbreviations for bloom parsing
@@ -1640,28 +1856,28 @@ var JOURNAL_ICONS = {
 };
 var SEV_CFG = {
   low: {
-    color: "#d4a853",
-    bg: "rgba(212,168,83,0.1)",
-    border: "rgba(212,168,83,0.25)",
+    color: "#3f5c3a",
+    bg: "rgba(63,92,58,0.08)",
+    border: "rgba(63,92,58,0.2)",
     label: "Low",
     icon: "🟢"
   },
   moderate: {
-    color: "#fbbf24",
+    color: "#d9a441",
     bg: "rgba(251,191,36,0.1)",
     border: "rgba(251,191,36,0.25)",
     label: "Moderate",
     icon: "🟡"
   },
   high: {
-    color: "#fb923c",
+    color: "#c87d56",
     bg: "rgba(251,146,60,0.12)",
     border: "rgba(251,146,60,0.3)",
     label: "High",
     icon: "🟠"
   },
   critical: {
-    color: "#f87171",
+    color: "#c0524a",
     bg: "rgba(248,113,113,0.12)",
     border: "rgba(248,113,113,0.3)",
     label: "Critical",
@@ -1670,26 +1886,30 @@ var SEV_CFG = {
 };
 var INP = {
   width: "100%",
-  padding: "10px 12px",
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.1)",
-  borderRadius: 10,
-  color: "#f0ede8",
-  fontSize: 13,
+  padding: "11px 13px",
+  background: "#fffdf8",
+  border: "1px solid #e3dcc9",
+  borderRadius: 12,
+  color: "#2d2a24",
+  fontSize: 14,
   fontFamily: "inherit",
   boxSizing: "border-box"
 };
 var SEL = Object.assign({}, INP, {
   appearance: "none"
 });
-var G = "#d4a853"; // warm gold  -  primary accent
-var DIM = "#4a4a3a"; // muted warm grey
+var G = "#3f5c3a"; // deep forest green  -  primary accent
+var DIM = "#9a9079"; // muted warm taupe
+var TERRA = "#c87d56"; // terracotta  -  harvest/warm accent
+var HONEY = "#d9a441"; // honey  -  highlights
+var INK = "#2d2a24"; // primary text  -  warm charcoal
+var INK2 = "#6b6354"; // secondary text
 
 function Label(props) {
   return React.createElement("div", {
     style: {
       fontSize: 9,
-      color: "#6b6b52",
+      color: "#9a9079",
       textTransform: "uppercase",
       letterSpacing: 1.5,
       marginBottom: 5,
@@ -1718,17 +1938,18 @@ function PBtn(props) {
     onClick: props.onClick,
     style: Object.assign({
       width: "100%",
-      padding: "12px 0",
-      background: "linear-gradient(135deg,rgba(212,168,83,0.22),rgba(212,168,83,0.12))",
-      border: "1px solid rgba(212,168,83,0.4)",
-      borderRadius: 12,
-      color: G,
-      fontSize: 14,
+      padding: "13px 0",
+      background: "linear-gradient(135deg,#4a6b44,#34502f)",
+      border: "none",
+      borderRadius: 13,
+      color: "#fdfbf2",
+      fontSize: 14.5,
       cursor: "pointer",
       fontFamily: "inherit",
-      marginTop: 12,
-      letterSpacing: 0.3,
-      fontWeight: "600"
+      marginTop: 14,
+      letterSpacing: 0.2,
+      fontWeight: "600",
+      boxShadow: "0 3px 10px rgba(63,92,58,0.25)"
     }, props.style || {})
   }, props.children);
 }
@@ -1741,7 +1962,7 @@ function DBtn(props) {
       background: "rgba(220,80,80,0.08)",
       border: "1px solid rgba(220,80,80,0.25)",
       borderRadius: 12,
-      color: "#e07070",
+      color: "#c0524a",
       fontSize: 13,
       cursor: "pointer",
       fontFamily: "inherit",
@@ -1759,8 +1980,9 @@ function Modal(props) {
       display: "flex",
       alignItems: "flex-end",
       justifyContent: "center",
-      background: "rgba(0,0,0,0.75)",
-      backdropFilter: "blur(12px)"
+      background: "rgba(45,42,36,0.45)",
+      backdropFilter: "blur(8px)",
+      WebkitBackdropFilter: "blur(8px)"
     },
     onClick: props.onClose
   }, /*#__PURE__*/React.createElement("div", {
@@ -1768,16 +1990,25 @@ function Modal(props) {
       e.stopPropagation();
     },
     style: {
-      background: "linear-gradient(180deg,#1c1c14 0%,#161610 100%)",
-      border: "1px solid rgba(212,168,83,0.2)",
-      borderRadius: "24px 24px 0 0",
+      background: "#faf6ec",
+      border: "1px solid #e3dcc9",
+      borderRadius: "26px 26px 0 0",
       width: "100%",
       maxWidth: 480,
       maxHeight: "90vh",
       overflowY: "auto",
-      padding: 22
+      padding: 24,
+      boxShadow: "0 -8px 40px rgba(45,42,36,0.18)"
     }
   }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 40,
+      height: 4,
+      borderRadius: 4,
+      background: "#ddd4bf",
+      margin: "0 auto 18px"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
@@ -1785,21 +2016,22 @@ function Modal(props) {
       marginBottom: 18
     }
   }, /*#__PURE__*/React.createElement("div", {
+    className: "serif",
     style: {
-      fontSize: 16,
-      fontWeight: "700",
-      color: G,
-      letterSpacing: 0.3
+      fontSize: 20,
+      fontWeight: "600",
+      color: INK,
+      letterSpacing: "-0.2px"
     }
   }, props.title), /*#__PURE__*/React.createElement("button", {
     onClick: props.onClose,
     style: {
-      background: "rgba(255,255,255,0.07)",
-      border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: 10,
-      color: "#8a8a7a",
-      width: 30,
-      height: 30,
+      background: "#f0ebde",
+      border: "1px solid #e3dcc9",
+      borderRadius: 11,
+      color: "#9a9079",
+      width: 32,
+      height: 32,
       cursor: "pointer",
       fontSize: 14,
       fontFamily: "inherit",
@@ -1834,8 +2066,8 @@ function PlantImage(props) {
   if (err || !src) {
     return /*#__PURE__*/React.createElement("div", {
       style: Object.assign({}, boxStyle, {
-        background: "rgba(255,255,255,0.05)",
-        border: "1px solid rgba(255,255,255,0.08)",
+        background: "#f7f3ea",
+        border: "1px solid #ebe4d4",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -1927,8 +2159,8 @@ function BedForm(props) {
       cursor: "pointer",
       fontFamily: "inherit",
       fontSize: 12,
-      background: form.irrigated ? "rgba(212,168,83,0.18)" : "rgba(255,255,255,0.05)",
-      border: form.irrigated ? "1px solid rgba(212,168,83,0.38)" : "1px solid rgba(255,255,255,0.1)",
+      background: form.irrigated ? "rgba(63,92,58,0.12)" : "#f7f3ea",
+      border: form.irrigated ? "1px solid rgba(63,92,58,0.3)" : "1px solid #e7e0cf",
       color: form.irrigated ? G : DIM
     }
   }, "\uD83D\uDCA7 Auto-irrigated"), /*#__PURE__*/React.createElement("button", {
@@ -1942,8 +2174,8 @@ function BedForm(props) {
       cursor: "pointer",
       fontFamily: "inherit",
       fontSize: 12,
-      background: !form.irrigated ? "rgba(212,168,83,0.18)" : "rgba(255,255,255,0.05)",
-      border: !form.irrigated ? "1px solid rgba(212,168,83,0.38)" : "1px solid rgba(255,255,255,0.1)",
+      background: !form.irrigated ? "rgba(63,92,58,0.12)" : "#f7f3ea",
+      border: !form.irrigated ? "1px solid rgba(63,92,58,0.3)" : "1px solid #e7e0cf",
       color: !form.irrigated ? G : DIM
     }
   }, "\uD83E\uDEA3 Hand water")), /*#__PURE__*/React.createElement(PBtn, {
@@ -2033,8 +2265,8 @@ function PlantForm(props) {
       },
       style: {
         fontSize: 20,
-        background: form.emoji === em ? "rgba(212,168,83,0.2)" : "rgba(255,255,255,0.05)",
-        border: form.emoji === em ? "1px solid rgba(212,168,83,0.4)" : "1px solid rgba(255,255,255,0.08)",
+        background: form.emoji === em ? "rgba(63,92,58,0.13)" : "#f7f3ea",
+        border: form.emoji === em ? "1px solid rgba(63,92,58,0.32)" : "1px solid #ebe4d4",
         borderRadius: 8,
         padding: "4px 6px",
         cursor: "pointer"
@@ -2081,8 +2313,8 @@ function PlantForm(props) {
         cursor: "pointer",
         fontFamily: "inherit",
         fontSize: 11,
-        background: form.status === k ? v.color + "22" : "rgba(255,255,255,0.05)",
-        border: form.status === k ? "1px solid " + v.color + "55" : "1px solid rgba(255,255,255,0.08)",
+        background: form.status === k ? v.color + "22" : "#f7f3ea",
+        border: form.status === k ? "1px solid " + v.color + "55" : "1px solid #ebe4d4",
         color: form.status === k ? v.color : DIM
       }
     }, v.label);
@@ -2145,12 +2377,12 @@ function PlantForm(props) {
       alignItems: "center",
       justifyContent: "center",
       fontSize: 12,
-      color: "#7ec87e"
+      color: "#4f7a4a"
     }
   }, form.deerResistant ? "✓" : ""), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 13,
-      color: "#c4bdaa"
+      color: "#6b6354"
     }
   }, "Deer resistant")), /*#__PURE__*/React.createElement(Label, null, "Notes"), /*#__PURE__*/React.createElement("textarea", {
     style: Object.assign({}, INP, {
@@ -2191,7 +2423,72 @@ function ChemForm(props) {
       return Object.assign({}, p, _defineProperty({}, k, v));
     });
   }
-  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Label, null, "Product Name"), /*#__PURE__*/React.createElement("input", {
+
+  // "" = not chosen yet, "__custom__" = create your own, else a catalog product name
+  var isExisting = !!(chem && chem.id);
+  var _useState1 = useState(isExisting ? "__custom__" : ""),
+    _useState10 = _slicedToArray(_useState1, 2),
+    picker = _useState10[0],
+    setPicker = _useState10[1];
+  function choose(val) {
+    setPicker(val);
+    if (val && val !== "__custom__") {
+      var p = PRODUCT_BY_NAME[val];
+      if (p) setForm(function (prev) {
+        return Object.assign({}, prev, {
+          name: p.name,
+          type: p.type,
+          interval: p.interval,
+          target: p.target,
+          notes: p.notes
+        });
+      });
+    } else if (val === "__custom__") {
+      // clear prefilled fields for a fresh manual entry (keep any date/status)
+      setForm(function (prev) {
+        return Object.assign({}, prev, {
+          name: "",
+          type: "Fertilizer",
+          target: "",
+          interval: 14,
+          notes: ""
+        });
+      });
+    }
+  }
+  var showFields = picker !== "";
+  return /*#__PURE__*/React.createElement("div", null, !isExisting && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Label, null, "Choose a Product"), /*#__PURE__*/React.createElement("select", {
+    style: SEL,
+    value: picker,
+    onChange: function onChange(e) {
+      choose(e.target.value);
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "Select a product..."), /*#__PURE__*/React.createElement("option", {
+    value: "__custom__"
+  }, "+ Create your own"), PRODUCT_CATALOG.map(function (g) {
+    return /*#__PURE__*/React.createElement("optgroup", {
+      key: g.group,
+      label: g.group
+    }, g.items.map(function (it) {
+      return /*#__PURE__*/React.createElement("option", {
+        key: it.name,
+        value: it.name
+      }, it.name);
+    }));
+  })), picker && picker !== "__custom__" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "#6b6354",
+      marginTop: 8,
+      padding: "8px 10px",
+      background: "rgba(63,92,58,0.05)",
+      border: "1px solid rgba(63,92,58,0.1)",
+      borderRadius: 8,
+      lineHeight: 1.5
+    }
+  }, "Prefilled below - edit anything to fit your garden, then Save.")), showFields && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Label, null, "Product Name"), /*#__PURE__*/React.createElement("input", {
     style: INP,
     value: form.name,
     onChange: function onChange(e) {
@@ -2240,8 +2537,8 @@ function ChemForm(props) {
     },
     style: {
       padding: "10px 14px",
-      background: "rgba(255,255,255,0.06)",
-      border: "1px solid rgba(255,255,255,0.12)",
+      background: "#fffdf8",
+      border: "1px solid #e3dcc9",
       borderRadius: 10,
       color: DIM,
       fontSize: 12,
@@ -2283,8 +2580,8 @@ function ChemForm(props) {
       cursor: "pointer",
       fontFamily: "inherit",
       fontSize: 12,
-      background: form.active ? "rgba(212,168,83,0.18)" : "rgba(255,255,255,0.05)",
-      border: form.active ? "1px solid rgba(212,168,83,0.38)" : "1px solid rgba(255,255,255,0.1)",
+      background: form.active ? "rgba(63,92,58,0.12)" : "#f7f3ea",
+      border: form.active ? "1px solid rgba(63,92,58,0.3)" : "1px solid #e7e0cf",
       color: form.active ? G : DIM
     }
   }, "Active"), /*#__PURE__*/React.createElement("button", {
@@ -2298,8 +2595,8 @@ function ChemForm(props) {
       cursor: "pointer",
       fontFamily: "inherit",
       fontSize: 12,
-      background: !form.active ? "rgba(212,168,83,0.18)" : "rgba(255,255,255,0.05)",
-      border: !form.active ? "1px solid rgba(212,168,83,0.38)" : "1px solid rgba(255,255,255,0.1)",
+      background: !form.active ? "rgba(63,92,58,0.12)" : "#f7f3ea",
+      border: !form.active ? "1px solid rgba(63,92,58,0.3)" : "1px solid #e7e0cf",
       color: !form.active ? G : DIM
     }
   }, "Archived")), /*#__PURE__*/React.createElement(PBtn, {
@@ -2310,11 +2607,11 @@ function ChemForm(props) {
     onClick: function onClick() {
       props.onDelete(chem.id);
     }
-  }, "Delete"));
+  }, "Delete")));
 }
 function TaskForm(props) {
   var task = props.task;
-  var _useState1 = useState(_objectSpread({
+  var _useState11 = useState(_objectSpread({
       title: "",
       month: CURRENT_MONTH,
       category: "Maintenance",
@@ -2322,9 +2619,9 @@ function TaskForm(props) {
       detail: "",
       done: false
     }, task)),
-    _useState10 = _slicedToArray(_useState1, 2),
-    form = _useState10[0],
-    setForm = _useState10[1];
+    _useState12 = _slicedToArray(_useState11, 2),
+    form = _useState12[0],
+    setForm = _useState12[1];
   function upd(k, v) {
     setForm(function (p) {
       return Object.assign({}, p, _defineProperty({}, k, v));
@@ -2364,7 +2661,7 @@ function TaskForm(props) {
       gap: 6,
       marginTop: 4
     }
-  }, [["high", "#f87171"], ["medium", "#fbbf24"], ["low", "#d4a853"]].map(function (pair) {
+  }, [["high", "#c0524a"], ["medium", "#d9a441"], ["low", "#3f5c3a"]].map(function (pair) {
     var p = pair[0];
     var c = pair[1];
     return /*#__PURE__*/React.createElement("button", {
@@ -2379,8 +2676,8 @@ function TaskForm(props) {
         cursor: "pointer",
         fontFamily: "inherit",
         fontSize: 12,
-        background: form.priority === p ? c + "22" : "rgba(255,255,255,0.05)",
-        border: form.priority === p ? "1px solid " + c + "55" : "1px solid rgba(255,255,255,0.08)",
+        background: form.priority === p ? c + "22" : "#f7f3ea",
+        border: form.priority === p ? "1px solid " + c + "55" : "1px solid #ebe4d4",
         color: form.priority === p ? c : DIM,
         textTransform: "capitalize"
       }
@@ -2408,16 +2705,16 @@ function TaskForm(props) {
 function HarvestForm(props) {
   var plants = props.plants;
   var harvest = props.harvest;
-  var _useState11 = useState(_objectSpread({
+  var _useState13 = useState(_objectSpread({
       plantId: "",
       date: TODAY_STR,
       amount: "",
       unit: "lbs",
       notes: ""
     }, harvest)),
-    _useState12 = _slicedToArray(_useState11, 2),
-    form = _useState12[0],
-    setForm = _useState12[1];
+    _useState14 = _slicedToArray(_useState13, 2),
+    form = _useState14[0],
+    setForm = _useState14[1];
   function upd(k, v) {
     setForm(function (p) {
       return Object.assign({}, p, _defineProperty({}, k, v));
@@ -2500,16 +2797,16 @@ function JournalForm(props) {
   var beds = props.beds;
   var plants = props.plants;
   var entry = props.entry;
-  var _useState13 = useState(_objectSpread({
+  var _useState15 = useState(_objectSpread({
       bedId: "",
       plantId: "",
       date: TODAY_STR,
       type: "observation",
       text: ""
     }, entry)),
-    _useState14 = _slicedToArray(_useState13, 2),
-    form = _useState14[0],
-    setForm = _useState14[1];
+    _useState16 = _slicedToArray(_useState15, 2),
+    form = _useState16[0],
+    setForm = _useState16[1];
   function upd(k, v) {
     setForm(function (p) {
       return Object.assign({}, p, _defineProperty({}, k, v));
@@ -2540,8 +2837,8 @@ function JournalForm(props) {
         cursor: "pointer",
         fontFamily: "inherit",
         fontSize: 12,
-        background: form.type === k ? "rgba(212,168,83,0.2)" : "rgba(255,255,255,0.05)",
-        border: form.type === k ? "1px solid rgba(212,168,83,0.4)" : "1px solid rgba(255,255,255,0.08)",
+        background: form.type === k ? "rgba(63,92,58,0.13)" : "#f7f3ea",
+        border: form.type === k ? "1px solid rgba(63,92,58,0.32)" : "1px solid #ebe4d4",
         color: form.type === k ? G : DIM,
         textTransform: "capitalize"
       }
@@ -2691,18 +2988,18 @@ var ZONE7A_ADVISORIES = {
 };
 function WeatherWidget(props) {
   var settings = props.settings || {};
-  var _useState15 = useState(null),
-    _useState16 = _slicedToArray(_useState15, 2),
-    wx = _useState16[0],
-    setWx = _useState16[1];
-  var _useState17 = useState(true),
+  var _useState17 = useState(null),
     _useState18 = _slicedToArray(_useState17, 2),
-    loading = _useState18[0],
-    setLoading = _useState18[1];
-  var _useState19 = useState(null),
+    wx = _useState18[0],
+    setWx = _useState18[1];
+  var _useState19 = useState(true),
     _useState20 = _slicedToArray(_useState19, 2),
-    errMsg = _useState20[0],
-    setErrMsg = _useState20[1];
+    loading = _useState20[0],
+    setLoading = _useState20[1];
+  var _useState21 = useState(null),
+    _useState22 = _slicedToArray(_useState21, 2),
+    errMsg = _useState22[0],
+    setErrMsg = _useState22[1];
   useEffect(function () {
     // Get coordinates from settings, fall back to Melville NY
     var lat = settings.lat || 40.7876;
@@ -2735,8 +3032,8 @@ function WeatherWidget(props) {
     style: {
       width: 14,
       height: 14,
-      border: "2px solid rgba(212,168,83,0.2)",
-      borderTop: "2px solid #d4a853",
+      border: "2px solid rgba(63,92,58,0.13)",
+      borderTop: "2px solid #3f5c3a",
       borderRadius: "50%",
       animation: "spin 0.8s linear infinite"
     }
@@ -2815,11 +3112,12 @@ function WeatherWidget(props) {
   var locationLabel = settings.location || "Your Garden";
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      background: "rgba(255,255,255,0.04)",
-      border: "1px solid rgba(255,255,255,0.08)",
-      borderRadius: 14,
+      background: "#fffdf8",
+      border: "1px solid #ebe4d4",
+      borderRadius: 16,
       marginBottom: 14,
-      padding: "14px 14px"
+      padding: "15px 15px",
+      boxShadow: "0 2px 8px rgba(63,92,58,0.07)"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -2847,7 +3145,7 @@ function WeatherWidget(props) {
     style: {
       fontSize: 24,
       fontWeight: "700",
-      color: "#60a5fa",
+      color: "#3b7ea1",
       letterSpacing: "-0.5px"
     }
   }, tempF, "\xB0F"), /*#__PURE__*/React.createElement("span", {
@@ -2872,7 +3170,7 @@ function WeatherWidget(props) {
       padding: "4px 9px",
       borderRadius: 8,
       background: spraySafe ? "rgba(126,200,126,0.15)" : "rgba(224,112,112,0.12)",
-      color: spraySafe ? "#7ec87e" : "#e07070",
+      color: spraySafe ? "#4f7a4a" : "#c0524a",
       border: "1px solid " + (spraySafe ? "rgba(126,200,126,0.3)" : "rgba(224,112,112,0.25)"),
       fontWeight: "600"
     }
@@ -2884,7 +3182,7 @@ function WeatherWidget(props) {
       padding: "7px 10px",
       marginBottom: 6,
       fontSize: 11,
-      color: "#e07070"
+      color: "#c0524a"
     }
   }, "\uD83C\uDF42 High humidity  -  fungal pressure high. Check tomatoes, apply copper if due."), heatStress && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -2894,7 +3192,7 @@ function WeatherWidget(props) {
       padding: "7px 10px",
       marginBottom: 6,
       fontSize: 11,
-      color: "#fbbf24"
+      color: "#d9a441"
     }
   }, "\uD83C\uDF21 Heat stress risk  -  water strawberry tower. Avoid spraying."), frostRisk && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -2904,7 +3202,7 @@ function WeatherWidget(props) {
       padding: "7px 10px",
       marginBottom: 6,
       fontSize: 11,
-      color: "#60a5fa"
+      color: "#3b7ea1"
     }
   }, "\u2744\uFE0F Frost risk tonight  -  cover tender plants."), !spraySafe && sprayReason && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -2914,7 +3212,7 @@ function WeatherWidget(props) {
       padding: "7px 10px",
       marginBottom: 6,
       fontSize: 11,
-      color: "#fb923c"
+      color: "#c87d56"
     }
   }, "\u26A0\uFE0F ", sprayReason, "  -  delay chemical applications."), daily && daily.time && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -2945,8 +3243,8 @@ function WeatherWidget(props) {
       key: dateStr,
       style: {
         flex: 1,
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(255,255,255,0.07)",
+        background: "#fffdf8",
+        border: "1px solid #f2ede0",
         borderRadius: 10,
         padding: "8px 4px",
         textAlign: "center"
@@ -2966,7 +3264,7 @@ function WeatherWidget(props) {
     }, WX_EMOJI[dc] || "🌡"), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 12,
-        color: "#e8e4dc",
+        color: "#2d2a24",
         fontWeight: "700"
       }
     }, hi, "\xB0"), /*#__PURE__*/React.createElement("div", {
@@ -2977,13 +3275,13 @@ function WeatherWidget(props) {
     }, lo, "\xB0"), rain > 0.05 && /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 9,
-        color: "#60a5fa",
+        color: "#3b7ea1",
         marginTop: 2
       }
     }, rain.toFixed(2), " in"), ok && /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 9,
-        color: "#7ec87e",
+        color: "#4f7a4a",
         marginTop: 2,
         fontWeight: "600"
       }
@@ -3006,8 +3304,8 @@ function SeasonalAdvisory(props) {
   if (!adv) return null;
   return /*#__PURE__*/React.createElement("div", {
     style: {
-      background: "rgba(255,255,255,0.04)",
-      border: "1px solid rgba(255,255,255,0.08)",
+      background: "#fffdf8",
+      border: "1px solid #ebe4d4",
       borderRadius: 14,
       marginBottom: 14,
       padding: "14px"
@@ -3046,7 +3344,7 @@ function SeasonalAdvisory(props) {
   }, "Weather offline  -  showing seasonal guidance"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#a0967e",
+      color: "#6b6354",
       lineHeight: 1.6
     }
   }, adv.spray));
@@ -3387,43 +3685,43 @@ function statusForCrop(crop) {
 }
 var STATUS_LABELS = {
   start: {
-    color: "#a78bfa",
+    color: "#8b6fc4",
     bg: "rgba(167,139,250,0.15)",
     label: "Start indoors now"
   },
   sow: {
-    color: "#d4a853",
-    bg: "rgba(212,168,83,0.15)",
+    color: "#3f5c3a",
+    bg: "rgba(63,92,58,0.1)",
     label: "Direct sow now"
   },
   transplant: {
-    color: "#fb923c",
+    color: "#c87d56",
     bg: "rgba(251,146,60,0.15)",
     label: "Transplant now"
   },
   harvest: {
-    color: "#fbbf24",
+    color: "#d9a441",
     bg: "rgba(251,191,36,0.15)",
     label: "Harvest window"
   },
   upcoming_start: {
-    color: "#a78bfa",
+    color: "#8b6fc4",
     bg: "rgba(167,139,250,0.08)",
     label: "Start indoors soon"
   },
   upcoming_sow: {
-    color: "#d4a853",
-    bg: "rgba(212,168,83,0.08)",
+    color: "#3f5c3a",
+    bg: "rgba(63,92,58,0.06)",
     label: "Direct sow soon"
   },
   upcoming_transplant: {
-    color: "#fb923c",
+    color: "#c87d56",
     bg: "rgba(251,146,60,0.08)",
     label: "Transplant soon"
   },
   none: {
-    color: "#5a5844",
-    bg: "rgba(255,255,255,0.035)",
+    color: "#9a9079",
+    bg: "#fdfbf5",
     label: ""
   }
 };
@@ -3436,22 +3734,22 @@ function PlantingCalendar(props) {
   var firstFrostLocal = frosts.firstFrost;
   var frostLabel = "Last frost " + fmtSingle(lastFrostLocal) + "  ·  First frost " + fmtSingle(firstFrostLocal);
   var locationLabel = [s.location, s.zone ? "Zone " + s.zone : ""].filter(Boolean).join("  ·  ") || "Your Garden";
-  var _useState21 = useState("All"),
-    _useState22 = _slicedToArray(_useState21, 2),
-    filterCat = _useState22[0],
-    setFilterCat = _useState22[1];
-  var _useState23 = useState(null),
+  var _useState23 = useState("All"),
     _useState24 = _slicedToArray(_useState23, 2),
-    selectedCrop = _useState24[0],
-    setSelectedCrop = _useState24[1];
-  var _useState25 = useState("myGarden"),
+    filterCat = _useState24[0],
+    setFilterCat = _useState24[1];
+  var _useState25 = useState(null),
     _useState26 = _slicedToArray(_useState25, 2),
-    tab = _useState26[0],
-    setTab = _useState26[1]; // "myGarden" | "guide"
-  var _useState27 = useState(false),
+    selectedCrop = _useState26[0],
+    setSelectedCrop = _useState26[1];
+  var _useState27 = useState("myGarden"),
     _useState28 = _slicedToArray(_useState27, 2),
-    showAll = _useState28[0],
-    setShowAll = _useState28[1];
+    tab = _useState28[0],
+    setTab = _useState28[1]; // "myGarden" | "guide"
+  var _useState29 = useState(false),
+    _useState30 = _slicedToArray(_useState29, 2),
+    showAll = _useState30[0],
+    setShowAll = _useState30[1];
 
   // -- MY GARDEN TAB --
   // Plants that have a cropType linked  -  show real timeline from planted date
@@ -3518,10 +3816,12 @@ function PlantingCalendar(props) {
       margin: "4px 0"
     }
   }, /*#__PURE__*/React.createElement("div", {
+    className: "serif",
     style: {
-      fontSize: 17,
-      color: G,
-      fontWeight: "bold",
+      fontSize: 22,
+      color: INK,
+      fontWeight: "600",
+      letterSpacing: "-0.3px",
       marginBottom: 4
     }
   }, "Planting Planner"), /*#__PURE__*/React.createElement("div", {
@@ -3547,8 +3847,8 @@ function PlantingCalendar(props) {
       cursor: "pointer",
       fontFamily: "inherit",
       fontSize: 11,
-      background: tab === "myGarden" ? "rgba(212,168,83,0.18)" : "rgba(255,255,255,0.05)",
-      border: tab === "myGarden" ? "1px solid rgba(212,168,83,0.38)" : "1px solid rgba(255,255,255,0.1)",
+      background: tab === "myGarden" ? "rgba(63,92,58,0.12)" : "#f7f3ea",
+      border: tab === "myGarden" ? "1px solid rgba(63,92,58,0.3)" : "1px solid #e7e0cf",
       color: tab === "myGarden" ? G : DIM
     }
   }, "\uD83E\uDEB4 Garden"), /*#__PURE__*/React.createElement("button", {
@@ -3562,8 +3862,8 @@ function PlantingCalendar(props) {
       cursor: "pointer",
       fontFamily: "inherit",
       fontSize: 11,
-      background: tab === "bloom" ? "rgba(212,168,83,0.18)" : "rgba(255,255,255,0.05)",
-      border: tab === "bloom" ? "1px solid rgba(212,168,83,0.38)" : "1px solid rgba(255,255,255,0.1)",
+      background: tab === "bloom" ? "rgba(63,92,58,0.12)" : "#f7f3ea",
+      border: tab === "bloom" ? "1px solid rgba(63,92,58,0.3)" : "1px solid #e7e0cf",
       color: tab === "bloom" ? G : DIM
     }
   }, "\uD83C\uDF38 Bloom"), /*#__PURE__*/React.createElement("button", {
@@ -3577,8 +3877,8 @@ function PlantingCalendar(props) {
       cursor: "pointer",
       fontFamily: "inherit",
       fontSize: 11,
-      background: tab === "guide" ? "rgba(212,168,83,0.18)" : "rgba(255,255,255,0.05)",
-      border: tab === "guide" ? "1px solid rgba(212,168,83,0.38)" : "1px solid rgba(255,255,255,0.1)",
+      background: tab === "guide" ? "rgba(63,92,58,0.12)" : "#f7f3ea",
+      border: tab === "guide" ? "1px solid rgba(63,92,58,0.3)" : "1px solid #e7e0cf",
       color: tab === "guide" ? G : DIM
     }
   }, "\uD83D\uDCD6 Guide")), tab === "bloom" && function () {
@@ -3632,7 +3932,7 @@ function PlantingCalendar(props) {
           width: 92,
           flexShrink: 0,
           fontSize: 10,
-          color: "#c4bdaa",
+          color: "#6b6354",
           whiteSpace: "nowrap",
           overflow: "hidden",
           textOverflow: "ellipsis"
@@ -3656,8 +3956,8 @@ function PlantingCalendar(props) {
             flex: 1,
             height: 14,
             borderRadius: 2,
-            background: on ? col : isNow ? "rgba(212,168,83,0.08)" : "rgba(255,255,255,0.03)",
-            border: isNow ? "1px solid rgba(212,168,83,0.3)" : "none",
+            background: on ? col : isNow ? "rgba(63,92,58,0.06)" : "#faf7ef",
+            border: isNow ? "1px solid rgba(63,92,58,0.25)" : "none",
             boxSizing: "border-box"
           }
         });
@@ -3686,7 +3986,7 @@ function PlantingCalendar(props) {
       style: {
         marginTop: 14,
         padding: "10px 12px",
-        background: "rgba(255,255,255,0.03)",
+        background: "#faf7ef",
         borderRadius: 10,
         fontSize: 10,
         color: DIM,
@@ -3735,9 +4035,10 @@ function PlantingCalendar(props) {
         setSelectedCrop(selectedCrop === plant.id ? null : plant.id);
       },
       style: {
-        background: "rgba(255,255,255,0.045)",
-        border: "1px solid rgba(255,255,255,0.08)",
+        background: "#fffdf8",
+        border: "1px solid #ebe4d4",
         borderRadius: 12,
+        boxShadow: "0 1px 3px rgba(63,92,58,0.06)",
         padding: "11px 13px",
         marginBottom: 8,
         cursor: "pointer"
@@ -3761,7 +4062,7 @@ function PlantingCalendar(props) {
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 14,
-        color: "#e8e4dc",
+        color: "#2d2a24",
         fontWeight: "bold"
       }
     }, plant.name), /*#__PURE__*/React.createElement("div", {
@@ -3795,33 +4096,33 @@ function PlantingCalendar(props) {
     }, "Day ", tl.daysSincePlanted, " of ~", tl.daysToHarvest), /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 9,
-        color: "#fbbf24"
+        color: "#d9a441"
       }
     }, tl.progressPct, "% to harvest")), /*#__PURE__*/React.createElement("div", {
       style: {
         height: 4,
-        background: "rgba(255,255,255,0.08)",
+        background: "#ebe4d4",
         borderRadius: 3
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         height: "100%",
         borderRadius: 3,
-        background: "linear-gradient(90deg,#d4a853,#f0c060)",
+        background: "linear-gradient(90deg,#3f5c3a,#6b8463)",
         width: tl.progressPct + "%",
         transition: "width 0.5s"
       }
     })), tl.harvestEst && /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 9,
-        color: "#fbbf24",
+        color: "#d9a441",
         marginTop: 3
       }
     }, "Est. harvest: ", fmtSingle(tl.harvestEst))), selectedCrop === plant.id && /*#__PURE__*/React.createElement("div", {
       style: {
         marginTop: 10,
         paddingTop: 10,
-        borderTop: "1px solid rgba(255,255,255,0.07)"
+        borderTop: "1px solid #f2ede0"
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
@@ -3840,7 +4141,7 @@ function PlantingCalendar(props) {
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
-        background: "rgba(255,255,255,0.045)",
+        background: "#fffdf8",
         borderRadius: 6,
         padding: "4px 8px"
       }
@@ -3852,11 +4153,11 @@ function PlantingCalendar(props) {
     }, "SPACING"), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
-        color: "#d4cdb8"
+        color: "#3a3529"
       }
     }, tl.crop.spacing)), /*#__PURE__*/React.createElement("div", {
       style: {
-        background: "rgba(255,255,255,0.045)",
+        background: "#fffdf8",
         borderRadius: 6,
         padding: "4px 8px"
       }
@@ -3868,7 +4169,7 @@ function PlantingCalendar(props) {
     }, "LIGHT"), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
-        color: "#d4cdb8"
+        color: "#3a3529"
       }
     }, tl.crop.sunlight)), tl.crop.frostTender && /*#__PURE__*/React.createElement("div", {
       style: {
@@ -3879,11 +4180,11 @@ function PlantingCalendar(props) {
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
-        color: "#60a5fa"
+        color: "#3b7ea1"
       }
     }, "\u2744\uFE0F Frost tender"))), /*#__PURE__*/React.createElement("div", {
       style: {
-        background: "rgba(255,255,255,0.045)",
+        background: "#fffdf8",
         borderRadius: 8,
         padding: "8px 10px"
       }
@@ -3896,14 +4197,14 @@ function PlantingCalendar(props) {
     }, "TIP"), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
-        color: "#a0967e",
+        color: "#6b6354",
         lineHeight: 1.6
       }
     }, tl.crop.tip)), plant.notes && /*#__PURE__*/React.createElement("div", {
       style: {
         marginTop: 8,
         fontSize: 11,
-        color: "#6b6b52",
+        color: "#9a9079",
         fontStyle: "italic"
       }
     }, plant.notes)));
@@ -3922,8 +4223,8 @@ function PlantingCalendar(props) {
     return /*#__PURE__*/React.createElement("div", {
       key: plant.id,
       style: {
-        background: "rgba(255,255,255,0.035)",
-        border: "1px solid rgba(255,255,255,0.06)",
+        background: "#fdfbf5",
+        border: "1px solid #fffdf8",
         borderRadius: 10,
         padding: "10px 13px",
         marginBottom: 6,
@@ -3942,7 +4243,7 @@ function PlantingCalendar(props) {
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 13,
-        color: "#d4cdb8"
+        color: "#3a3529"
       }
     }, plant.name), /*#__PURE__*/React.createElement("div", {
       style: {
@@ -3977,9 +4278,9 @@ function PlantingCalendar(props) {
         fontSize: 10,
         fontFamily: "inherit",
         whiteSpace: "nowrap",
-        background: filterCat === cat ? "rgba(212,168,83,0.2)" : "rgba(255,255,255,0.05)",
+        background: filterCat === cat ? "rgba(63,92,58,0.13)" : "#f7f3ea",
         color: filterCat === cat ? G : DIM,
-        outline: filterCat === cat ? "1px solid rgba(212,168,83,0.4)" : "1px solid rgba(255,255,255,0.08)",
+        outline: filterCat === cat ? "1px solid rgba(63,92,58,0.32)" : "1px solid #ebe4d4",
         transition: "all 0.15s"
       }
     }, cat);
@@ -4011,7 +4312,7 @@ function PlantingCalendar(props) {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#fbbf24",
+      color: "#d9a441",
       textTransform: "uppercase",
       letterSpacing: 1,
       marginBottom: 8
@@ -4035,7 +4336,7 @@ function PlantingCalendar(props) {
       width: "100%",
       padding: "8px 0",
       background: "transparent",
-      border: "1px dashed rgba(255,255,255,0.1)",
+      border: "1px dashed #e7e0cf",
       borderRadius: 8,
       color: DIM,
       fontSize: 11,
@@ -4089,7 +4390,7 @@ function CropCard(props) {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 14,
-      color: "#e8e4dc",
+      color: "#2d2a24",
       fontWeight: "bold"
     }
   }, crop.name), /*#__PURE__*/React.createElement("div", {
@@ -4120,7 +4421,7 @@ function CropCard(props) {
     style: {
       marginTop: 10,
       paddingTop: 10,
-      borderTop: "1px solid rgba(255,255,255,0.07)"
+      borderTop: "1px solid #f2ede0"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -4150,12 +4451,12 @@ function CropCard(props) {
   }, "\uD83C\uDFE0"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#a78bfa"
+      color: "#8b6fc4"
     }
   }, "Start indoors"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#a0967e"
+      color: "#6b6354"
     }
   }, fmtRange(crop.startIndoor, addDays(crop.startIndoor, 14)))), isPast(addDays(crop.startIndoor, 14)) && /*#__PURE__*/React.createElement("span", {
     style: {
@@ -4179,12 +4480,12 @@ function CropCard(props) {
   }, "\uD83C\uDF31"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#d4a853"
+      color: "#3f5c3a"
     }
   }, "Direct sow"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#a0967e"
+      color: "#6b6354"
     }
   }, fmtRange(crop.directSow, addDays(crop.directSow, 14)))), isPast(addDays(crop.directSow, 14)) && /*#__PURE__*/React.createElement("span", {
     style: {
@@ -4208,12 +4509,12 @@ function CropCard(props) {
   }, "\uD83E\uDEB4"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#fb923c"
+      color: "#c87d56"
     }
   }, "Transplant outside"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#a0967e"
+      color: "#6b6354"
     }
   }, fmtRange(crop.transplant, addDays(crop.transplant, 14)))), isPast(addDays(crop.transplant, 14)) && /*#__PURE__*/React.createElement("span", {
     style: {
@@ -4237,12 +4538,12 @@ function CropCard(props) {
   }, "\uD83C\uDF3E"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#fbbf24"
+      color: "#d9a441"
     }
   }, "Harvest window"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#a0967e"
+      color: "#6b6354"
     }
   }, fmtSingle(crop.harvest), " onwards")))), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -4253,7 +4554,7 @@ function CropCard(props) {
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      background: "rgba(255,255,255,0.045)",
+      background: "#fffdf8",
       borderRadius: 6,
       padding: "4px 8px"
     }
@@ -4265,11 +4566,11 @@ function CropCard(props) {
   }, "SPACING"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#d4cdb8"
+      color: "#3a3529"
     }
   }, crop.spacing)), /*#__PURE__*/React.createElement("div", {
     style: {
-      background: "rgba(255,255,255,0.045)",
+      background: "#fffdf8",
       borderRadius: 6,
       padding: "4px 8px"
     }
@@ -4281,11 +4582,11 @@ function CropCard(props) {
   }, "DEPTH"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#d4cdb8"
+      color: "#3a3529"
     }
   }, crop.depth)), /*#__PURE__*/React.createElement("div", {
     style: {
-      background: "rgba(255,255,255,0.045)",
+      background: "#fffdf8",
       borderRadius: 6,
       padding: "4px 8px"
     }
@@ -4297,7 +4598,7 @@ function CropCard(props) {
   }, "LIGHT"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#d4cdb8"
+      color: "#3a3529"
     }
   }, crop.sunlight)), crop.frostTender && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -4308,11 +4609,11 @@ function CropCard(props) {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#60a5fa"
+      color: "#3b7ea1"
     }
   }, "\u2744\uFE0F Frost tender"))), /*#__PURE__*/React.createElement("div", {
     style: {
-      background: "rgba(255,255,255,0.045)",
+      background: "#fffdf8",
       borderRadius: 8,
       padding: "8px 10px"
     }
@@ -4325,7 +4626,7 @@ function CropCard(props) {
   }, "TIP"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#a0967e",
+      color: "#6b6354",
       lineHeight: 1.6
     }
   }, crop.tip))));
@@ -5308,7 +5609,7 @@ function lookupZoneByZip(zip) {
 }
 function SettingsView(props) {
   var s = props.settings || {};
-  var _useState29 = useState({
+  var _useState31 = useState({
       gardenName: s.gardenName || "",
       location: s.location || "",
       zone: s.zone || "",
@@ -5316,21 +5617,21 @@ function SettingsView(props) {
       lastFrost: s.lastFrost || "05-15",
       firstFrost: s.firstFrost || "10-15"
     }),
-    _useState30 = _slicedToArray(_useState29, 2),
-    form = _useState30[0],
-    setForm = _useState30[1];
-  var _useState31 = useState(false),
     _useState32 = _slicedToArray(_useState31, 2),
-    saved = _useState32[0],
-    setSaved = _useState32[1];
-  var _useState33 = useState(null),
+    form = _useState32[0],
+    setForm = _useState32[1];
+  var _useState33 = useState(false),
     _useState34 = _slicedToArray(_useState33, 2),
-    zoneStatus = _useState34[0],
-    setZoneStatus = _useState34[1];
-  var _useState35 = useState(""),
+    saved = _useState34[0],
+    setSaved = _useState34[1];
+  var _useState35 = useState(null),
     _useState36 = _slicedToArray(_useState35, 2),
-    zoneMsg = _useState36[0],
-    setZoneMsg = _useState36[1];
+    zoneStatus = _useState36[0],
+    setZoneStatus = _useState36[1];
+  var _useState37 = useState(""),
+    _useState38 = _slicedToArray(_useState37, 2),
+    zoneMsg = _useState38[0],
+    setZoneMsg = _useState38[1];
   function upd(k, v) {
     setForm(function (p) {
       return Object.assign({}, p, _defineProperty({}, k, v));
@@ -5383,10 +5684,12 @@ function SettingsView(props) {
       margin: "4px 0"
     }
   }, /*#__PURE__*/React.createElement("div", {
+    className: "serif",
     style: {
-      fontSize: 17,
-      color: G,
-      fontWeight: "700",
+      fontSize: 22,
+      color: INK,
+      fontWeight: "600",
+      letterSpacing: "-0.3px",
       marginBottom: 4
     }
   }, "Settings"), /*#__PURE__*/React.createElement("div", {
@@ -5397,10 +5700,11 @@ function SettingsView(props) {
     }
   }, "Customize your garden app"), /*#__PURE__*/React.createElement("div", {
     style: {
-      background: "rgba(255,255,255,0.04)",
-      border: "1px solid rgba(255,255,255,0.08)",
+      background: "#fffdf8",
+      border: "1px solid #ebe4d4",
       borderRadius: 14,
       padding: "16px 14px",
+      boxShadow: "0 1px 3px rgba(63,92,58,0.06)",
       marginBottom: 12
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -5439,8 +5743,8 @@ function SettingsView(props) {
     onClick: doLookup,
     style: {
       padding: "0 12px",
-      background: "rgba(212,168,83,0.15)",
-      border: "1px solid rgba(212,168,83,0.35)",
+      background: "rgba(63,92,58,0.1)",
+      border: "1px solid rgba(63,92,58,0.28)",
       borderRadius: 10,
       color: G,
       fontSize: 11,
@@ -5460,7 +5764,7 @@ function SettingsView(props) {
     style: {
       fontSize: 11,
       marginTop: 6,
-      color: zoneStatus === "found" ? "#7ec87e" : "#e07070"
+      color: zoneStatus === "found" ? "#4f7a4a" : "#c0524a"
     }
   }, zoneStatus === "found" ? "✓ " : "⚠ ", zoneMsg), /*#__PURE__*/React.createElement(Label, null, "Hardiness Zone"), /*#__PURE__*/React.createElement("input", {
     style: INP,
@@ -5478,10 +5782,11 @@ function SettingsView(props) {
     placeholder: "e.g. Drip system, Sprinklers, Hand watered"
   })), /*#__PURE__*/React.createElement("div", {
     style: {
-      background: "rgba(255,255,255,0.04)",
-      border: "1px solid rgba(255,255,255,0.08)",
+      background: "#fffdf8",
+      border: "1px solid #ebe4d4",
       borderRadius: 14,
       padding: "16px 14px",
+      boxShadow: "0 1px 3px rgba(63,92,58,0.06)",
       marginBottom: 18
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -5516,10 +5821,10 @@ function SettingsView(props) {
     style: {
       width: "100%",
       padding: "13px 0",
-      background: saved ? "rgba(100,200,100,0.18)" : "linear-gradient(135deg,rgba(212,168,83,0.22),rgba(212,168,83,0.12))",
-      border: "1px solid " + (saved ? "rgba(100,200,100,0.4)" : "rgba(212,168,83,0.4)"),
+      background: saved ? "rgba(100,200,100,0.18)" : "linear-gradient(135deg,rgba(63,92,58,0.14),rgba(63,92,58,0.09))",
+      border: "1px solid " + (saved ? "rgba(100,200,100,0.4)" : "rgba(63,92,58,0.32)"),
       borderRadius: 12,
-      color: saved ? "#7ec87e" : G,
+      color: saved ? "#4f7a4a" : G,
       fontSize: 14,
       cursor: "pointer",
       fontFamily: "inherit",
@@ -5531,7 +5836,7 @@ function SettingsView(props) {
     style: {
       marginTop: 24,
       paddingTop: 16,
-      borderTop: "1px solid rgba(255,255,255,0.06)"
+      borderTop: "1px solid #fffdf8"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -5542,32 +5847,32 @@ function SettingsView(props) {
   }, "All data stored locally on this device")));
 }
 function GardenApp() {
-  var _useState37 = useState(function () {
+  var _useState39 = useState(function () {
       return loadData();
     }),
-    _useState38 = _slicedToArray(_useState37, 2),
-    data = _useState38[0],
-    setData = _useState38[1];
-  var _useState39 = useState("dashboard"),
     _useState40 = _slicedToArray(_useState39, 2),
-    view = _useState40[0],
-    setView = _useState40[1];
-  var _useState41 = useState(null),
+    data = _useState40[0],
+    setData = _useState40[1];
+  var _useState41 = useState("dashboard"),
     _useState42 = _slicedToArray(_useState41, 2),
-    modal = _useState42[0],
-    setModal = _useState42[1];
+    view = _useState42[0],
+    setView = _useState42[1];
   var _useState43 = useState(null),
     _useState44 = _slicedToArray(_useState43, 2),
-    expandedBed = _useState44[0],
-    setExpandedBed = _useState44[1];
-  var _useState45 = useState(CURRENT_MONTH),
+    modal = _useState44[0],
+    setModal = _useState44[1];
+  var _useState45 = useState(null),
     _useState46 = _slicedToArray(_useState45, 2),
-    selMonth = _useState46[0],
-    setSelMonth = _useState46[1];
-  var _useState47 = useState(null),
+    expandedBed = _useState46[0],
+    setExpandedBed = _useState46[1];
+  var _useState47 = useState(CURRENT_MONTH),
     _useState48 = _slicedToArray(_useState47, 2),
-    plantDetail = _useState48[0],
-    setPlantDetail = _useState48[1];
+    selMonth = _useState48[0],
+    setSelMonth = _useState48[1];
+  var _useState49 = useState(null),
+    _useState50 = _slicedToArray(_useState49, 2),
+    plantDetail = _useState50[0],
+    setPlantDetail = _useState50[1];
   useEffect(function () {
     saveData(data);
   }, [data]);
@@ -5722,57 +6027,57 @@ function GardenApp() {
     if (hasTomatoes && month >= 5 && month <= 8) suggestions.push({
       text: "Pinch tomato suckers  -  check weekly",
       icon: "🍅",
-      color: "#f87171"
+      color: "#c0524a"
     });
     if (hasTomatoes && month >= 6 && month <= 8) suggestions.push({
       text: "Apply copper fungicide to tomatoes  -  every 7-10 days",
       icon: "🧪",
-      color: "#fb923c"
+      color: "#c87d56"
     });
     if (hasBlueberry && month >= 6 && month <= 7) suggestions.push({
       text: "Net blueberries before they ripen",
       icon: "🫐",
-      color: "#c084fc"
+      color: "#9d6bc4"
     });
     if (hasBlueberry && month >= 7 && month <= 8) suggestions.push({
       text: "Harvest blueberries  -  check daily",
       icon: "🫐",
-      color: "#fbbf24"
+      color: "#d9a441"
     });
     if (hasPear && month === 6) suggestions.push({
       text: "Thin Asian pear clusters  -  1 fruit per cluster",
       icon: "🍐",
-      color: "#fb923c"
+      color: "#c87d56"
     });
     if (hasStrawberry && month >= 6 && month <= 8) suggestions.push({
       text: "Check strawberry tower daily  -  water if dry",
       icon: "🍓",
-      color: "#f87171"
+      color: "#c0524a"
     });
     if (hasRaspberry && month >= 7 && month <= 8) suggestions.push({
       text: "Cut raspberry floricanes after harvest",
       icon: "🍓",
-      color: "#d4a853"
+      color: "#3f5c3a"
     });
     if (hasBlackberry && month >= 7 && month <= 9) suggestions.push({
       text: "Harvest blackberries when deep black",
       icon: "🫐",
-      color: "#fbbf24"
+      color: "#d9a441"
     });
     if (hasFig && month === 11) suggestions.push({
       text: "Wrap fig in burlap for winter",
       icon: "🫐",
-      color: "#60a5fa"
+      color: "#3b7ea1"
     });
     if (hasPersimmon && month >= 10 && month <= 11) suggestions.push({
       text: "Harvest persimmon  -  fully orange is fine",
       icon: "🟠",
-      color: "#fbbf24"
+      color: "#d9a441"
     });
     if (plants.length > 0 && month >= 6 && month <= 9) suggestions.push({
       text: "Mulch beds if not done  -  3 inch layer",
       icon: "🌿",
-      color: "#d4a853"
+      color: "#3f5c3a"
     });
     return suggestions;
   }
@@ -5829,151 +6134,215 @@ function GardenApp() {
   return /*#__PURE__*/React.createElement("div", {
     style: {
       minHeight: "100vh",
-      background: "linear-gradient(160deg,#0e0e0a 0%,#141410 50%,#0c0c08 100%)",
-      fontFamily: "'Inter','SF Pro Display',-apple-system,BlinkMacSystemFont,sans-serif",
-      color: "#e8e4dc"
+      background: "linear-gradient(165deg,#f5f1e8 0%,#efe9da 55%,#f2ede0 100%)",
+      fontFamily: "'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif",
+      color: INK
     }
-  }, /*#__PURE__*/React.createElement("style", null, "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'); @keyframes spin{to{transform:rotate(360deg)}} ::-webkit-scrollbar{width:3px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:rgba(212,168,83,0.2);border-radius:3px}"), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("style", null, "@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=DM+Sans:wght@400;500;600;700&display=swap'); @keyframes spin{to{transform:rotate(360deg)}} @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}} body{background:#f5f1e8} .fade-up{animation:fadeUp 0.4s ease both} ::-webkit-scrollbar{width:4px;height:4px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:rgba(63,92,58,0.2);border-radius:4px} .serif{font-family:'Fraunces',Georgia,serif}"), /*#__PURE__*/React.createElement("div", {
     style: {
-      background: "rgba(0,0,0,0.5)",
-      borderBottom: "1px solid rgba(212,168,83,0.12)",
-      padding: "16px 16px 0",
+      background: "rgba(245,241,232,0.82)",
+      borderBottom: "1px solid #e3dcc9",
+      padding: "16px 18px 0",
       position: "sticky",
       top: 0,
       zIndex: 50,
-      backdropFilter: "blur(20px)"
+      backdropFilter: "blur(20px)",
+      WebkitBackdropFilter: "blur(20px)"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
-      gap: 10,
+      gap: 11,
       marginBottom: 14
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      width: 34,
-      height: 34,
-      borderRadius: 10,
-      background: "linear-gradient(135deg,rgba(212,168,83,0.3),rgba(212,168,83,0.1))",
-      border: "1px solid rgba(212,168,83,0.3)",
+      width: 38,
+      height: 38,
+      borderRadius: 12,
+      background: "linear-gradient(135deg,#4a6b44,#2f4a2b)",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      fontSize: 18,
-      flexShrink: 0
+      fontSize: 19,
+      flexShrink: 0,
+      boxShadow: "0 2px 8px rgba(63,92,58,0.25)"
     }
   }, "\uD83C\uDF3F"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "serif",
     style: {
-      fontSize: 17,
-      fontWeight: "700",
-      color: "#f0ede8",
-      letterSpacing: "-0.3px"
+      fontSize: 21,
+      fontWeight: "600",
+      color: INK,
+      letterSpacing: "-0.4px",
+      lineHeight: 1.05
     }
   }, gardenName), (locationLine || irrigLine) && /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 9,
+      fontSize: 9.5,
       color: DIM,
-      letterSpacing: "1.5px",
-      textTransform: "uppercase"
+      letterSpacing: "1.2px",
+      textTransform: "uppercase",
+      marginTop: 1,
+      fontWeight: "500"
     }
   }, [locationLine, irrigLine].filter(Boolean).join("  ·  "))), /*#__PURE__*/React.createElement("div", {
     style: {
       marginLeft: "auto",
       fontSize: 10,
       color: DIM,
-      fontVariantNumeric: "tabular-nums"
+      fontVariantNumeric: "tabular-nums",
+      textAlign: "right",
+      fontWeight: "500"
     }
   }, TODAY.toLocaleDateString("en-US", {
     month: "short",
-    day: "numeric",
-    year: "numeric"
+    day: "numeric"
   }))), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex"
+      display: "flex",
+      overflowX: "auto"
     }
   }, NAV_TABS.map(function (tab) {
+    var on = view === tab.key;
     return /*#__PURE__*/React.createElement("button", {
       key: tab.key,
       onClick: function onClick() {
         setView(tab.key);
       },
       style: {
-        flex: 1,
-        padding: "8px 2px",
+        flex: "1 0 auto",
+        minWidth: 44,
+        padding: "7px 4px 9px",
         border: "none",
         cursor: "pointer",
         background: "transparent",
-        color: view === tab.key ? G : DIM,
+        color: on ? G : DIM,
         fontFamily: "inherit",
-        borderBottom: view === tab.key ? "2px solid " + G : "2px solid transparent",
+        borderBottom: on ? "2.5px solid " + G : "2.5px solid transparent",
         fontSize: 9,
-        letterSpacing: "0.5px",
-        fontWeight: view === tab.key ? "600" : "400",
+        letterSpacing: "0.3px",
+        fontWeight: on ? "700" : "500",
         transition: "all 0.2s"
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 14,
-        marginBottom: 2
+        fontSize: 15,
+        marginBottom: 3,
+        filter: on ? "none" : "grayscale(0.4) opacity(0.7)"
       }
     }, tab.icon), tab.label);
   }))), /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: 14,
+      padding: 16,
       maxWidth: 480,
       margin: "0 auto",
-      paddingBottom: 32
+      paddingBottom: 40
+    },
+    className: "fade-up"
+  }, view === "dashboard" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative",
+      borderRadius: 18,
+      overflow: "hidden",
+      marginBottom: 14,
+      height: 150,
+      boxShadow: "0 6px 20px rgba(63,92,58,0.18)"
     }
-  }, view === "dashboard" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(WeatherWidget, {
+  }, /*#__PURE__*/React.createElement("img", {
+    src: "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=900&q=80",
+    alt: "Garden",
+    style: {
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+      display: "block"
+    },
+    onError: function onError(e) {
+      e.target.style.display = "none";
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      inset: 0,
+      background: "linear-gradient(180deg,rgba(20,30,18,0.05) 0%,rgba(20,30,18,0.55) 100%)"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      left: 16,
+      right: 16,
+      bottom: 13
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "serif",
+    style: {
+      fontSize: 24,
+      fontWeight: "600",
+      color: "#fff",
+      letterSpacing: "-0.4px",
+      lineHeight: 1.05,
+      textShadow: "0 1px 8px rgba(0,0,0,0.3)"
+    }
+  }, gardenName), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "rgba(255,255,255,0.92)",
+      marginTop: 2,
+      fontWeight: "500",
+      textShadow: "0 1px 6px rgba(0,0,0,0.3)"
+    }
+  }, (ZONE7A_ADVISORIES[CURRENT_MONTH] || {}).season || "", locationLine ? "  ·  " + locationLine : ""))), /*#__PURE__*/React.createElement(WeatherWidget, {
     settings: settings
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr 1fr 1fr",
-      gap: 7,
-      margin: "4px 0 14px"
+      gap: 8,
+      margin: "4px 0 16px"
     }
   }, [{
     label: "Areas",
     val: beds.length,
     icon: "🪴",
-    color: "#60a5fa"
+    color: "#3b7ea1"
   }, {
     label: "Plants",
     val: plants.length,
     icon: "🌱",
-    color: "#d4a853"
+    color: "#3f5c3a"
   }, {
     label: "Inputs",
     val: chemicals.filter(function (c) {
       return c.active;
     }).length,
     icon: "🧪",
-    color: "#c084fc"
+    color: "#9d6bc4"
   }, {
     label: "Harvests",
     val: harvests.length,
     icon: "🌾",
-    color: "#fbbf24"
+    color: "#d9a441"
   }].map(function (stat) {
     return /*#__PURE__*/React.createElement("div", {
       key: stat.label,
-      style: {
-        background: "rgba(255,255,255,0.045)",
-        border: "1px solid rgba(255,255,255,0.07)",
-        borderRadius: 12,
-        padding: "10px 6px",
+      style: _defineProperty({
+        background: "#fffdf8",
+        border: "1px solid #ece5d5",
+        borderRadius: 14,
+        boxShadow: "0 1px 3px rgba(63,92,58,0.06)",
+        padding: "11px 6px",
         textAlign: "center"
-      }
+      }, "boxShadow", "0 1px 3px rgba(63,92,58,0.06)")
     }, /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 16
+        fontSize: 17
       }
     }, stat.icon), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 20,
-        fontWeight: "bold",
+        fontSize: 21,
+        fontWeight: "700",
         color: stat.color,
         lineHeight: 1.1
       }
@@ -5982,13 +6351,14 @@ function GardenApp() {
         fontSize: 8,
         color: DIM,
         letterSpacing: 1,
-        textTransform: "uppercase"
+        textTransform: "uppercase",
+        fontWeight: "600"
       }
     }, stat.label));
   })), /*#__PURE__*/React.createElement("div", {
     style: {
-      background: "rgba(255,255,255,0.045)",
-      border: "1px solid rgba(255,255,255,0.07)",
+      background: "#fffdf8",
+      border: "1px solid #f2ede0",
       borderRadius: 12,
       padding: "12px 14px",
       marginBottom: 12
@@ -6003,24 +6373,24 @@ function GardenApp() {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 13,
-      color: "#d4a853"
+      color: "#3f5c3a"
     }
   }, "\uD83D\uDCCB ", MONTHS_L[CURRENT_MONTH - 1], " Tasks"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
-      color: "#fbbf24"
+      color: "#d9a441"
     }
   }, doneCur.length, " / ", curTasks.length, " done")), /*#__PURE__*/React.createElement("div", {
     style: {
       height: 5,
-      background: "rgba(255,255,255,0.08)",
+      background: "#ebe4d4",
       borderRadius: 3
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       height: "100%",
       borderRadius: 3,
-      background: "linear-gradient(90deg,#d4a853,#e8c878)",
+      background: "linear-gradient(90deg,#3f5c3a,#5a7355)",
       width: (curTasks.length ? Math.round(doneCur.length / curTasks.length * 100) : 0) + "%",
       transition: "width 0.5s"
     }
@@ -6031,7 +6401,7 @@ function GardenApp() {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#f87171",
+      color: "#c0524a",
       marginBottom: 7
     }
   }, "\u26A0\uFE0F Chemical / Fertilizer Alerts"), dueChem.concat(soonChem).map(function (c) {
@@ -6056,12 +6426,12 @@ function GardenApp() {
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 13,
-        color: "#f0ede8"
+        color: "#2d2a24"
       }
     }, c.name), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
-        color: over ? "#f87171" : "#fbbf24"
+        color: over ? "#c0524a" : "#d9a441"
       }
     }, !c.lastApplied ? "Never applied" : over ? "Overdue " + Math.abs(dl) + "d" : "Due in " + dl + "d", /*#__PURE__*/React.createElement("span", {
       style: {
@@ -6072,8 +6442,8 @@ function GardenApp() {
         markApplied(c.id);
       },
       style: {
-        background: "rgba(74,222,128,0.14)",
-        border: "1px solid rgba(212,168,83,0.3)",
+        background: "rgba(63,92,58,0.1)",
+        border: "1px solid rgba(63,92,58,0.25)",
         borderRadius: 7,
         color: G,
         padding: "5px 10px",
@@ -6091,15 +6461,15 @@ function GardenApp() {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#d4a853",
+      color: "#3f5c3a",
       marginBottom: 7
     }
   }, "\uD83D\uDDD3 Open Tasks This Month"), openCur.slice(0, 4).map(function (t) {
     return /*#__PURE__*/React.createElement("div", {
       key: t.id,
       style: {
-        background: "rgba(255,255,255,0.035)",
-        border: "1px solid rgba(255,255,255,0.06)",
+        background: "#fdfbf5",
+        border: "1px solid #fffdf8",
         borderRadius: 10,
         padding: "9px 12px",
         marginBottom: 6,
@@ -6115,7 +6485,7 @@ function GardenApp() {
         width: 18,
         height: 18,
         borderRadius: 4,
-        border: "1.5px solid rgba(74,222,128,0.32)",
+        border: "1.5px solid rgba(63,92,58,0.4)",
         background: "transparent",
         cursor: "pointer",
         flexShrink: 0
@@ -6127,10 +6497,10 @@ function GardenApp() {
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 13,
-        color: "#e8e4dc"
+        color: "#2d2a24"
       }
     }, t.title)), /*#__PURE__*/React.createElement(Tag, {
-      color: TASK_COLORS[t.category] || "#94a3b8"
+      color: TASK_COLORS[t.category] || "#9a9079"
     }, t.category));
   })), harvests.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -6139,7 +6509,7 @@ function GardenApp() {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#fbbf24",
+      color: "#d9a441",
       marginBottom: 7
     }
   }, "\uD83C\uDF3E Recent Harvests"), harvests.slice().sort(function (a, b) {
@@ -6155,7 +6525,7 @@ function GardenApp() {
         alignItems: "center",
         gap: 9,
         padding: "7px 0",
-        borderBottom: "1px solid rgba(255,255,255,0.05)"
+        borderBottom: "1px solid #f7f3ea"
       }
     }, /*#__PURE__*/React.createElement("span", {
       style: {
@@ -6168,7 +6538,7 @@ function GardenApp() {
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 13,
-        color: "#e8e4dc"
+        color: "#2d2a24"
       }
     }, p ? p.name : "Unknown"), /*#__PURE__*/React.createElement("div", {
       style: {
@@ -6178,7 +6548,7 @@ function GardenApp() {
     }, fmtDateShort(h.date))), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 13,
-        color: "#fbbf24",
+        color: "#d9a441",
         fontWeight: "bold"
       }
     }, h.amount, " ", h.unit));
@@ -6200,7 +6570,7 @@ function GardenApp() {
       background: "rgba(251,191,36,0.12)",
       border: "1px solid rgba(251,191,36,0.28)",
       borderRadius: 10,
-      color: "#fbbf24",
+      color: "#d9a441",
       fontSize: 12,
       cursor: "pointer",
       fontFamily: "inherit"
@@ -6218,7 +6588,7 @@ function GardenApp() {
       background: "rgba(96,165,250,0.1)",
       border: "1px solid rgba(96,165,250,0.25)",
       borderRadius: 10,
-      color: "#60a5fa",
+      color: "#3b7ea1",
       fontSize: 12,
       cursor: "pointer",
       fontFamily: "inherit"
@@ -6230,15 +6600,15 @@ function GardenApp() {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#d4a853",
+      color: "#3f5c3a",
       marginBottom: 7
     }
   }, "\uD83D\uDCA1 Suggested for your plants"), suggestedTasks.map(function (task, i) {
     return /*#__PURE__*/React.createElement("div", {
       key: i,
       style: {
-        background: "rgba(255,255,255,0.035)",
-        border: "1px solid rgba(255,255,255,0.06)",
+        background: "#fdfbf5",
+        border: "1px solid #fffdf8",
         borderRadius: 10,
         padding: "9px 12px",
         marginBottom: 6,
@@ -6255,7 +6625,7 @@ function GardenApp() {
       style: {
         flex: 1,
         fontSize: 12,
-        color: "#d4cdb8",
+        color: "#3a3529",
         lineHeight: 1.4
       }
     }, task.text), /*#__PURE__*/React.createElement("div", {
@@ -6275,10 +6645,12 @@ function GardenApp() {
       margin: "4px 0 14px"
     }
   }, /*#__PURE__*/React.createElement("div", {
+    className: "serif",
     style: {
-      fontSize: 17,
-      color: "#d4a853",
-      fontWeight: "bold"
+      fontSize: 22,
+      color: INK,
+      fontWeight: "600",
+      letterSpacing: "-0.3px"
     }
   }, "Areas"), /*#__PURE__*/React.createElement("button", {
     onClick: function onClick() {
@@ -6288,25 +6660,27 @@ function GardenApp() {
       });
     },
     style: {
-      background: "rgba(74,222,128,0.14)",
-      border: "1px solid rgba(212,168,83,0.3)",
-      borderRadius: 8,
-      color: G,
-      padding: "5px 12px",
+      background: "linear-gradient(135deg,#4a6b44,#3a5530)",
+      border: "none",
+      borderRadius: 10,
+      color: "#fdfbf2",
+      padding: "6px 14px",
       fontSize: 12,
       cursor: "pointer",
-      fontFamily: "inherit"
+      fontFamily: "inherit",
+      fontWeight: "600",
+      boxShadow: "0 2px 6px rgba(63,92,58,0.2)"
     }
   }, "+ Area")), beds.map(function (bed) {
     var bp = plants.filter(function (p) {
       return p.bedId === bed.id;
     });
     var open = expandedBed === bed.id;
-    var tc = BED_COLORS[bed.type] || "#94a3b8";
+    var tc = BED_COLORS[bed.type] || "#9a9079";
     return /*#__PURE__*/React.createElement("div", {
       key: bed.id,
       style: {
-        background: "rgba(255,255,255,0.035)",
+        background: "#fdfbf5",
         border: "1px solid rgba(255,255,255," + (open ? "0.1" : "0.06") + ")",
         borderRadius: 12,
         marginBottom: 8,
@@ -6339,7 +6713,7 @@ function GardenApp() {
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 14,
-        color: "#e8e4dc",
+        color: "#2d2a24",
         fontWeight: "bold"
       }
     }, bed.name), /*#__PURE__*/React.createElement("div", {
@@ -6378,15 +6752,15 @@ function GardenApp() {
       }
     }, open ? "▲" : "▼"))), open && /*#__PURE__*/React.createElement("div", {
       style: {
-        borderTop: "1px solid rgba(255,255,255,0.06)",
+        borderTop: "1px solid #fffdf8",
         padding: "0 14px 14px"
       }
     }, bed.notes && /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
-        color: "#5a5844",
+        color: "#9a9079",
         padding: "8px 0",
-        borderBottom: "1px solid rgba(255,255,255,0.05)",
+        borderBottom: "1px solid #f7f3ea",
         marginBottom: 8
       }
     }, bed.notes), bp.length === 0 && /*#__PURE__*/React.createElement("div", {
@@ -6405,7 +6779,7 @@ function GardenApp() {
           alignItems: "center",
           gap: 10,
           padding: "8px 0",
-          borderBottom: "1px solid rgba(255,255,255,0.04)",
+          borderBottom: "1px solid #fffdf8",
           cursor: "pointer"
         },
         onClick: function onClick() {
@@ -6425,7 +6799,7 @@ function GardenApp() {
       }, /*#__PURE__*/React.createElement("div", {
         style: {
           fontSize: 13,
-          color: "#e8e4dc"
+          color: "#2d2a24"
         }
       }, p.name), /*#__PURE__*/React.createElement("div", {
         style: {
@@ -6472,7 +6846,7 @@ function GardenApp() {
         width: "100%",
         padding: "7px 0",
         background: "transparent",
-        border: "1px dashed rgba(212,168,83,0.18)",
+        border: "1px dashed rgba(63,92,58,0.12)",
         borderRadius: 8,
         color: DIM,
         fontSize: 11,
@@ -6488,10 +6862,12 @@ function GardenApp() {
       margin: "4px 0 14px"
     }
   }, /*#__PURE__*/React.createElement("div", {
+    className: "serif",
     style: {
-      fontSize: 17,
-      color: "#d4a853",
-      fontWeight: "bold"
+      fontSize: 22,
+      color: INK,
+      fontWeight: "600",
+      letterSpacing: "-0.3px"
     }
   }, "Fertilizers and Inputs"), /*#__PURE__*/React.createElement("button", {
     onClick: function onClick() {
@@ -6501,14 +6877,16 @@ function GardenApp() {
       });
     },
     style: {
-      background: "rgba(74,222,128,0.14)",
-      border: "1px solid rgba(212,168,83,0.3)",
-      borderRadius: 8,
-      color: G,
-      padding: "5px 12px",
+      background: "linear-gradient(135deg,#4a6b44,#3a5530)",
+      border: "none",
+      borderRadius: 10,
+      color: "#fdfbf2",
+      padding: "6px 14px",
       fontSize: 12,
       cursor: "pointer",
-      fontFamily: "inherit"
+      fontFamily: "inherit",
+      fontWeight: "600",
+      boxShadow: "0 2px 6px rgba(63,92,58,0.2)"
     }
   }, "+ Add")), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -6524,12 +6902,12 @@ function GardenApp() {
     var due = isDue(c.lastApplied, c.interval);
     var soon = isSoon(c.lastApplied, c.interval);
     var dl = daysLeft(c.lastApplied, c.interval);
-    var tc = CHEM_COLORS[c.type] || "#94a3b8";
+    var tc = CHEM_COLORS[c.type] || "#9a9079";
     return /*#__PURE__*/React.createElement("div", {
       key: c.id,
       style: {
-        background: "rgba(255,255,255,0.035)",
-        border: "1px solid " + (due ? "rgba(248,113,113,0.24)" : soon ? "rgba(251,191,36,0.2)" : "rgba(255,255,255,0.07)"),
+        background: "#fdfbf5",
+        border: "1px solid " + (due ? "rgba(248,113,113,0.24)" : soon ? "rgba(251,191,36,0.2)" : "#f2ede0"),
         borderRadius: 12,
         padding: "12px 14px",
         marginBottom: 8
@@ -6558,19 +6936,19 @@ function GardenApp() {
     }, c.type), /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 13,
-        color: "#e8e4dc",
+        color: "#2d2a24",
         fontWeight: "bold"
       }
     }, c.name)), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
-        color: "#5a5844",
+        color: "#9a9079",
         marginBottom: 3
       }
     }, "Target: ", c.target), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
-        color: due ? "#f87171" : soon ? "#fbbf24" : DIM
+        color: due ? "#c0524a" : soon ? "#d9a441" : DIM
       }
     }, !c.lastApplied ? "Never applied" : due ? "Overdue " + Math.abs(dl) + "d" : soon ? "Due in " + dl + "d" : "OK  -  " + dl + "d left", /*#__PURE__*/React.createElement("span", {
       style: {
@@ -6579,10 +6957,10 @@ function GardenApp() {
     }, "  \xB7  every ", c.interval, "d")), c.notes && /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
-        color: "#5a5844",
+        color: "#9a9079",
         marginTop: 5,
         paddingTop: 5,
-        borderTop: "1px solid rgba(255,255,255,0.05)"
+        borderTop: "1px solid #f7f3ea"
       }
     }, c.notes)), /*#__PURE__*/React.createElement("div", {
       style: {
@@ -6597,8 +6975,8 @@ function GardenApp() {
         markApplied(c.id);
       },
       style: {
-        background: "rgba(212,168,83,0.12)",
-        border: "1px solid rgba(212,168,83,0.25)",
+        background: "rgba(63,92,58,0.09)",
+        border: "1px solid rgba(63,92,58,0.2)",
         borderRadius: 7,
         color: G,
         padding: "4px 9px",
@@ -6645,8 +7023,8 @@ function GardenApp() {
         });
       },
       style: {
-        background: "rgba(255,255,255,0.02)",
-        border: "1px solid rgba(255,255,255,0.05)",
+        background: "#f7f3ea",
+        border: "1px solid #f7f3ea",
         borderRadius: 10,
         padding: "10px 14px",
         marginBottom: 6,
@@ -6659,7 +7037,7 @@ function GardenApp() {
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 13,
-        color: "#a0967e"
+        color: "#6b6354"
       }
     }, c.name), /*#__PURE__*/React.createElement("div", {
       style: {
@@ -6675,10 +7053,12 @@ function GardenApp() {
       margin: "4px 0 14px"
     }
   }, /*#__PURE__*/React.createElement("div", {
+    className: "serif",
     style: {
-      fontSize: 17,
-      color: "#d4a853",
-      fontWeight: "bold"
+      fontSize: 22,
+      color: INK,
+      fontWeight: "600",
+      letterSpacing: "-0.3px"
     }
   }, "Garden Journal"), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -6696,7 +7076,7 @@ function GardenApp() {
       background: "rgba(251,191,36,0.12)",
       border: "1px solid rgba(251,191,36,0.28)",
       borderRadius: 8,
-      color: "#fbbf24",
+      color: "#d9a441",
       padding: "5px 10px",
       fontSize: 11,
       cursor: "pointer",
@@ -6713,7 +7093,7 @@ function GardenApp() {
       background: "rgba(96,165,250,0.1)",
       border: "1px solid rgba(96,165,250,0.25)",
       borderRadius: 8,
-      color: "#60a5fa",
+      color: "#3b7ea1",
       padding: "5px 10px",
       fontSize: 11,
       cursor: "pointer",
@@ -6722,7 +7102,7 @@ function GardenApp() {
   }, "\uD83D\uDCDD Note"))), harvests.length > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#fbbf24",
+      color: "#d9a441",
       textTransform: "uppercase",
       letterSpacing: 1,
       marginBottom: 8
@@ -6763,17 +7143,17 @@ function GardenApp() {
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 13,
-        color: "#e8e4dc"
+        color: "#2d2a24"
       }
     }, p ? p.name : "Unknown"), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
-        color: "#5a5844"
+        color: "#9a9079"
       }
     }, fmtDateShort(h.date), h.notes ? "  ·  " + h.notes : "")), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 15,
-        color: "#fbbf24",
+        color: "#d9a441",
         fontWeight: "bold",
         flexShrink: 0
       }
@@ -6781,7 +7161,7 @@ function GardenApp() {
   })), journal.length > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#60a5fa",
+      color: "#3b7ea1",
       textTransform: "uppercase",
       letterSpacing: 1,
       margin: "14px 0 8px"
@@ -6806,8 +7186,8 @@ function GardenApp() {
         });
       },
       style: {
-        background: hasDx ? dxSev.bg : "rgba(255,255,255,0.035)",
-        border: "1px solid " + (hasDx ? dxSev.border : "rgba(255,255,255,0.07)"),
+        background: hasDx ? dxSev.bg : "#fdfbf5",
+        border: "1px solid " + (hasDx ? dxSev.border : "#f2ede0"),
         borderRadius: 10,
         padding: "10px 12px",
         marginBottom: 6,
@@ -6849,7 +7229,7 @@ function GardenApp() {
     }, dxSev.icon, " ", j.diagnosisData.identified), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 12,
-        color: "#e8e4dc",
+        color: "#2d2a24",
         lineHeight: 1.5,
         whiteSpace: "pre-line"
       }
@@ -6865,7 +7245,7 @@ function GardenApp() {
     }, /*#__PURE__*/React.createElement("span", null, fmtDateShort(j.date)), bed && /*#__PURE__*/React.createElement("span", null, bed.name), p && /*#__PURE__*/React.createElement("span", null, p.emoji, " ", p.name), hasDx ? /*#__PURE__*/React.createElement(Tag, {
       color: dxSev.color
     }, "AI Diagnosis") : /*#__PURE__*/React.createElement(Tag, {
-      color: "#60a5fa"
+      color: "#3b7ea1"
     }, j.type)))));
   })), harvests.length === 0 && journal.length === 0 && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -6895,10 +7275,12 @@ function GardenApp() {
       margin: "4px 0 12px"
     }
   }, /*#__PURE__*/React.createElement("div", {
+    className: "serif",
     style: {
-      fontSize: 17,
-      color: "#d4a853",
-      fontWeight: "bold"
+      fontSize: 22,
+      color: INK,
+      fontWeight: "600",
+      letterSpacing: "-0.3px"
     }
   }, "Seasonal Calendar"), /*#__PURE__*/React.createElement("button", {
     onClick: function onClick() {
@@ -6910,14 +7292,16 @@ function GardenApp() {
       });
     },
     style: {
-      background: "rgba(74,222,128,0.14)",
-      border: "1px solid rgba(212,168,83,0.3)",
-      borderRadius: 8,
-      color: G,
-      padding: "5px 12px",
+      background: "linear-gradient(135deg,#4a6b44,#3a5530)",
+      border: "none",
+      borderRadius: 10,
+      color: "#fdfbf2",
+      padding: "6px 14px",
       fontSize: 12,
       cursor: "pointer",
-      fontFamily: "inherit"
+      fontFamily: "inherit",
+      fontWeight: "600",
+      boxShadow: "0 2px 6px rgba(63,92,58,0.2)"
     }
   }, "+ Task")), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -6948,9 +7332,9 @@ function GardenApp() {
         fontSize: 10,
         fontFamily: "inherit",
         position: "relative",
-        background: selMonth === mn ? "rgba(212,168,83,0.18)" : mn === CURRENT_MONTH ? "rgba(251,191,36,0.1)" : "rgba(255,255,255,0.045)",
-        color: selMonth === mn ? G : mn === CURRENT_MONTH ? "#fbbf24" : DIM,
-        outline: selMonth === mn ? "1px solid rgba(212,168,83,0.38)" : mn === CURRENT_MONTH ? "1px solid rgba(251,191,36,0.2)" : "1px solid rgba(255,255,255,0.06)",
+        background: selMonth === mn ? "rgba(63,92,58,0.12)" : mn === CURRENT_MONTH ? "rgba(251,191,36,0.1)" : "#fffdf8",
+        color: selMonth === mn ? G : mn === CURRENT_MONTH ? "#d9a441" : DIM,
+        outline: selMonth === mn ? "1px solid rgba(63,92,58,0.3)" : mn === CURRENT_MONTH ? "1px solid rgba(251,191,36,0.2)" : "1px solid #fffdf8",
         transition: "all 0.15s"
       }
     }, m, cnt > 0 && /*#__PURE__*/React.createElement("div", {
@@ -6961,20 +7345,20 @@ function GardenApp() {
         width: 14,
         height: 14,
         borderRadius: "50%",
-        background: "#f87171",
+        background: "#c0524a",
         fontSize: 8,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         color: "white",
         fontWeight: "bold",
-        border: "1.5px solid #0e0e0a"
+        border: "1.5px solid #f5f1e8"
       }
     }, cnt));
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 15,
-      color: "#e8e4dc",
+      color: "#2d2a24",
       marginBottom: 10,
       display: "flex",
       alignItems: "center",
@@ -6983,7 +7367,7 @@ function GardenApp() {
   }, MONTHS_L[selMonth - 1], selMonth === CURRENT_MONTH && /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 10,
-      color: "#fbbf24",
+      color: "#d9a441",
       background: "rgba(251,191,36,0.1)",
       border: "1px solid rgba(251,191,36,0.2)",
       borderRadius: 4,
@@ -7004,8 +7388,8 @@ function GardenApp() {
     return /*#__PURE__*/React.createElement("div", {
       key: t.id,
       style: {
-        background: t.done ? "rgba(212,168,83,0.04)" : "rgba(255,255,255,0.035)",
-        border: "1px solid " + (t.done ? "rgba(212,168,83,0.18)" : "rgba(255,255,255,0.07)"),
+        background: t.done ? "rgba(63,92,58,0.05)" : "#fdfbf5",
+        border: "1px solid " + (t.done ? "rgba(63,92,58,0.12)" : "#f2ede0"),
         borderRadius: 12,
         padding: "11px 14px",
         marginBottom: 7,
@@ -7027,8 +7411,8 @@ function GardenApp() {
         borderRadius: 5,
         flexShrink: 0,
         marginTop: 1,
-        border: "1.5px solid " + (t.done ? "#d4a853" : "rgba(212,168,83,0.35)"),
-        background: t.done ? "#d4a853" : "transparent",
+        border: "1.5px solid " + (t.done ? "#3f5c3a" : "rgba(63,92,58,0.28)"),
+        background: t.done ? "#3f5c3a" : "transparent",
         cursor: "pointer",
         display: "flex",
         alignItems: "center",
@@ -7044,7 +7428,7 @@ function GardenApp() {
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 13,
-        color: t.done ? "#5a5844" : "#e8e4dc",
+        color: t.done ? "#9a9079" : "#2d2a24",
         textDecoration: t.done ? "line-through" : "none",
         marginBottom: 4
       }
@@ -7055,13 +7439,13 @@ function GardenApp() {
         flexWrap: "wrap"
       }
     }, /*#__PURE__*/React.createElement(Tag, {
-      color: TASK_COLORS[t.category] || "#94a3b8"
+      color: TASK_COLORS[t.category] || "#9a9079"
     }, t.category), t.priority === "high" && /*#__PURE__*/React.createElement(Tag, {
-      color: "#f87171"
+      color: "#c0524a"
     }, "high")), t.detail && /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
-        color: "#5a5844",
+        color: "#9a9079",
         marginTop: 5
       }
     }, t.detail)), /*#__PURE__*/React.createElement("button", {
@@ -7173,7 +7557,7 @@ function GardenApp() {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
-      color: "#5a5844",
+      color: "#9a9079",
       marginBottom: 4
     }
   }, plantDetail.category, "  \xB7  ", (beds.find(function (b) {
@@ -7191,29 +7575,29 @@ function GardenApp() {
       marginLeft: 5
     }
   }, /*#__PURE__*/React.createElement(Tag, {
-    color: "#7ec87e"
+    color: "#4f7a4a"
   }, "\uD83E\uDD8C resistant")), plantDetail.bloom && plantDetail.bloom !== "none" && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#c4bdaa",
+      color: "#6b6354",
       marginTop: 6
     }
   }, "\uD83C\uDF38 Blooms ", plantDetail.bloom, plantDetail.color ? " · " + plantDetail.color : ""), plantDetail.sun && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#c4bdaa",
+      color: "#6b6354",
       marginTop: 3
     }
   }, "\u2600\uFE0F ", plantDetail.sun), plantDetail.planted && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: "#5a5844",
+      color: "#9a9079",
       marginTop: 6
     }
   }, "Planted ", fmtDate(plantDetail.planted)), plantDetail.notes && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
-      color: "#a0967e",
+      color: "#6b6354",
       marginTop: 6,
       lineHeight: 1.5
     }
@@ -7228,8 +7612,8 @@ function GardenApp() {
     style: {
       width: "100%",
       padding: "10px 0",
-      background: "rgba(212,168,83,0.1)",
-      border: "1px solid rgba(212,168,83,0.25)",
+      background: "rgba(63,92,58,0.08)",
+      border: "1px solid rgba(63,92,58,0.2)",
       borderRadius: 10,
       color: G,
       fontSize: 13,
