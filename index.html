@@ -1411,19 +1411,12 @@ function loadData() {
     var raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       var saved = JSON.parse(raw);
-      // Merge in any new default beds/plants/tasks by id, without overwriting user edits
-      ["beds", "plants", "tasks", "chemicals"].forEach(function (key) {
-        if (!Array.isArray(saved[key])) saved[key] = (DEFAULT_DATA[key] || []).slice();
-        var have = {};
-        saved[key].forEach(function (item) {
-          if (item && item.id) have[item.id] = true;
-        });
-        (DEFAULT_DATA[key] || []).forEach(function (def) {
-          if (def && def.id && !have[def.id]) saved[key].push(def);
-        });
-      });
-      // Ensure settings object exists
+      // Respect the user's data exactly - including anything they've deleted.
+      // (New default content ships via a bumped STORAGE_KEY, not a live merge.)
       if (!saved.settings) saved.settings = Object.assign({}, DEFAULT_DATA.settings);
+      ["beds", "plants", "tasks", "chemicals", "harvests", "journal"].forEach(function (key) {
+        if (!Array.isArray(saved[key])) saved[key] = [];
+      });
       return saved;
     }
   } catch (e) {}
@@ -1503,8 +1496,24 @@ var STATUS_CFG = {
   struggling: {
     color: "#c0524a",
     label: "Struggling"
+  },
+  blooming: {
+    color: "#c2649a",
+    label: "Blooming"
   }
 };
+
+// Display status: if a plant is in its bloom window this month, show "Blooming" live
+// (does not overwrite the saved status - purely for display)
+function displayStatus(p) {
+  try {
+    if (p && p.bloom && p.bloom !== "none") {
+      var months = bloomMonths(p.bloom);
+      if (months.indexOf(CURRENT_MONTH) !== -1) return "blooming";
+    }
+  } catch (e) {}
+  return p ? p.status : "healthy";
+}
 var CHEM_COLORS = {
   Fertilizer: "#3f5c3a",
   Fungicide: "#c87d56",
@@ -1886,9 +1895,43 @@ function PBtn(props) {
   }, props.children);
 }
 function DBtn(props) {
+  var _useState = useState(false),
+    _useState2 = _slicedToArray(_useState, 2),
+    armed = _useState2[0],
+    setArmed = _useState2[1];
+  useEffect(function () {
+    if (!armed) return;
+    var t = setTimeout(function () {
+      setArmed(false);
+    }, 3000);
+    return function () {
+      clearTimeout(t);
+    };
+  }, [armed]);
+  function handle() {
+    if (armed) {
+      setArmed(false);
+      props.onClick();
+    } else {
+      setArmed(true);
+    }
+  }
   return React.createElement("button", {
-    onClick: props.onClick,
-    style: {
+    onClick: handle,
+    style: armed ? {
+      width: "100%",
+      padding: "10px 0",
+      background: "#c0524a",
+      border: "1px solid #c0524a",
+      borderRadius: 12,
+      color: "#fff",
+      fontSize: 13,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      marginTop: 6,
+      letterSpacing: 0.3,
+      fontWeight: "600"
+    } : {
       width: "100%",
       padding: "10px 0",
       background: "rgba(220,80,80,0.08)",
@@ -1901,7 +1944,7 @@ function DBtn(props) {
       marginTop: 6,
       letterSpacing: 0.3
     }
-  }, props.children);
+  }, armed ? "Tap again to confirm" : props.children);
 }
 function Modal(props) {
   return /*#__PURE__*/React.createElement("div", {
@@ -1980,14 +2023,14 @@ function PlantImage(props) {
   var size = props.size || 120;
   var radius = props.radius || 10;
   var curated = PLANT_IMAGES[plantId];
-  var _useState = useState(curated || null),
-    _useState2 = _slicedToArray(_useState, 2),
-    src = _useState2[0],
-    setSrc = _useState2[1];
-  var _useState3 = useState(false),
+  var _useState3 = useState(curated || null),
     _useState4 = _slicedToArray(_useState3, 2),
-    err = _useState4[0],
-    setErr = _useState4[1];
+    src = _useState4[0],
+    setSrc = _useState4[1];
+  var _useState5 = useState(false),
+    _useState6 = _slicedToArray(_useState5, 2),
+    err = _useState6[0],
+    setErr = _useState6[1];
   var boxStyle = {
     width: size,
     height: size,
@@ -2025,15 +2068,15 @@ function PlantImage(props) {
 }
 function BedForm(props) {
   var bed = props.bed;
-  var _useState5 = useState(_objectSpread({
+  var _useState7 = useState(_objectSpread({
       name: "",
       type: "vegetable",
       notes: "",
       irrigated: true
     }, bed)),
-    _useState6 = _slicedToArray(_useState5, 2),
-    form = _useState6[0],
-    setForm = _useState6[1];
+    _useState8 = _slicedToArray(_useState7, 2),
+    form = _useState8[0],
+    setForm = _useState8[1];
   function upd(k, v) {
     setForm(function (p) {
       return Object.assign({}, p, _defineProperty({}, k, v));
@@ -2124,7 +2167,7 @@ function PlantForm(props) {
   var plant = props.plant;
   var beds = props.beds;
   var EMOJIS = ["🌱", "🍅", "🫐", "🍓", "🍐", "🟠", "🍎", "🌿", "🌸", "🌻", "🥬", "🫛", "🌶️", "🥒", "🧅", "🧄", "🌹", "🌷", "🌼", "🌾", "🌳", "🌲", "🧡", "🍋"];
-  var _useState7 = useState(_objectSpread({
+  var _useState9 = useState(_objectSpread({
       name: "",
       category: "",
       status: "growing",
@@ -2138,14 +2181,16 @@ function PlantForm(props) {
       color: "",
       deerResistant: false
     }, plant)),
-    _useState8 = _slicedToArray(_useState7, 2),
-    form = _useState8[0],
-    setForm = _useState8[1];
+    _useState0 = _slicedToArray(_useState9, 2),
+    form = _useState0[0],
+    setForm = _useState0[1];
   function upd(k, v) {
     setForm(function (p) {
       return Object.assign({}, p, _defineProperty({}, k, v));
     });
   }
+  var ORNAMENTAL_CATS = ["Rose", "Peony", "Hydrangea", "Perennial", "Bulb", "Flowering Tree", "Shrub", "Groundcover", "Ornamental Grass", "Evergreen"];
+  var isOrnamental = ORNAMENTAL_CATS.indexOf(form.category) !== -1;
 
   // When cropType is selected, auto-fill name/emoji/category if empty
   function onCropType(cropId) {
@@ -2162,7 +2207,7 @@ function PlantForm(props) {
     }
   }
   var statuses = Object.entries(STATUS_CFG);
-  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Label, null, "Crop Type (links to Planner)"), /*#__PURE__*/React.createElement("select", {
+  return /*#__PURE__*/React.createElement("div", null, !isOrnamental && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Label, null, "Crop Type (links to Planner)"), /*#__PURE__*/React.createElement("select", {
     style: SEL,
     value: form.cropType,
     onChange: function onChange(e) {
@@ -2175,7 +2220,7 @@ function PlantForm(props) {
       key: c.id,
       value: c.id
     }, c.emoji, " ", c.name);
-  })), /*#__PURE__*/React.createElement(Label, null, "Plant Name"), /*#__PURE__*/React.createElement("input", {
+  }))), /*#__PURE__*/React.createElement(Label, null, "Plant Name"), /*#__PURE__*/React.createElement("input", {
     style: INP,
     value: form.name,
     onChange: function onChange(e) {
@@ -2257,14 +2302,23 @@ function PlantForm(props) {
     onChange: function onChange(e) {
       upd("planted", e.target.value);
     }
-  }), /*#__PURE__*/React.createElement(Label, null, "Bloom Time (optional, e.g. Jun-Sep)"), /*#__PURE__*/React.createElement("input", {
+  }), (isOrnamental || form.bloom || form.sun || form.color || form.deerResistant) && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Label, null, "Bloom Time (optional, e.g. Jun-Sep)"), /*#__PURE__*/React.createElement("input", {
     style: INP,
     value: form.bloom,
     onChange: function onChange(e) {
       upd("bloom", e.target.value);
     },
     placeholder: "e.g. May-Jun, or leave blank"
-  }), /*#__PURE__*/React.createElement(Label, null, "Sun / Color (optional)"), /*#__PURE__*/React.createElement("div", {
+  }), !form.bloom && ["Rose", "Peony", "Hydrangea", "Perennial", "Bulb", "Flowering Tree", "Shrub", "Groundcover", "Ornamental Grass"].indexOf(form.category) !== -1 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10.5,
+      color: "#bb8a2e",
+      marginTop: 5,
+      lineHeight: 1.45,
+      display: "flex",
+      gap: 5
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "\uD83C\uDF38"), /*#__PURE__*/React.createElement("span", null, "Add a bloom time (like \"May-Jun\") to see this in the Bloom planner.")), /*#__PURE__*/React.createElement(Label, null, "Sun / Color (optional)"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 8
@@ -2303,7 +2357,7 @@ function PlantForm(props) {
       width: 20,
       height: 20,
       borderRadius: 6,
-      border: "1px solid " + (form.deerResistant ? "rgba(126,200,126,0.6)" : "rgba(255,255,255,0.2)"),
+      border: "1px solid " + (form.deerResistant ? "rgba(126,200,126,0.6)" : "#d3cab4"),
       background: form.deerResistant ? "rgba(126,200,126,0.25)" : "transparent",
       display: "flex",
       alignItems: "center",
@@ -2316,7 +2370,7 @@ function PlantForm(props) {
       fontSize: 13,
       color: "#6b6354"
     }
-  }, "Deer resistant")), /*#__PURE__*/React.createElement(Label, null, "Notes"), /*#__PURE__*/React.createElement("textarea", {
+  }, "Deer resistant"))), /*#__PURE__*/React.createElement(Label, null, "Notes"), /*#__PURE__*/React.createElement("textarea", {
     style: Object.assign({}, INP, {
       height: 72,
       resize: "none"
@@ -2338,7 +2392,7 @@ function PlantForm(props) {
 }
 function ChemForm(props) {
   var chem = props.chem;
-  var _useState9 = useState(_objectSpread({
+  var _useState1 = useState(_objectSpread({
       name: "",
       type: "Fertilizer",
       target: "",
@@ -2347,9 +2401,9 @@ function ChemForm(props) {
       notes: "",
       active: true
     }, chem)),
-    _useState0 = _slicedToArray(_useState9, 2),
-    form = _useState0[0],
-    setForm = _useState0[1];
+    _useState10 = _slicedToArray(_useState1, 2),
+    form = _useState10[0],
+    setForm = _useState10[1];
   function upd(k, v) {
     setForm(function (p) {
       return Object.assign({}, p, _defineProperty({}, k, v));
@@ -2358,10 +2412,10 @@ function ChemForm(props) {
 
   // "" = not chosen yet, "__custom__" = create your own, else a catalog product name
   var isExisting = !!(chem && chem.id);
-  var _useState1 = useState(isExisting ? "__custom__" : ""),
-    _useState10 = _slicedToArray(_useState1, 2),
-    picker = _useState10[0],
-    setPicker = _useState10[1];
+  var _useState11 = useState(isExisting ? "__custom__" : ""),
+    _useState12 = _slicedToArray(_useState11, 2),
+    picker = _useState12[0],
+    setPicker = _useState12[1];
   function choose(val) {
     setPicker(val);
     if (val && val !== "__custom__") {
@@ -2543,7 +2597,7 @@ function ChemForm(props) {
 }
 function TaskForm(props) {
   var task = props.task;
-  var _useState11 = useState(_objectSpread({
+  var _useState13 = useState(_objectSpread({
       title: "",
       month: CURRENT_MONTH,
       category: "Maintenance",
@@ -2551,9 +2605,9 @@ function TaskForm(props) {
       detail: "",
       done: false
     }, task)),
-    _useState12 = _slicedToArray(_useState11, 2),
-    form = _useState12[0],
-    setForm = _useState12[1];
+    _useState14 = _slicedToArray(_useState13, 2),
+    form = _useState14[0],
+    setForm = _useState14[1];
   function upd(k, v) {
     setForm(function (p) {
       return Object.assign({}, p, _defineProperty({}, k, v));
@@ -2637,16 +2691,16 @@ function TaskForm(props) {
 function HarvestForm(props) {
   var plants = props.plants;
   var harvest = props.harvest;
-  var _useState13 = useState(_objectSpread({
+  var _useState15 = useState(_objectSpread({
       plantId: "",
       date: TODAY_STR,
       amount: "",
       unit: "lbs",
       notes: ""
     }, harvest)),
-    _useState14 = _slicedToArray(_useState13, 2),
-    form = _useState14[0],
-    setForm = _useState14[1];
+    _useState16 = _slicedToArray(_useState15, 2),
+    form = _useState16[0],
+    setForm = _useState16[1];
   function upd(k, v) {
     setForm(function (p) {
       return Object.assign({}, p, _defineProperty({}, k, v));
@@ -2729,16 +2783,16 @@ function JournalForm(props) {
   var beds = props.beds;
   var plants = props.plants;
   var entry = props.entry;
-  var _useState15 = useState(_objectSpread({
+  var _useState17 = useState(_objectSpread({
       bedId: "",
       plantId: "",
       date: TODAY_STR,
       type: "observation",
       text: ""
     }, entry)),
-    _useState16 = _slicedToArray(_useState15, 2),
-    form = _useState16[0],
-    setForm = _useState16[1];
+    _useState18 = _slicedToArray(_useState17, 2),
+    form = _useState18[0],
+    setForm = _useState18[1];
   function upd(k, v) {
     setForm(function (p) {
       return Object.assign({}, p, _defineProperty({}, k, v));
@@ -2920,18 +2974,18 @@ var ZONE7A_ADVISORIES = {
 };
 function WeatherWidget(props) {
   var settings = props.settings || {};
-  var _useState17 = useState(null),
-    _useState18 = _slicedToArray(_useState17, 2),
-    wx = _useState18[0],
-    setWx = _useState18[1];
-  var _useState19 = useState(true),
+  var _useState19 = useState(null),
     _useState20 = _slicedToArray(_useState19, 2),
-    loading = _useState20[0],
-    setLoading = _useState20[1];
-  var _useState21 = useState(null),
+    wx = _useState20[0],
+    setWx = _useState20[1];
+  var _useState21 = useState(true),
     _useState22 = _slicedToArray(_useState21, 2),
-    errMsg = _useState22[0],
-    setErrMsg = _useState22[1];
+    loading = _useState22[0],
+    setLoading = _useState22[1];
+  var _useState23 = useState(null),
+    _useState24 = _slicedToArray(_useState23, 2),
+    errMsg = _useState24[0],
+    setErrMsg = _useState24[1];
   useEffect(function () {
     // Get coordinates from settings, fall back to Melville NY
     var lat = settings.lat || 40.7876;
@@ -3225,7 +3279,10 @@ function WeatherWidget(props) {
       marginTop: 7,
       textAlign: "right"
     }
-  }, "Open-Meteo data")));
+  }, "Updated ", new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit"
+  }), "  \xB7  Open-Meteo")));
 }
 function SeasonalAdvisory(props) {
   // Lightweight fallback shown if live weather fails to load
@@ -3662,86 +3719,64 @@ function PlantingCalendar(props) {
   var beds = props.beds || [];
   var s = props.settings || {};
   var frosts = getFrostDates(s);
-  var lastFrostLocal = frosts.lastFrost;
-  var firstFrostLocal = frosts.firstFrost;
-  var frostLabel = "Last frost " + fmtSingle(lastFrostLocal) + "  ·  First frost " + fmtSingle(firstFrostLocal);
+  var frostLabel = "Last frost " + fmtSingle(frosts.lastFrost) + "  ·  First frost " + fmtSingle(frosts.firstFrost);
   var locationLabel = [s.location, s.zone ? "Zone " + s.zone : ""].filter(Boolean).join("  ·  ") || "Your Garden";
-  var _useState23 = useState("All"),
-    _useState24 = _slicedToArray(_useState23, 2),
-    filterCat = _useState24[0],
-    setFilterCat = _useState24[1];
-  var _useState25 = useState(null),
+  var _useState25 = useState("sow"),
     _useState26 = _slicedToArray(_useState25, 2),
-    selectedCrop = _useState26[0],
-    setSelectedCrop = _useState26[1];
-  var _useState27 = useState("myGarden"),
+    tab = _useState26[0],
+    setTab = _useState26[1]; // "sow" | "bloom"
+  var _useState27 = useState("now"),
     _useState28 = _slicedToArray(_useState27, 2),
-    tab = _useState28[0],
-    setTab = _useState28[1]; // "myGarden" | "guide"
-  var _useState29 = useState(false),
-    _useState30 = _slicedToArray(_useState29, 2),
-    showAll = _useState30[0],
-    setShowAll = _useState30[1];
-
-  // -- MY GARDEN TAB --
-  // Plants that have a cropType linked  -  show real timeline from planted date
-  var linkedPlants = plants.filter(function (p) {
-    return p.cropType;
-  });
-  var unlinkedPlants = plants.filter(function (p) {
-    return !p.cropType;
-  });
-  function plantTimeline(plant) {
-    var crop = CROPS.find(function (c) {
-      return c.id === plant.cropType;
-    });
-    if (!crop || !plant.planted) return null;
-    var planted = new Date(plant.planted + "T12:00:00");
-    var bed = beds.find(function (b) {
-      return b.id === plant.bedId;
-    });
-
-    // Calculate harvest based on days from transplant date in crop def
-    var daysToHarvest = crop.harvest ? Math.round((crop.harvest - (crop.transplant || crop.directSow || crop.startIndoor || LAST_FROST)) / 86400000) : null;
-    var harvestEst = daysToHarvest ? addDays(planted, daysToHarvest) : null;
-    var daysSincePlanted = Math.round((new Date() - planted) / 86400000);
-    var progressPct = daysToHarvest ? Math.min(100, Math.round(daysSincePlanted / daysToHarvest * 100)) : null;
-    return {
-      crop: crop,
-      bed: bed,
-      planted: planted,
-      harvestEst: harvestEst,
-      progressPct: progressPct,
-      daysSincePlanted: daysSincePlanted,
-      daysToHarvest: daysToHarvest
-    };
+    sowView = _useState28[0],
+    setSowView = _useState28[1]; // "now" | "timeline"
+  var nowMonth = CURRENT_MONTH;
+  function moOf(d) {
+    return d ? new Date(d).getMonth() + 1 : null;
   }
 
-  // -- GUIDE TAB --
-  var filtered = filterCat === "All" ? CROPS : CROPS.filter(function (c) {
-    return c.category === filterCat;
-  });
-  var priority = {
-    start: 0,
-    sow: 0,
-    transplant: 0,
-    harvest: 0,
-    upcoming_start: 1,
-    upcoming_sow: 1,
-    upcoming_transplant: 1,
-    none: 2
+  // Build sow/harvest activity per crop: which months have an action
+  // actions: start (indoor), sow (direct), transplant, harvest
+  function cropActions(c) {
+    return {
+      start: moOf(c.startIndoor),
+      sow: moOf(c.directSow),
+      transplant: moOf(c.transplant),
+      harvest: moOf(c.harvest)
+    };
+  }
+  var ACT_COLOR = {
+    start: "#8b6fc4",
+    sow: "#3f8c6e",
+    transplant: "#3b7ea1",
+    harvest: "#d9a441"
   };
-  var sorted = filtered.slice().sort(function (a, b) {
-    return (priority[statusForCrop(a)] || 2) - (priority[statusForCrop(b)] || 2);
+  var ACT_LABEL = {
+    start: "Start indoors",
+    sow: "Direct sow",
+    transplant: "Transplant",
+    harvest: "Harvest"
+  };
+
+  // "This month" list - what to do now
+  var thisMonthItems = [];
+  CROPS.forEach(function (c) {
+    var a = cropActions(c);
+    ["start", "sow", "transplant", "harvest"].forEach(function (act) {
+      if (a[act] === nowMonth) thisMonthItems.push({
+        crop: c,
+        action: act
+      });
+    });
   });
-  var active = sorted.filter(function (c) {
-    return priority[statusForCrop(c)] === 0;
-  });
-  var upcoming = sorted.filter(function (c) {
-    return priority[statusForCrop(c)] === 1;
-  });
-  var rest = sorted.filter(function (c) {
-    return priority[statusForCrop(c)] === 2;
+  // sort: harvest first (rewarding), then transplant, sow, start
+  var order = {
+    harvest: 0,
+    transplant: 1,
+    sow: 2,
+    start: 3
+  };
+  thisMonthItems.sort(function (x, y) {
+    return order[x.action] - order[y.action];
   });
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -3756,71 +3791,289 @@ function PlantingCalendar(props) {
       letterSpacing: "-0.3px",
       marginBottom: 4
     }
-  }, "Planting Planner"), /*#__PURE__*/React.createElement("div", {
+  }, "Planner"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: DIM,
-      marginBottom: 12
+      marginBottom: 14
     }
   }, locationLabel, "  \xB7  ", frostLabel), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 6,
-      marginBottom: 14
+      marginBottom: 16
     }
   }, /*#__PURE__*/React.createElement("button", {
     onClick: function onClick() {
-      setTab("myGarden");
+      setTab("sow");
     },
     style: {
       flex: 1,
-      padding: "8px 0",
-      borderRadius: 8,
+      padding: "9px 0",
+      borderRadius: 11,
       cursor: "pointer",
       fontFamily: "inherit",
-      fontSize: 11,
-      background: tab === "myGarden" ? "rgba(63,92,58,0.12)" : "#f7f3ea",
-      border: tab === "myGarden" ? "1px solid rgba(63,92,58,0.3)" : "1px solid #e7e0cf",
-      color: tab === "myGarden" ? G : DIM
+      fontSize: 12.5,
+      fontWeight: tab === "sow" ? "700" : "500",
+      background: tab === "sow" ? "linear-gradient(135deg,#4a6b44,#3a5530)" : "#fffdf8",
+      border: tab === "sow" ? "none" : "1px solid #e3dcc9",
+      color: tab === "sow" ? "#fdfbf2" : DIM,
+      boxShadow: tab === "sow" ? "0 2px 6px rgba(63,92,58,0.18)" : "none"
     }
-  }, "\uD83E\uDEB4 Garden"), /*#__PURE__*/React.createElement("button", {
+  }, "\uD83C\uDF31 Sow & Harvest"), /*#__PURE__*/React.createElement("button", {
     onClick: function onClick() {
       setTab("bloom");
     },
     style: {
       flex: 1,
-      padding: "8px 0",
-      borderRadius: 8,
+      padding: "9px 0",
+      borderRadius: 11,
       cursor: "pointer",
       fontFamily: "inherit",
-      fontSize: 11,
-      background: tab === "bloom" ? "rgba(63,92,58,0.12)" : "#f7f3ea",
-      border: tab === "bloom" ? "1px solid rgba(63,92,58,0.3)" : "1px solid #e7e0cf",
-      color: tab === "bloom" ? G : DIM
+      fontSize: 12.5,
+      fontWeight: tab === "bloom" ? "700" : "500",
+      background: tab === "bloom" ? "linear-gradient(135deg,#4a6b44,#3a5530)" : "#fffdf8",
+      border: tab === "bloom" ? "none" : "1px solid #e3dcc9",
+      color: tab === "bloom" ? "#fdfbf2" : DIM,
+      boxShadow: tab === "bloom" ? "0 2px 6px rgba(63,92,58,0.18)" : "none"
     }
-  }, "\uD83C\uDF38 Bloom"), /*#__PURE__*/React.createElement("button", {
-    onClick: function onClick() {
-      setTab("guide");
-    },
+  }, "\uD83C\uDF38 Bloom")), tab === "sow" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
-      flex: 1,
-      padding: "8px 0",
-      borderRadius: 8,
-      cursor: "pointer",
-      fontFamily: "inherit",
-      fontSize: 11,
-      background: tab === "guide" ? "rgba(63,92,58,0.12)" : "#f7f3ea",
-      border: tab === "guide" ? "1px solid rgba(63,92,58,0.3)" : "1px solid #e7e0cf",
-      color: tab === "guide" ? G : DIM
+      display: "flex",
+      gap: 6,
+      marginBottom: 14
     }
-  }, "\uD83D\uDCD6 Guide")), tab === "bloom" && function () {
+  }, [{
+    k: "now",
+    label: "This Month"
+  }, {
+    k: "timeline",
+    label: "Year View"
+  }].map(function (v) {
+    var on = sowView === v.k;
+    return /*#__PURE__*/React.createElement("button", {
+      key: v.k,
+      onClick: function onClick() {
+        setSowView(v.k);
+      },
+      style: {
+        flex: 1,
+        padding: "7px 0",
+        borderRadius: 9,
+        cursor: "pointer",
+        fontFamily: "inherit",
+        fontSize: 11.5,
+        fontWeight: on ? "700" : "500",
+        background: on ? "rgba(63,92,58,0.1)" : "transparent",
+        border: on ? "1px solid rgba(63,92,58,0.3)" : "1px solid #e3dcc9",
+        color: on ? G : DIM
+      }
+    }, v.label);
+  })), sowView === "now" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: INK,
+      marginBottom: 10,
+      fontWeight: "600"
+    }
+  }, MONTHS_L[nowMonth - 1], " - what to do now"), thisMonthItems.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      padding: "36px 0",
+      color: DIM
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 34,
+      marginBottom: 8
+    }
+  }, "\uD83C\uDF19"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13
+    }
+  }, "Nothing to sow or harvest this month."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      marginTop: 4
+    }
+  }, "Check the Year View to see what is coming up.")) : thisMonthItems.map(function (item, idx) {
+    var c = item.crop,
+      act = item.action;
+    return /*#__PURE__*/React.createElement("div", {
+      key: c.id + act,
+      style: {
+        background: "#fffdf8",
+        border: "1px solid #ece5d5",
+        borderLeft: "3px solid " + ACT_COLOR[act],
+        borderRadius: 12,
+        padding: "11px 13px",
+        marginBottom: 8,
+        display: "flex",
+        alignItems: "center",
+        gap: 11,
+        boxShadow: "0 1px 3px rgba(63,92,58,0.06)"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 22,
+        flexShrink: 0
+      }
+    }, c.emoji), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1,
+        minWidth: 0
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 14,
+        color: INK,
+        fontWeight: "500"
+      }
+    }, c.name), c.tip && /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "#9a9079",
+        marginTop: 2,
+        lineHeight: 1.4
+      }
+    }, c.tip)), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10,
+        fontWeight: "700",
+        color: ACT_COLOR[act],
+        background: ACT_COLOR[act] + "18",
+        border: "1px solid " + ACT_COLOR[act] + "40",
+        borderRadius: 20,
+        padding: "4px 10px",
+        whiteSpace: "nowrap",
+        flexShrink: 0
+      }
+    }, ACT_LABEL[act]));
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8,
+      display: "flex",
+      gap: 12,
+      flexWrap: "wrap",
+      justifyContent: "center",
+      fontSize: 10,
+      color: DIM
+    }
+  }, ["start", "sow", "transplant", "harvest"].map(function (a) {
+    return /*#__PURE__*/React.createElement("span", {
+      key: a,
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 4
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        width: 8,
+        height: 8,
+        borderRadius: 2,
+        background: ACT_COLOR[a]
+      }
+    }), ACT_LABEL[a]);
+  }))), sowView === "timeline" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 1,
+      marginBottom: 6,
+      paddingLeft: 84
+    }
+  }, MONTH_ABBR.map(function (m, i) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: m,
+      style: {
+        flex: 1,
+        textAlign: "center",
+        fontSize: 7,
+        color: i + 1 === nowMonth ? G : DIM,
+        fontWeight: i + 1 === nowMonth ? "700" : "400"
+      }
+    }, m[0]);
+  })), CROPS.map(function (c) {
+    var a = cropActions(c);
+    return /*#__PURE__*/React.createElement("div", {
+      key: c.id,
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 4,
+        marginBottom: 4
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 80,
+        flexShrink: 0,
+        fontSize: 10,
+        color: "#6b6354",
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        marginRight: 3
+      }
+    }, c.emoji), c.name), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1,
+        display: "flex",
+        gap: 1
+      }
+    }, MONTH_ABBR.map(function (m, i) {
+      var mn = i + 1;
+      var isNow = mn === nowMonth;
+      // which action falls in this month (priority harvest>transplant>sow>start for color)
+      var col = null;
+      if (a.harvest === mn) col = ACT_COLOR.harvest;else if (a.transplant === mn) col = ACT_COLOR.transplant;else if (a.sow === mn) col = ACT_COLOR.sow;else if (a.start === mn) col = ACT_COLOR.start;
+      return /*#__PURE__*/React.createElement("div", {
+        key: m,
+        style: {
+          flex: 1,
+          height: 14,
+          borderRadius: 2,
+          background: col || (isNow ? "rgba(63,92,58,0.06)" : "#faf7ef"),
+          border: isNow && !col ? "1px solid rgba(63,92,58,0.25)" : "none",
+          boxSizing: "border-box"
+        }
+      });
+    })));
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 12,
+      display: "flex",
+      gap: 12,
+      flexWrap: "wrap",
+      justifyContent: "center",
+      fontSize: 10,
+      color: DIM
+    }
+  }, ["start", "sow", "transplant", "harvest"].map(function (a) {
+    return /*#__PURE__*/React.createElement("span", {
+      key: a,
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 4
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        width: 8,
+        height: 8,
+        borderRadius: 2,
+        background: ACT_COLOR[a]
+      }
+    }), ACT_LABEL[a]);
+  })))), tab === "bloom" && function () {
     var bloomers = plants.filter(function (p) {
       return p.bloom && p.bloom !== "none" && bloomMonths(p.bloom).length > 0;
     });
     bloomers.sort(function (a, b) {
       return bloomMonths(a.bloom)[0] - bloomMonths(b.bloom)[0];
     });
-    var nowMonth = new Date().getMonth() + 1;
     var bloomingNow = bloomers.filter(function (p) {
       return bloomMonths(p.bloom).indexOf(nowMonth) !== -1;
     });
@@ -3914,7 +4167,7 @@ function PlantingCalendar(props) {
         fontSize: 11,
         marginTop: 4
       }
-    }, "Add a bloom time to a plant in the Beds tab.")), bloomers.length > 0 && /*#__PURE__*/React.createElement("div", {
+    }, "Add a bloom time to a plant in the Garden tab.")), bloomers.length > 0 && /*#__PURE__*/React.createElement("div", {
       style: {
         marginTop: 14,
         padding: "10px 12px",
@@ -3925,367 +4178,7 @@ function PlantingCalendar(props) {
         lineHeight: 1.6
       }
     }, "Each bar shows the months a plant is in flower. The highlighted column is the current month. Plan for continuous color by filling gaps where few bars overlap."));
-  }(), tab === "myGarden" && /*#__PURE__*/React.createElement("div", null, plants.length === 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      textAlign: "center",
-      padding: "40px 0",
-      color: DIM
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 36,
-      marginBottom: 8
-    }
-  }, "\uD83C\uDF31"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 14
-    }
-  }, "No plants yet."), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      marginTop: 4
-    }
-  }, "Add plants in the Beds tab to track them here.")), linkedPlants.length > 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 16
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: G,
-      textTransform: "uppercase",
-      letterSpacing: 1,
-      marginBottom: 8
-    }
-  }, "Tracked Plants"), linkedPlants.map(function (plant) {
-    var tl = plantTimeline(plant);
-    if (!tl) return null;
-    var sc = STATUS_CFG[plant.status] || STATUS_CFG.healthy;
-    return /*#__PURE__*/React.createElement("div", {
-      key: plant.id,
-      onClick: function onClick() {
-        setSelectedCrop(selectedCrop === plant.id ? null : plant.id);
-      },
-      style: {
-        background: "#fffdf8",
-        border: "1px solid #ebe4d4",
-        borderRadius: 12,
-        boxShadow: "0 1px 3px rgba(63,92,58,0.06)",
-        padding: "11px 13px",
-        marginBottom: 8,
-        cursor: "pointer"
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        alignItems: "center",
-        gap: 10
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 22,
-        flexShrink: 0
-      }
-    }, plant.emoji), /*#__PURE__*/React.createElement("div", {
-      style: {
-        flex: 1,
-        minWidth: 0
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 14,
-        color: "#2d2a24",
-        fontWeight: "bold"
-      }
-    }, plant.name), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10,
-        color: DIM
-      }
-    }, tl.bed ? tl.bed.name : "Unknown area", "  \xB7  planted ", fmtSingle(tl.planted))), /*#__PURE__*/React.createElement(Tag, {
-      color: sc.color
-    }, sc.label), /*#__PURE__*/React.createElement("span", {
-      style: {
-        color: DIM,
-        fontSize: 11,
-        flexShrink: 0
-      }
-    }, selectedCrop === plant.id ? "▲" : "▼")), tl.progressPct !== null && /*#__PURE__*/React.createElement("div", {
-      style: {
-        marginTop: 8
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        justifyContent: "space-between",
-        marginBottom: 3
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 9,
-        color: DIM
-      }
-    }, "Day ", tl.daysSincePlanted, " of ~", tl.daysToHarvest), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 9,
-        color: "#d9a441"
-      }
-    }, tl.progressPct, "% to harvest")), /*#__PURE__*/React.createElement("div", {
-      style: {
-        height: 4,
-        background: "#ebe4d4",
-        borderRadius: 3
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        height: "100%",
-        borderRadius: 3,
-        background: "linear-gradient(90deg,#3f5c3a,#6b8463)",
-        width: tl.progressPct + "%",
-        transition: "width 0.5s"
-      }
-    })), tl.harvestEst && /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 9,
-        color: "#d9a441",
-        marginTop: 3
-      }
-    }, "Est. harvest: ", fmtSingle(tl.harvestEst))), selectedCrop === plant.id && /*#__PURE__*/React.createElement("div", {
-      style: {
-        marginTop: 10,
-        paddingTop: 10,
-        borderTop: "1px solid #f2ede0"
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10,
-        color: DIM,
-        textTransform: "uppercase",
-        letterSpacing: 1,
-        marginBottom: 6
-      }
-    }, "Crop Info"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        gap: 8,
-        flexWrap: "wrap",
-        marginBottom: 8
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        background: "#fffdf8",
-        borderRadius: 6,
-        padding: "4px 8px"
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 9,
-        color: DIM
-      }
-    }, "SPACING"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 11,
-        color: "#3a3529"
-      }
-    }, tl.crop.spacing)), /*#__PURE__*/React.createElement("div", {
-      style: {
-        background: "#fffdf8",
-        borderRadius: 6,
-        padding: "4px 8px"
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 9,
-        color: DIM
-      }
-    }, "LIGHT"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 11,
-        color: "#3a3529"
-      }
-    }, tl.crop.sunlight)), tl.crop.frostTender && /*#__PURE__*/React.createElement("div", {
-      style: {
-        background: "rgba(96,165,250,0.1)",
-        borderRadius: 6,
-        padding: "4px 8px"
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 11,
-        color: "#3b7ea1"
-      }
-    }, "\u2744\uFE0F Frost tender"))), /*#__PURE__*/React.createElement("div", {
-      style: {
-        background: "#fffdf8",
-        borderRadius: 8,
-        padding: "8px 10px"
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 9,
-        color: DIM,
-        marginBottom: 3
-      }
-    }, "TIP"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 11,
-        color: "#6b6354",
-        lineHeight: 1.6
-      }
-    }, tl.crop.tip)), plant.notes && /*#__PURE__*/React.createElement("div", {
-      style: {
-        marginTop: 8,
-        fontSize: 11,
-        color: "#9a9079",
-        fontStyle: "italic"
-      }
-    }, plant.notes)));
-  })), unlinkedPlants.length > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: DIM,
-      textTransform: "uppercase",
-      letterSpacing: 1,
-      marginBottom: 8
-    }
-  }, "Not linked to crop guide"), unlinkedPlants.map(function (plant) {
-    var bed = beds.find(function (b) {
-      return b.id === plant.bedId;
-    });
-    return /*#__PURE__*/React.createElement("div", {
-      key: plant.id,
-      style: {
-        background: "#fdfbf5",
-        border: "1px solid #fffdf8",
-        borderRadius: 10,
-        padding: "10px 13px",
-        marginBottom: 6,
-        display: "flex",
-        alignItems: "center",
-        gap: 10
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 20
-      }
-    }, plant.emoji), /*#__PURE__*/React.createElement("div", {
-      style: {
-        flex: 1
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 13,
-        color: "#3a3529"
-      }
-    }, plant.name), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10,
-        color: DIM
-      }
-    }, bed ? bed.name : "Unknown area")), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10,
-        color: DIM
-      }
-    }, "Edit plant \u2192 set crop type"));
-  }))), tab === "guide" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 5,
-      overflowX: "auto",
-      paddingBottom: 6,
-      marginBottom: 14
-    }
-  }, CATEGORIES.map(function (cat) {
-    return /*#__PURE__*/React.createElement("button", {
-      key: cat,
-      onClick: function onClick() {
-        setFilterCat(cat);
-      },
-      style: {
-        padding: "4px 10px",
-        borderRadius: 16,
-        border: "none",
-        cursor: "pointer",
-        fontSize: 10,
-        fontFamily: "inherit",
-        whiteSpace: "nowrap",
-        background: filterCat === cat ? "rgba(63,92,58,0.13)" : "#f7f3ea",
-        color: filterCat === cat ? G : DIM,
-        outline: filterCat === cat ? "1px solid rgba(63,92,58,0.32)" : "1px solid #ebe4d4",
-        transition: "all 0.15s"
-      }
-    }, cat);
-  })), active.length > 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 14
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: G,
-      textTransform: "uppercase",
-      letterSpacing: 1,
-      marginBottom: 8
-    }
-  }, "\uD83C\uDF31 Action needed now"), active.map(function (crop) {
-    return /*#__PURE__*/React.createElement(CropCard, {
-      key: crop.id,
-      crop: crop,
-      onSelect: function onSelect() {
-        setSelectedCrop(selectedCrop === crop.id ? null : crop.id);
-      },
-      expanded: selectedCrop === crop.id
-    });
-  })), upcoming.length > 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 14
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: "#d9a441",
-      textTransform: "uppercase",
-      letterSpacing: 1,
-      marginBottom: 8
-    }
-  }, "\u23F0 Coming up within 30 days"), upcoming.map(function (crop) {
-    return /*#__PURE__*/React.createElement(CropCard, {
-      key: crop.id,
-      crop: crop,
-      onSelect: function onSelect() {
-        setSelectedCrop(selectedCrop === crop.id ? null : crop.id);
-      },
-      expanded: selectedCrop === crop.id
-    });
-  })), rest.length > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("button", {
-    onClick: function onClick() {
-      setShowAll(function (s) {
-        return !s;
-      });
-    },
-    style: {
-      width: "100%",
-      padding: "8px 0",
-      background: "transparent",
-      border: "1px dashed #e7e0cf",
-      borderRadius: 8,
-      color: DIM,
-      fontSize: 11,
-      cursor: "pointer",
-      fontFamily: "inherit",
-      marginBottom: showAll ? 10 : 0
-    }
-  }, showAll ? "▲ Hide" : "▼ Show all " + rest.length + " crops"), showAll && rest.map(function (crop) {
-    return /*#__PURE__*/React.createElement(CropCard, {
-      key: crop.id,
-      crop: crop,
-      onSelect: function onSelect() {
-        setSelectedCrop(selectedCrop === crop.id ? null : crop.id);
-      },
-      expanded: selectedCrop === crop.id
-    });
-  }))));
+  }());
 }
 function CropCard(props) {
   var crop = props.crop;
@@ -5541,7 +5434,7 @@ function lookupZoneByZip(zip) {
 }
 function SettingsView(props) {
   var s = props.settings || {};
-  var _useState31 = useState({
+  var _useState29 = useState({
       gardenName: s.gardenName || "",
       location: s.location || "",
       zone: s.zone || "",
@@ -5549,21 +5442,77 @@ function SettingsView(props) {
       lastFrost: s.lastFrost || "05-15",
       firstFrost: s.firstFrost || "10-15"
     }),
+    _useState30 = _slicedToArray(_useState29, 2),
+    form = _useState30[0],
+    setForm = _useState30[1];
+  var _useState31 = useState(false),
     _useState32 = _slicedToArray(_useState31, 2),
-    form = _useState32[0],
-    setForm = _useState32[1];
-  var _useState33 = useState(false),
+    saved = _useState32[0],
+    setSaved = _useState32[1];
+  var _useState33 = useState(null),
     _useState34 = _slicedToArray(_useState33, 2),
-    saved = _useState34[0],
-    setSaved = _useState34[1];
-  var _useState35 = useState(null),
+    zoneStatus = _useState34[0],
+    setZoneStatus = _useState34[1];
+  var _useState35 = useState(""),
     _useState36 = _slicedToArray(_useState35, 2),
-    zoneStatus = _useState36[0],
-    setZoneStatus = _useState36[1];
+    zoneMsg = _useState36[0],
+    setZoneMsg = _useState36[1];
   var _useState37 = useState(""),
     _useState38 = _slicedToArray(_useState37, 2),
-    zoneMsg = _useState38[0],
-    setZoneMsg = _useState38[1];
+    backupMsg = _useState38[0],
+    setBackupMsg = _useState38[1];
+  var _useState39 = useState(false),
+    _useState40 = _slicedToArray(_useState39, 2),
+    importOpen = _useState40[0],
+    setImportOpen = _useState40[1];
+  var _useState41 = useState(""),
+    _useState42 = _slicedToArray(_useState41, 2),
+    importText = _useState42[0],
+    setImportText = _useState42[1];
+  var copyRef = useRef(null);
+  function doExport() {
+    var txt = props.onExport ? props.onExport() : "";
+    // Try clipboard first; fall back to showing the text to copy manually
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(function () {
+        setBackupMsg("✓ Backup copied to clipboard - paste it somewhere safe (Notes, email).");
+        setTimeout(function () {
+          setBackupMsg("");
+        }, 6000);
+      }).catch(function () {
+        if (copyRef.current) {
+          copyRef.current.value = txt;
+          copyRef.current.style.display = "block";
+          copyRef.current.select();
+        }
+        setBackupMsg("Select all the text below and copy it to save your backup.");
+      });
+    } else {
+      if (copyRef.current) {
+        copyRef.current.value = txt;
+        copyRef.current.style.display = "block";
+        copyRef.current.select();
+      }
+      setBackupMsg("Select all the text below and copy it to save your backup.");
+    }
+  }
+  function doImport() {
+    if (!importText.trim()) {
+      setBackupMsg("Paste your backup text first.");
+      return;
+    }
+    var ok = props.onImport ? props.onImport(importText.trim()) : false;
+    if (ok) {
+      setBackupMsg("✓ Backup restored successfully.");
+      setImportOpen(false);
+      setImportText("");
+    } else {
+      setBackupMsg("⚠ That doesn't look like a valid Tendril backup.");
+    }
+    setTimeout(function () {
+      setBackupMsg("");
+    }, 6000);
+  }
   function upd(k, v) {
     setForm(function (p) {
       return Object.assign({}, p, _defineProperty({}, k, v));
@@ -5766,9 +5715,138 @@ function SettingsView(props) {
     }
   }, saved ? "✓ Saved!" : "Save Settings"), /*#__PURE__*/React.createElement("div", {
     style: {
+      marginTop: 20,
+      background: "#fffdf8",
+      border: "1px solid #ebe4d4",
+      borderRadius: 14,
+      padding: "16px 14px",
+      boxShadow: "0 1px 3px rgba(63,92,58,0.06)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: G,
+      fontWeight: "600",
+      marginBottom: 2
+    }
+  }, "Backup & Restore"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: DIM,
+      marginBottom: 12,
+      lineHeight: 1.5
+    }
+  }, "Your garden is saved on this device only. Back it up before switching phones or clearing Safari."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: doExport,
+    style: {
+      flex: 1,
+      padding: "11px 0",
+      background: "#f5f1e8",
+      border: "1px solid #e3dcc9",
+      borderRadius: 11,
+      color: INK,
+      fontSize: 13,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontWeight: "500"
+    }
+  }, "\u2B06 Back Up"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      setImportOpen(!importOpen);
+      setBackupMsg("");
+    },
+    style: {
+      flex: 1,
+      padding: "11px 0",
+      background: "#f5f1e8",
+      border: "1px solid #e3dcc9",
+      borderRadius: 11,
+      color: INK,
+      fontSize: 13,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontWeight: "500"
+    }
+  }, "\u2B07 Restore")), /*#__PURE__*/React.createElement("textarea", {
+    ref: copyRef,
+    readOnly: true,
+    style: {
+      display: "none",
+      width: "100%",
+      height: 80,
+      marginTop: 10,
+      padding: "8px 10px",
+      background: "#f5f1e8",
+      border: "1px solid #e3dcc9",
+      borderRadius: 10,
+      color: INK,
+      fontSize: 10,
+      fontFamily: "monospace",
+      boxSizing: "border-box",
+      resize: "none"
+    }
+  }), importOpen && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10
+    }
+  }, /*#__PURE__*/React.createElement("textarea", {
+    value: importText,
+    onChange: function onChange(e) {
+      setImportText(e.target.value);
+    },
+    placeholder: "Paste your backup text here...",
+    style: {
+      width: "100%",
+      height: 80,
+      padding: "8px 10px",
+      background: "#fffdf8",
+      border: "1px solid #e3dcc9",
+      borderRadius: 10,
+      color: INK,
+      fontSize: 11,
+      fontFamily: "monospace",
+      boxSizing: "border-box",
+      resize: "none"
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: doImport,
+    style: {
+      width: "100%",
+      marginTop: 8,
+      padding: "10px 0",
+      background: "linear-gradient(135deg,#4a6b44,#34502f)",
+      border: "none",
+      borderRadius: 11,
+      color: "#fdfbf2",
+      fontSize: 13,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontWeight: "600"
+    }
+  }, "Restore This Backup"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "#c0524a",
+      marginTop: 6,
+      textAlign: "center"
+    }
+  }, "Restoring replaces everything currently in the app.")), backupMsg && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: backupMsg.indexOf("✓") === 0 ? "#4f7a4a" : backupMsg.indexOf("⚠") === 0 ? "#c0524a" : DIM,
+      marginTop: 10,
+      lineHeight: 1.5
+    }
+  }, backupMsg)), /*#__PURE__*/React.createElement("div", {
+    style: {
       marginTop: 24,
       paddingTop: 16,
-      borderTop: "1px solid #fffdf8"
+      borderTop: "1px solid #ebe4d4"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -5779,36 +5857,65 @@ function SettingsView(props) {
   }, "All data stored locally on this device")));
 }
 function GardenApp() {
-  var _useState39 = useState(function () {
+  var _useState43 = useState(function () {
       return loadData();
     }),
-    _useState40 = _slicedToArray(_useState39, 2),
-    data = _useState40[0],
-    setData = _useState40[1];
-  var _useState41 = useState("dashboard"),
-    _useState42 = _slicedToArray(_useState41, 2),
-    view = _useState42[0],
-    setView = _useState42[1];
-  var _useState43 = useState(null),
     _useState44 = _slicedToArray(_useState43, 2),
-    modal = _useState44[0],
-    setModal = _useState44[1];
-  var _useState45 = useState(null),
+    data = _useState44[0],
+    setData = _useState44[1];
+  var _useState45 = useState("dashboard"),
     _useState46 = _slicedToArray(_useState45, 2),
-    expandedBed = _useState46[0],
-    setExpandedBed = _useState46[1];
-  var _useState47 = useState("all"),
+    view = _useState46[0],
+    setView = _useState46[1];
+  var _useState47 = useState(null),
     _useState48 = _slicedToArray(_useState47, 2),
-    areaFilter = _useState48[0],
-    setAreaFilter = _useState48[1];
-  var _useState49 = useState(CURRENT_MONTH),
+    modal = _useState48[0],
+    setModal = _useState48[1];
+  var _useState49 = useState(null),
     _useState50 = _slicedToArray(_useState49, 2),
-    selMonth = _useState50[0],
-    setSelMonth = _useState50[1];
-  var _useState51 = useState(null),
+    expandedBed = _useState50[0],
+    setExpandedBed = _useState50[1];
+  var _useState51 = useState("all"),
     _useState52 = _slicedToArray(_useState51, 2),
-    plantDetail = _useState52[0],
-    setPlantDetail = _useState52[1];
+    areaFilter = _useState52[0],
+    setAreaFilter = _useState52[1];
+  var _useState53 = useState(""),
+    _useState54 = _slicedToArray(_useState53, 2),
+    plantSearch = _useState54[0],
+    setPlantSearch = _useState54[1];
+  var _useState55 = useState("tasks"),
+    _useState56 = _slicedToArray(_useState55, 2),
+    calTab = _useState56[0],
+    setCalTab = _useState56[1];
+  var _useState57 = useState("journal"),
+    _useState58 = _slicedToArray(_useState57, 2),
+    moreTab = _useState58[0],
+    setMoreTab = _useState58[1];
+  var _useState59 = useState(null),
+    _useState60 = _slicedToArray(_useState59, 2),
+    toast = _useState60[0],
+    setToast = _useState60[1];
+  var _useState61 = useState(false),
+    _useState62 = _slicedToArray(_useState61, 2),
+    freshArmed = _useState62[0],
+    setFreshArmed = _useState62[1];
+  useEffect(function () {
+    if (!toast) return;
+    var t = setTimeout(function () {
+      setToast(null);
+    }, 2200);
+    return function () {
+      clearTimeout(t);
+    };
+  }, [toast]);
+  var _useState63 = useState(CURRENT_MONTH),
+    _useState64 = _slicedToArray(_useState63, 2),
+    selMonth = _useState64[0],
+    setSelMonth = _useState64[1];
+  var _useState65 = useState(null),
+    _useState66 = _slicedToArray(_useState65, 2),
+    plantDetail = _useState66[0],
+    setPlantDetail = _useState66[1];
   useEffect(function () {
     saveData(data);
   }, [data]);
@@ -5822,6 +5929,41 @@ function GardenApp() {
     setData(function (d) {
       return Object.assign({}, d, _defineProperty({}, k, v));
     });
+  }
+  function exportData() {
+    return JSON.stringify(data);
+  }
+  function confirmStartFresh() {
+    var empty = {
+      beds: [],
+      plants: [],
+      chemicals: [],
+      tasks: [],
+      harvests: [],
+      journal: [],
+      settings: Object.assign({}, settings, {
+        welcomed: true
+      })
+    };
+    setData(empty);
+    setToast("Started fresh - your garden is now empty");
+    return true;
+  }
+  function importData(text) {
+    try {
+      var parsed = JSON.parse(text);
+      if (!parsed || _typeof(parsed) !== "object") return false;
+      // Basic shape check - must have at least one known array
+      if (!Array.isArray(parsed.plants) && !Array.isArray(parsed.beds)) return false;
+      ["beds", "plants", "tasks", "chemicals", "harvests", "journal"].forEach(function (key) {
+        if (!Array.isArray(parsed[key])) parsed[key] = [];
+      });
+      if (!parsed.settings) parsed.settings = Object.assign({}, DEFAULT_DATA.settings);
+      setData(parsed);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
   function saveBed(b) {
     upd("beds", b.id ? beds.map(function (x) {
@@ -5874,6 +6016,10 @@ function GardenApp() {
         lastApplied: TODAY_STR
       }) : c;
     }));
+    var c = chemicals.find(function (x) {
+      return x.id === id;
+    });
+    setToast(c ? "✓ " + c.name + " applied today" : "✓ Applied today");
   }
   function saveTask(t) {
     upd("tasks", t.id ? tasks.map(function (x) {
@@ -5891,18 +6037,46 @@ function GardenApp() {
   }
   function toggleTask(id) {
     upd("tasks", tasks.map(function (t) {
-      return t.id === id ? Object.assign({}, t, {
-        done: !t.done
-      }) : t;
+      if (t.id !== id) return t;
+      // Year-aware: done this year toggles off; otherwise mark done this year (and clear skip)
+      var isDoneThisYear = t.doneYear === YEAR;
+      return Object.assign({}, t, {
+        doneYear: isDoneThisYear ? null : YEAR,
+        skipYear: null,
+        done: !isDoneThisYear
+      });
     }));
   }
+  function skipTaskThisYear(id) {
+    upd("tasks", tasks.map(function (t) {
+      if (t.id !== id) return t;
+      var isSkipped = t.skipYear === YEAR;
+      return Object.assign({}, t, {
+        skipYear: isSkipped ? null : YEAR,
+        doneYear: null,
+        done: false
+      });
+    }));
+  }
+  // Status helpers for the current year
+  function taskDoneNow(t) {
+    return t.doneYear === YEAR;
+  }
+  function taskSkippedNow(t) {
+    return t.skipYear === YEAR;
+  }
+  function taskOpenNow(t) {
+    return t.doneYear !== YEAR && t.skipYear !== YEAR;
+  }
   function saveHarvest(h) {
+    var isNew = !h.id;
     upd("harvests", h.id ? harvests.map(function (x) {
       return x.id === h.id ? h : x;
     }) : harvests.concat([Object.assign({}, h, {
       id: uid()
     })]));
     setModal(null);
+    if (isNew) setToast("✓ Harvest logged");
   }
   function delHarvest(id) {
     upd("harvests", harvests.filter(function (h) {
@@ -5911,12 +6085,14 @@ function GardenApp() {
     setModal(null);
   }
   function saveJournal(j) {
+    var isNew = !j.id;
     upd("journal", j.id ? journal.map(function (x) {
       return x.id === j.id ? j : x;
     }) : journal.concat([Object.assign({}, j, {
       id: uid()
     })]));
     setModal(null);
+    if (isNew) setToast("✓ Note added");
   }
   function delJournal(id) {
     upd("journal", journal.filter(function (j) {
@@ -6027,12 +6203,45 @@ function GardenApp() {
   var curTasks = tasks.filter(function (t) {
     return t.month === CURRENT_MONTH;
   });
-  var openCur = curTasks.filter(function (t) {
-    return !t.done;
+  var openCur = curTasks.filter(taskOpenNow);
+  var doneCur = curTasks.filter(taskDoneNow);
+
+  // Plants currently in bloom (this month)
+  var bloomingNowList = plants.filter(function (p) {
+    return p.bloom && p.bloom !== "none" && bloomMonths(p.bloom).indexOf(CURRENT_MONTH) !== -1;
   });
-  var doneCur = curTasks.filter(function (t) {
-    return t.done;
+  // Plants that start blooming next month (coming soon)
+  var nextMonth = CURRENT_MONTH === 12 ? 1 : CURRENT_MONTH + 1;
+  var bloomingSoonList = plants.filter(function (p) {
+    if (!p.bloom || p.bloom === "none") return false;
+    var m = bloomMonths(p.bloom);
+    return m.indexOf(CURRENT_MONTH) === -1 && m.indexOf(nextMonth) !== -1;
   });
+
+  // A single contextual "tip of the day" - rotates through the most relevant thing
+  function buildTip() {
+    if (dueChem.length > 0) return {
+      icon: "💧",
+      text: dueChem.length === 1 ? dueChem[0].name + " is due for application." : dueChem.length + " inputs are overdue for application."
+    };
+    if (openCur.length > 0) return {
+      icon: "🗓",
+      text: "You have " + openCur.length + " " + MONTHS_L[CURRENT_MONTH - 1] + " task" + (openCur.length > 1 ? "s" : "") + " to tackle."
+    };
+    if (bloomingSoonList.length > 0) return {
+      icon: "🌸",
+      text: bloomingSoonList[0].name + (bloomingSoonList.length > 1 ? " and others" : "") + " will start blooming next month."
+    };
+    if (bloomingNowList.length > 0) return {
+      icon: "🌼",
+      text: bloomingNowList.length + " plant" + (bloomingNowList.length > 1 ? "s are" : " is") + " in bloom right now - enjoy the color."
+    };
+    return {
+      icon: "🌿",
+      text: "Your garden is all caught up. Nice work."
+    };
+  }
+  var todayTip = buildTip();
   var settings = data.settings || {};
   var gardenName = settings.gardenName || "Tendril";
   var locationLine = [settings.location, settings.zone ? "Zone " + settings.zone : ""].filter(Boolean).join("  ·  ");
@@ -6040,32 +6249,24 @@ function GardenApp() {
   var irrigLabel = settings.irrigationLabel ? "💧 " + settings.irrigationLabel : "💧 Auto";
   var NAV_TABS = [{
     key: "dashboard",
-    icon: "⬡",
-    label: "Home"
+    icon: "☀️",
+    label: "Today"
   }, {
     key: "beds",
     icon: "🪴",
-    label: "Areas"
+    label: "Garden"
   }, {
-    key: "planner",
-    icon: "🌱",
-    label: "Planner"
+    key: "calendar",
+    icon: "🗓",
+    label: "Calendar"
   }, {
     key: "chemicals",
     icon: "🧪",
     label: "Inputs"
   }, {
-    key: "journal",
-    icon: "📓",
-    label: "Journal"
-  }, {
-    key: "tasks",
-    icon: "🗓",
-    label: "Cal"
-  }, {
-    key: "settings",
-    icon: "⚙️",
-    label: "Settings"
+    key: "more",
+    icon: "•••",
+    label: "More"
   }];
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -6182,13 +6383,84 @@ function GardenApp() {
       paddingBottom: 40
     },
     className: "fade-up"
-  }, view === "dashboard" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, view === "dashboard" && /*#__PURE__*/React.createElement("div", null, !settings.welcomed && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#fffdf8",
+      border: "1px solid #d8e0d2",
+      borderRadius: 16,
+      padding: "16px 16px 14px",
+      marginBottom: 16,
+      boxShadow: "0 2px 8px rgba(63,92,58,0.08)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "serif",
+    style: {
+      fontSize: 18,
+      color: INK,
+      fontWeight: "600",
+      marginBottom: 5
+    }
+  }, "Welcome to Tendril \uD83C\uDF3F"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      color: INK2,
+      lineHeight: 1.5,
+      marginBottom: 12
+    }
+  }, "Your garden comes pre-loaded with sample plants and seasonal tasks so you can explore right away. Edit or delete anything to make it yours  -  or clear it all and start fresh."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      upd("settings", Object.assign({}, settings, {
+        welcomed: true
+      }));
+    },
+    style: {
+      flex: 1,
+      padding: "10px 0",
+      background: "linear-gradient(135deg,#4a6b44,#34502f)",
+      border: "none",
+      borderRadius: 11,
+      color: "#fdfbf2",
+      fontSize: 13,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontWeight: "600"
+    }
+  }, "Start exploring"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      if (freshArmed) {
+        confirmStartFresh();
+        setFreshArmed(false);
+      } else {
+        setFreshArmed(true);
+        setTimeout(function () {
+          setFreshArmed(false);
+        }, 3000);
+      }
+    },
+    style: {
+      flex: 1,
+      padding: "10px 0",
+      background: freshArmed ? "#c0524a" : "#f5f1e8",
+      border: freshArmed ? "1px solid #c0524a" : "1px solid #e3dcc9",
+      borderRadius: 11,
+      color: freshArmed ? "#fff" : INK,
+      fontSize: 13,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontWeight: freshArmed ? "600" : "500"
+    }
+  }, freshArmed ? "Tap to confirm" : "Start fresh"))), /*#__PURE__*/React.createElement("div", {
     style: {
       position: "relative",
       borderRadius: 18,
       overflow: "hidden",
-      marginBottom: 14,
-      height: 150,
+      marginBottom: 16,
+      height: 120,
       boxShadow: "0 6px 20px rgba(63,92,58,0.18)"
     }
   }, /*#__PURE__*/React.createElement("img", {
@@ -6207,158 +6479,91 @@ function GardenApp() {
     style: {
       position: "absolute",
       inset: 0,
-      background: "linear-gradient(180deg,rgba(20,30,18,0.05) 0%,rgba(20,30,18,0.55) 100%)"
+      background: "linear-gradient(180deg,rgba(20,30,18,0.1) 0%,rgba(20,30,18,0.6) 100%)"
     }
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       position: "absolute",
       left: 16,
       right: 16,
-      bottom: 13
+      bottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "rgba(255,255,255,0.85)",
+      fontWeight: "600",
+      letterSpacing: "1px",
+      textTransform: "uppercase",
+      textShadow: "0 1px 6px rgba(0,0,0,0.3)"
+    }
+  }, TODAY.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "serif",
+    style: {
+      fontSize: 22,
+      fontWeight: "600",
+      color: "#fff",
+      letterSpacing: "-0.3px",
+      lineHeight: 1.1,
+      textShadow: "0 1px 8px rgba(0,0,0,0.35)"
+    }
+  }, (ZONE7A_ADVISORIES[CURRENT_MONTH] || {}).season || gardenName))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 12,
+      background: "linear-gradient(135deg,#3f5c3a,#2f4a2b)",
+      borderRadius: 16,
+      padding: "15px 17px",
+      marginBottom: 16,
+      boxShadow: "0 4px 14px rgba(63,92,58,0.22)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 24,
+      flexShrink: 0
+    }
+  }, todayTip.icon), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      color: "#f3ecd9",
+      lineHeight: 1.4,
+      fontWeight: "500"
+    }
+  }, todayTip.text)), /*#__PURE__*/React.createElement(WeatherWidget, {
+    settings: settings
+  }), (dueChem.length > 0 || soonChem.length > 0) && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 18
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "serif",
     style: {
-      fontSize: 24,
+      fontSize: 16,
+      color: INK,
       fontWeight: "600",
-      color: "#fff",
-      letterSpacing: "-0.4px",
-      lineHeight: 1.05,
-      textShadow: "0 1px 8px rgba(0,0,0,0.3)"
+      marginBottom: 9
     }
-  }, gardenName), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: "rgba(255,255,255,0.92)",
-      marginTop: 2,
-      fontWeight: "500",
-      textShadow: "0 1px 6px rgba(0,0,0,0.3)"
-    }
-  }, (ZONE7A_ADVISORIES[CURRENT_MONTH] || {}).season || "", locationLine ? "  ·  " + locationLine : ""))), /*#__PURE__*/React.createElement(WeatherWidget, {
-    settings: settings
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr 1fr 1fr",
-      gap: 8,
-      margin: "4px 0 16px"
-    }
-  }, [{
-    label: "Areas",
-    val: beds.length,
-    icon: "🪴",
-    color: "#3b7ea1"
-  }, {
-    label: "Plants",
-    val: plants.length,
-    icon: "🌱",
-    color: "#3f5c3a"
-  }, {
-    label: "Inputs",
-    val: chemicals.filter(function (c) {
-      return c.active;
-    }).length,
-    icon: "🧪",
-    color: "#9d6bc4"
-  }, {
-    label: "Harvests",
-    val: harvests.length,
-    icon: "🌾",
-    color: "#d9a441"
-  }].map(function (stat) {
-    return /*#__PURE__*/React.createElement("div", {
-      key: stat.label,
-      style: _defineProperty({
-        background: "#fffdf8",
-        border: "1px solid #ece5d5",
-        borderRadius: 14,
-        boxShadow: "0 1px 3px rgba(63,92,58,0.06)",
-        padding: "11px 6px",
-        textAlign: "center"
-      }, "boxShadow", "0 1px 3px rgba(63,92,58,0.06)")
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 17
-      }
-    }, stat.icon), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 21,
-        fontWeight: "700",
-        color: stat.color,
-        lineHeight: 1.1
-      }
-    }, stat.val), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 8,
-        color: DIM,
-        letterSpacing: 1,
-        textTransform: "uppercase",
-        fontWeight: "600"
-      }
-    }, stat.label));
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "#fffdf8",
-      border: "1px solid #f2ede0",
-      borderRadius: 12,
-      padding: "12px 14px",
-      marginBottom: 12
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 7
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 13,
-      color: "#3f5c3a"
-    }
-  }, "\uD83D\uDCCB ", MONTHS_L[CURRENT_MONTH - 1], " Tasks"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      color: "#d9a441"
-    }
-  }, doneCur.length, " / ", curTasks.length, " done")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      height: 5,
-      background: "#ebe4d4",
-      borderRadius: 3
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      height: "100%",
-      borderRadius: 3,
-      background: "linear-gradient(90deg,#3f5c3a,#5a7355)",
-      width: (curTasks.length ? Math.round(doneCur.length / curTasks.length * 100) : 0) + "%",
-      transition: "width 0.5s"
-    }
-  }))), (dueChem.length > 0 || soonChem.length > 0) && /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 12
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: "#c0524a",
-      marginBottom: 7
-    }
-  }, "\u26A0\uFE0F Chemical / Fertilizer Alerts"), dueChem.concat(soonChem).map(function (c) {
+  }, "Needs Attention"), dueChem.concat(soonChem).map(function (c) {
     var over = isDue(c.lastApplied, c.interval);
     var dl = daysLeft(c.lastApplied, c.interval);
     return /*#__PURE__*/React.createElement("div", {
       key: c.id,
       style: {
-        background: over ? "rgba(248,113,113,0.08)" : "rgba(251,191,36,0.07)",
-        border: "1px solid " + (over ? "rgba(248,113,113,0.22)" : "rgba(251,191,36,0.2)"),
-        borderRadius: 10,
-        padding: "10px 12px",
-        marginBottom: 7,
+        background: "#fffdf8",
+        border: "1px solid " + (over ? "#e8c5bf" : "#ece5d5"),
+        borderLeft: "3px solid " + (over ? "#c0524a" : "#d9a441"),
+        borderRadius: 12,
+        padding: "11px 13px",
+        marginBottom: 8,
         display: "flex",
         alignItems: "center",
-        gap: 10
+        gap: 10,
+        boxShadow: "0 1px 3px rgba(63,92,58,0.06)"
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
@@ -6366,137 +6571,159 @@ function GardenApp() {
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 13,
-        color: "#2d2a24"
+        fontSize: 14,
+        color: INK,
+        fontWeight: "500"
       }
     }, c.name), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 11,
-        color: over ? "#c0524a" : "#d9a441"
+        fontSize: 11.5,
+        color: over ? "#c0524a" : "#bb8a2e",
+        marginTop: 1
       }
-    }, !c.lastApplied ? "Never applied" : over ? "Overdue " + Math.abs(dl) + "d" : "Due in " + dl + "d", /*#__PURE__*/React.createElement("span", {
-      style: {
-        color: DIM
-      }
-    }, "  \xB7  ", c.target))), /*#__PURE__*/React.createElement("button", {
+    }, !c.lastApplied ? "Never applied" : over ? "Overdue by " + Math.abs(dl) + " days" : "Due in " + dl + " days")), /*#__PURE__*/React.createElement("button", {
       onClick: function onClick() {
         markApplied(c.id);
       },
       style: {
-        background: "rgba(63,92,58,0.1)",
-        border: "1px solid rgba(63,92,58,0.25)",
-        borderRadius: 7,
-        color: G,
-        padding: "5px 10px",
-        fontSize: 11,
+        background: "linear-gradient(135deg,#4a6b44,#3a5530)",
+        border: "none",
+        borderRadius: 9,
+        color: "#fdfbf2",
+        padding: "7px 14px",
+        fontSize: 12,
         cursor: "pointer",
         fontFamily: "inherit",
+        fontWeight: "600",
         whiteSpace: "nowrap",
         flexShrink: 0
       }
     }, "Done"));
   })), openCur.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
-      marginBottom: 12
+      marginBottom: 18
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 11,
-      color: "#3f5c3a",
-      marginBottom: 7
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "baseline",
+      marginBottom: 9
     }
-  }, "\uD83D\uDDD3 Open Tasks This Month"), openCur.slice(0, 4).map(function (t) {
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "serif",
+    style: {
+      fontSize: 16,
+      color: INK,
+      fontWeight: "600"
+    }
+  }, MONTHS_L[CURRENT_MONTH - 1], " Tasks"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: DIM,
+      fontWeight: "500"
+    }
+  }, doneCur.length, "/", curTasks.length, " done")), openCur.slice(0, 5).map(function (t) {
     return /*#__PURE__*/React.createElement("div", {
       key: t.id,
       style: {
-        background: "#fdfbf5",
-        border: "1px solid #fffdf8",
-        borderRadius: 10,
-        padding: "9px 12px",
-        marginBottom: 6,
+        background: "#fffdf8",
+        border: "1px solid #ece5d5",
+        borderRadius: 12,
+        padding: "11px 13px",
+        marginBottom: 8,
         display: "flex",
         alignItems: "center",
-        gap: 9
+        gap: 11,
+        boxShadow: "0 1px 3px rgba(63,92,58,0.06)"
       }
     }, /*#__PURE__*/React.createElement("button", {
       onClick: function onClick() {
         toggleTask(t.id);
       },
       style: {
-        width: 18,
-        height: 18,
-        borderRadius: 4,
-        border: "1.5px solid rgba(63,92,58,0.4)",
+        width: 20,
+        height: 20,
+        borderRadius: 6,
+        border: "1.5px solid #c3bba4",
         background: "transparent",
         cursor: "pointer",
         flexShrink: 0
       }
     }), /*#__PURE__*/React.createElement("div", {
       style: {
-        flex: 1
+        flex: 1,
+        fontSize: 13.5,
+        color: INK
       }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 13,
-        color: "#2d2a24"
-      }
-    }, t.title)), /*#__PURE__*/React.createElement(Tag, {
+    }, t.title), /*#__PURE__*/React.createElement(Tag, {
       color: TASK_COLORS[t.category] || "#9a9079"
     }, t.category));
-  })), harvests.length > 0 && /*#__PURE__*/React.createElement("div", {
+  }), openCur.length > 5 && /*#__PURE__*/React.createElement("div", {
+    onClick: function onClick() {
+      setView("calendar");
+      setCalTab("tasks");
+    },
     style: {
-      marginBottom: 12
+      textAlign: "center",
+      fontSize: 12,
+      color: G,
+      padding: "8px 0",
+      cursor: "pointer",
+      fontWeight: "600"
+    }
+  }, "View all ", openCur.length, " tasks \u2192")), bloomingNowList.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 18
     }
   }, /*#__PURE__*/React.createElement("div", {
+    className: "serif",
     style: {
-      fontSize: 11,
-      color: "#d9a441",
-      marginBottom: 7
+      fontSize: 16,
+      color: INK,
+      fontWeight: "600",
+      marginBottom: 9
     }
-  }, "\uD83C\uDF3E Recent Harvests"), harvests.slice().sort(function (a, b) {
-    return b.date.localeCompare(a.date);
-  }).slice(0, 4).map(function (h) {
-    var p = plants.find(function (pl) {
-      return pl.id === h.plantId;
-    });
+  }, "In Bloom Now"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      flexWrap: "wrap"
+    }
+  }, bloomingNowList.slice(0, 8).map(function (p) {
     return /*#__PURE__*/React.createElement("div", {
-      key: h.id,
+      key: p.id,
+      onClick: function onClick() {
+        setView("beds");
+        setExpandedBed(p.bedId);
+      },
       style: {
         display: "flex",
         alignItems: "center",
-        gap: 9,
-        padding: "7px 0",
-        borderBottom: "1px solid #f7f3ea"
+        gap: 6,
+        background: "#fffdf8",
+        border: "1px solid #ece5d5",
+        borderRadius: 20,
+        padding: "6px 12px 6px 8px",
+        cursor: "pointer",
+        boxShadow: "0 1px 2px rgba(63,92,58,0.05)"
       }
     }, /*#__PURE__*/React.createElement("span", {
       style: {
-        fontSize: 18
+        fontSize: 15
       }
-    }, p ? p.emoji : "🌱"), /*#__PURE__*/React.createElement("div", {
+    }, p.emoji), /*#__PURE__*/React.createElement("span", {
       style: {
-        flex: 1
+        fontSize: 12,
+        color: INK,
+        fontWeight: "500"
       }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 13,
-        color: "#2d2a24"
-      }
-    }, p ? p.name : "Unknown"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 11,
-        color: DIM
-      }
-    }, fmtDateShort(h.date))), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 13,
-        color: "#d9a441",
-        fontWeight: "bold"
-      }
-    }, h.amount, " ", h.unit));
-  })), /*#__PURE__*/React.createElement("div", {
+    }, p.name));
+  }))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
-      gap: 8
+      gap: 8,
+      marginTop: 4
     }
   }, /*#__PURE__*/React.createElement("button", {
     onClick: function onClick() {
@@ -6507,16 +6734,18 @@ function GardenApp() {
     },
     style: {
       flex: 1,
-      padding: "10px 0",
-      background: "rgba(251,191,36,0.12)",
-      border: "1px solid rgba(251,191,36,0.28)",
-      borderRadius: 10,
-      color: "#d9a441",
-      fontSize: 12,
+      padding: "12px 0",
+      background: "#fffdf8",
+      border: "1px solid #ece5d5",
+      borderRadius: 12,
+      color: INK,
+      fontSize: 13,
       cursor: "pointer",
-      fontFamily: "inherit"
+      fontFamily: "inherit",
+      fontWeight: "500",
+      boxShadow: "0 1px 3px rgba(63,92,58,0.06)"
     }
-  }, "\uD83C\uDF3E Harvest"), /*#__PURE__*/React.createElement("button", {
+  }, "\uD83C\uDF3E Log Harvest"), /*#__PURE__*/React.createElement("button", {
     onClick: function onClick() {
       setModal({
         type: "journal",
@@ -6525,60 +6754,18 @@ function GardenApp() {
     },
     style: {
       flex: 1,
-      padding: "10px 0",
-      background: "rgba(96,165,250,0.1)",
-      border: "1px solid rgba(96,165,250,0.25)",
-      borderRadius: 10,
-      color: "#3b7ea1",
-      fontSize: 12,
+      padding: "12px 0",
+      background: "#fffdf8",
+      border: "1px solid #ece5d5",
+      borderRadius: 12,
+      color: INK,
+      fontSize: 13,
       cursor: "pointer",
-      fontFamily: "inherit"
+      fontFamily: "inherit",
+      fontWeight: "500",
+      boxShadow: "0 1px 3px rgba(63,92,58,0.06)"
     }
-  }, "\uD83D\uDCDD Note")), suggestedTasks.length > 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 14
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: "#3f5c3a",
-      marginBottom: 7
-    }
-  }, "\uD83D\uDCA1 Suggested for your plants"), suggestedTasks.map(function (task, i) {
-    return /*#__PURE__*/React.createElement("div", {
-      key: i,
-      style: {
-        background: "#fdfbf5",
-        border: "1px solid #fffdf8",
-        borderRadius: 10,
-        padding: "9px 12px",
-        marginBottom: 6,
-        display: "flex",
-        alignItems: "center",
-        gap: 9
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 16,
-        flexShrink: 0
-      }
-    }, task.icon), /*#__PURE__*/React.createElement("div", {
-      style: {
-        flex: 1,
-        fontSize: 12,
-        color: "#3a3529",
-        lineHeight: 1.4
-      }
-    }, task.text), /*#__PURE__*/React.createElement("div", {
-      style: {
-        width: 6,
-        height: 6,
-        borderRadius: "50%",
-        background: task.color,
-        flexShrink: 0
-      }
-    }));
-  }))), view === "beds" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, "\uD83D\uDCDD Add Note"))), view === "beds" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
@@ -6616,7 +6803,7 @@ function GardenApp() {
     style: {
       display: "flex",
       gap: 6,
-      marginBottom: 14
+      marginBottom: 12
     }
   }, [{
     k: "all",
@@ -6648,7 +6835,116 @@ function GardenApp() {
         boxShadow: on ? "0 2px 6px rgba(63,92,58,0.18)" : "none"
       }
     }, f.label);
-  })), beds.filter(function (bed) {
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative",
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      position: "absolute",
+      left: 12,
+      top: "50%",
+      transform: "translateY(-50%)",
+      fontSize: 13,
+      color: DIM
+    }
+  }, "\uD83D\uDD0D"), /*#__PURE__*/React.createElement("input", {
+    value: plantSearch,
+    onChange: function onChange(e) {
+      setPlantSearch(e.target.value);
+    },
+    placeholder: "Search plants...",
+    style: {
+      width: "100%",
+      padding: "10px 12px 10px 34px",
+      background: "#fffdf8",
+      border: "1px solid #e3dcc9",
+      borderRadius: 11,
+      color: INK,
+      fontSize: 13,
+      fontFamily: "inherit",
+      boxSizing: "border-box"
+    }
+  }), plantSearch && /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      setPlantSearch("");
+    },
+    style: {
+      position: "absolute",
+      right: 8,
+      top: "50%",
+      transform: "translateY(-50%)",
+      background: "#f0ebde",
+      border: "none",
+      borderRadius: 8,
+      width: 24,
+      height: 24,
+      cursor: "pointer",
+      color: DIM,
+      fontSize: 12
+    }
+  }, "\u2715")), plantSearch.trim() ? function () {
+    var q = plantSearch.trim().toLowerCase();
+    var matches = plants.filter(function (p) {
+      return (p.name || "").toLowerCase().indexOf(q) !== -1 || (p.category || "").toLowerCase().indexOf(q) !== -1;
+    });
+    if (matches.length === 0) return /*#__PURE__*/React.createElement("div", {
+      style: {
+        textAlign: "center",
+        padding: "40px 0",
+        color: DIM,
+        fontSize: 13
+      }
+    }, "No plants match \"", plantSearch, "\"");
+    return matches.map(function (p) {
+      var bed = beds.find(function (b) {
+        return b.id === p.bedId;
+      });
+      return /*#__PURE__*/React.createElement("div", {
+        key: p.id,
+        onClick: function onClick() {
+          setPlantDetail(p);
+        },
+        style: {
+          background: "#fffdf8",
+          border: "1px solid #ece5d5",
+          borderRadius: 12,
+          padding: "11px 13px",
+          marginBottom: 8,
+          display: "flex",
+          alignItems: "center",
+          gap: 11,
+          cursor: "pointer",
+          boxShadow: "0 1px 3px rgba(63,92,58,0.06)"
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 22,
+          flexShrink: 0
+        }
+      }, p.emoji), /*#__PURE__*/React.createElement("div", {
+        style: {
+          flex: 1,
+          minWidth: 0
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 14,
+          color: INK,
+          fontWeight: "500"
+        }
+      }, p.name), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 11,
+          color: DIM,
+          marginTop: 1
+        }
+      }, bed ? bed.name : "No area", p.category ? "  ·  " + p.category : "")), p.category && /*#__PURE__*/React.createElement(Tag, {
+        color: catColor(p.category)
+      }, p.category));
+    });
+  }() : /*#__PURE__*/React.createElement("div", null, beds.filter(function (bed) {
     if (areaFilter === "all") return true;
     var isOrn = bed.type === "ornamental";
     return areaFilter === "ornamental" ? isOrn : !isOrn;
@@ -6753,7 +7049,7 @@ function GardenApp() {
         textAlign: "center"
       }
     }, "No plants yet"), bp.map(function (p) {
-      var sc = STATUS_CFG[p.status] || STATUS_CFG.healthy;
+      var sc = STATUS_CFG[displayStatus(p)] || STATUS_CFG.healthy;
       return /*#__PURE__*/React.createElement("div", {
         key: p.id,
         style: {
@@ -6836,7 +7132,7 @@ function GardenApp() {
         fontFamily: "inherit"
       }
     }, "+ Add plant to ", bed.name)));
-  })), view === "chemicals" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }))), view === "chemicals" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
@@ -6870,7 +7166,48 @@ function GardenApp() {
       fontWeight: "600",
       boxShadow: "0 2px 6px rgba(63,92,58,0.2)"
     }
-  }, "+ Add")), /*#__PURE__*/React.createElement("div", {
+  }, "+ Add")), chemicals.length === 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      padding: "44px 0",
+      color: DIM
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 38,
+      marginBottom: 10
+    }
+  }, "\uD83E\uDDEA"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      color: INK
+    }
+  }, "No inputs yet"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      marginTop: 4,
+      marginBottom: 16
+    }
+  }, "Track fertilizers, pest, and disease products with reminders."), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      setModal({
+        type: "chem",
+        payload: {}
+      });
+    },
+    style: {
+      padding: "10px 22px",
+      background: "linear-gradient(135deg,#4a6b44,#34502f)",
+      border: "none",
+      borderRadius: 12,
+      color: "#fdfbf2",
+      fontSize: 13,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontWeight: "600",
+      boxShadow: "0 3px 10px rgba(63,92,58,0.22)"
+    }
+  }, "+ Add your first input")), chemicals.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       color: DIM,
@@ -7027,7 +7364,76 @@ function GardenApp() {
         color: DIM
       }
     }, c.type));
-  }))), view === "journal" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }))), view === "calendar" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6,
+      marginBottom: 16
+    }
+  }, [{
+    k: "tasks",
+    label: "🗓 Tasks"
+  }, {
+    k: "planner",
+    label: "🌱 Planner"
+  }].map(function (t) {
+    var on = calTab === t.k;
+    return /*#__PURE__*/React.createElement("button", {
+      key: t.k,
+      onClick: function onClick() {
+        setCalTab(t.k);
+      },
+      style: {
+        flex: 1,
+        padding: "9px 0",
+        borderRadius: 11,
+        cursor: "pointer",
+        fontFamily: "inherit",
+        fontSize: 12.5,
+        fontWeight: on ? "700" : "500",
+        background: on ? "linear-gradient(135deg,#4a6b44,#3a5530)" : "#fffdf8",
+        border: on ? "none" : "1px solid #e3dcc9",
+        color: on ? "#fdfbf2" : DIM,
+        boxShadow: on ? "0 2px 6px rgba(63,92,58,0.18)" : "none"
+      }
+    }, t.label);
+  })), view === "more" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6,
+      marginBottom: 16
+    }
+  }, [{
+    k: "journal",
+    label: "📓 Journal"
+  }, {
+    k: "harvests",
+    label: "🌾 Harvests"
+  }, {
+    k: "settings",
+    label: "⚙️ Settings"
+  }].map(function (t) {
+    var on = moreTab === t.k;
+    return /*#__PURE__*/React.createElement("button", {
+      key: t.k,
+      onClick: function onClick() {
+        setMoreTab(t.k);
+      },
+      style: {
+        flex: 1,
+        padding: "9px 0",
+        borderRadius: 11,
+        cursor: "pointer",
+        fontFamily: "inherit",
+        fontSize: 12,
+        fontWeight: on ? "700" : "500",
+        background: on ? "linear-gradient(135deg,#4a6b44,#3a5530)" : "#fffdf8",
+        border: on ? "none" : "1px solid #e3dcc9",
+        color: on ? "#fdfbf2" : DIM,
+        boxShadow: on ? "0 2px 6px rgba(63,92,58,0.18)" : "none"
+      }
+    }, t.label);
+  })), view === "more" && moreTab === "journal" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
@@ -7229,7 +7635,7 @@ function GardenApp() {
     }, "AI Diagnosis") : /*#__PURE__*/React.createElement(Tag, {
       color: "#3b7ea1"
     }, j.type)))));
-  })), harvests.length === 0 && journal.length === 0 && /*#__PURE__*/React.createElement("div", {
+  })), journal.length === 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
       padding: "48px 0",
@@ -7242,14 +7648,35 @@ function GardenApp() {
     }
   }, "\uD83D\uDCD3"), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 14
+      fontSize: 14,
+      color: INK
     }
-  }, "Your journal is empty."), /*#__PURE__*/React.createElement("div", {
+  }, "Your journal is empty"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
-      marginTop: 4
+      marginTop: 4,
+      marginBottom: 16
     }
-  }, "Log your first harvest or observation above."))), view === "tasks" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, "Note observations, weather, pests, or anything worth remembering."), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      setModal({
+        type: "journal",
+        payload: {}
+      });
+    },
+    style: {
+      padding: "10px 22px",
+      background: "linear-gradient(135deg,#4a6b44,#34502f)",
+      border: "none",
+      borderRadius: 12,
+      color: "#fdfbf2",
+      fontSize: 13,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontWeight: "600",
+      boxShadow: "0 3px 10px rgba(63,92,58,0.22)"
+    }
+  }, "+ Add your first note"))), view === "calendar" && calTab === "tasks" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
@@ -7298,7 +7725,7 @@ function GardenApp() {
   }, MONTHS_S.map(function (m, i) {
     var mn = i + 1;
     var cnt = tasks.filter(function (t) {
-      return t.month === mn && !t.done;
+      return t.month === mn && t.doneYear !== YEAR && t.skipYear !== YEAR;
     }).length;
     return /*#__PURE__*/React.createElement("button", {
       key: m,
@@ -7364,99 +7791,383 @@ function GardenApp() {
       color: DIM,
       fontSize: 13
     }
-  }, "No tasks for ", MONTHS_L[selMonth - 1], ". Tap + to add one.") : tasks.filter(function (t) {
-    return t.month === selMonth;
-  }).map(function (t) {
-    return /*#__PURE__*/React.createElement("div", {
-      key: t.id,
+  }, "No tasks for ", MONTHS_L[selMonth - 1], ". Tap + to add one.") : function () {
+    var monthTasks = tasks.filter(function (t) {
+      return t.month === selMonth;
+    });
+    var openT = monthTasks.filter(taskOpenNow);
+    var restT = monthTasks.filter(function (t) {
+      return !taskOpenNow(t);
+    });
+    function renderTask(t) {
+      var done = taskDoneNow(t);
+      var skipped = taskSkippedNow(t);
+      var inactive = done || skipped;
+      return /*#__PURE__*/React.createElement("div", {
+        key: t.id,
+        style: {
+          background: inactive ? "rgba(63,92,58,0.04)" : "#fdfbf5",
+          border: "1px solid " + (inactive ? "#ece5d5" : "#f2ede0"),
+          borderRadius: 12,
+          padding: "11px 14px",
+          marginBottom: 7,
+          opacity: inactive ? 0.6 : 1
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          display: "flex",
+          gap: 10,
+          alignItems: "flex-start"
+        }
+      }, /*#__PURE__*/React.createElement("button", {
+        onClick: function onClick() {
+          toggleTask(t.id);
+        },
+        style: {
+          width: 20,
+          height: 20,
+          borderRadius: 5,
+          flexShrink: 0,
+          marginTop: 1,
+          border: "1.5px solid " + (done ? "#3f5c3a" : "rgba(63,92,58,0.28)"),
+          background: done ? "#3f5c3a" : "transparent",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#f3ecd9",
+          fontSize: 12
+        }
+      }, done ? "✓" : ""), /*#__PURE__*/React.createElement("div", {
+        style: {
+          flex: 1,
+          minWidth: 0
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 13,
+          color: inactive ? "#9a9079" : "#2d2a24",
+          textDecoration: done ? "line-through" : "none",
+          marginBottom: 4
+        }
+      }, t.title), /*#__PURE__*/React.createElement("div", {
+        style: {
+          display: "flex",
+          gap: 6,
+          flexWrap: "wrap",
+          alignItems: "center"
+        }
+      }, /*#__PURE__*/React.createElement(Tag, {
+        color: TASK_COLORS[t.category] || "#9a9079"
+      }, t.category), t.priority === "high" && !inactive && /*#__PURE__*/React.createElement(Tag, {
+        color: "#c0524a"
+      }, "high"), done && /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 10,
+          color: "#4f7a4a",
+          fontWeight: "600"
+        }
+      }, "\u2713 Done ", YEAR), skipped && /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 10,
+          color: "#9a9079",
+          fontWeight: "600"
+        }
+      }, "Skipped ", YEAR)), t.detail && !inactive && /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 11,
+          color: "#9a9079",
+          marginTop: 5
+        }
+      }, t.detail), !inactive && /*#__PURE__*/React.createElement("button", {
+        onClick: function onClick() {
+          skipTaskThisYear(t.id);
+        },
+        style: {
+          background: "transparent",
+          border: "none",
+          color: DIM,
+          cursor: "pointer",
+          fontSize: 11,
+          fontFamily: "inherit",
+          marginTop: 6,
+          padding: 0,
+          textDecoration: "underline"
+        }
+      }, "Skip this year"), skipped && /*#__PURE__*/React.createElement("button", {
+        onClick: function onClick() {
+          skipTaskThisYear(t.id);
+        },
+        style: {
+          background: "transparent",
+          border: "none",
+          color: G,
+          cursor: "pointer",
+          fontSize: 11,
+          fontFamily: "inherit",
+          marginTop: 6,
+          padding: 0,
+          textDecoration: "underline"
+        }
+      }, "Un-skip")), /*#__PURE__*/React.createElement("button", {
+        onClick: function onClick() {
+          setModal({
+            type: "task",
+            payload: t
+          });
+        },
+        style: {
+          background: "transparent",
+          border: "none",
+          color: DIM,
+          cursor: "pointer",
+          fontSize: 14,
+          padding: 2,
+          flexShrink: 0
+        }
+      }, "\u270F\uFE0F")));
+    }
+    return /*#__PURE__*/React.createElement("div", null, openT.length === 0 && /*#__PURE__*/React.createElement("div", {
       style: {
-        background: t.done ? "rgba(63,92,58,0.05)" : "#fdfbf5",
-        border: "1px solid " + (t.done ? "rgba(63,92,58,0.12)" : "#f2ede0"),
-        borderRadius: 12,
-        padding: "11px 14px",
-        marginBottom: 7,
-        opacity: t.done ? 0.55 : 1
+        textAlign: "center",
+        padding: "16px 0",
+        color: "#4f7a4a",
+        fontSize: 13
+      }
+    }, "\u2713 All ", MONTHS_L[selMonth - 1], " tasks handled for ", YEAR), openT.map(renderTask), restT.length > 0 && /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: openT.length ? 14 : 0,
+        paddingTop: 12,
+        borderTop: "1px solid #ebe4d4"
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
-        display: "flex",
-        gap: 10,
-        alignItems: "flex-start"
-      }
-    }, /*#__PURE__*/React.createElement("button", {
-      onClick: function onClick() {
-        toggleTask(t.id);
-      },
-      style: {
-        width: 20,
-        height: 20,
-        borderRadius: 5,
-        flexShrink: 0,
-        marginTop: 1,
-        border: "1.5px solid " + (t.done ? "#3f5c3a" : "rgba(63,92,58,0.28)"),
-        background: t.done ? "#3f5c3a" : "transparent",
-        cursor: "pointer",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "#0a1a0b",
-        fontSize: 12
-      }
-    }, t.done ? "✓" : ""), /*#__PURE__*/React.createElement("div", {
-      style: {
-        flex: 1,
-        minWidth: 0
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 13,
-        color: t.done ? "#9a9079" : "#2d2a24",
-        textDecoration: t.done ? "line-through" : "none",
-        marginBottom: 4
-      }
-    }, t.title), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        gap: 6,
-        flexWrap: "wrap"
-      }
-    }, /*#__PURE__*/React.createElement(Tag, {
-      color: TASK_COLORS[t.category] || "#9a9079"
-    }, t.category), t.priority === "high" && /*#__PURE__*/React.createElement(Tag, {
-      color: "#c0524a"
-    }, "high")), t.detail && /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 11,
-        color: "#9a9079",
-        marginTop: 5
-      }
-    }, t.detail)), /*#__PURE__*/React.createElement("button", {
-      onClick: function onClick() {
-        setModal({
-          type: "task",
-          payload: t
-        });
-      },
-      style: {
-        background: "transparent",
-        border: "none",
+        fontSize: 10,
         color: DIM,
-        cursor: "pointer",
-        fontSize: 14,
-        padding: 2,
-        flexShrink: 0
+        textTransform: "uppercase",
+        letterSpacing: 1,
+        marginBottom: 8,
+        fontWeight: "600"
       }
-    }, "\u270F\uFE0F")));
-  })), view === "planner" && /*#__PURE__*/React.createElement(PlantingCalendar, {
+    }, "Done / Skipped this year"), restT.map(renderTask)));
+  }()), view === "calendar" && calTab === "planner" && /*#__PURE__*/React.createElement(PlantingCalendar, {
     plants: plants,
     beds: beds,
     settings: settings
-  }), view === "settings" && /*#__PURE__*/React.createElement(SettingsView, {
+  }), view === "more" && moreTab === "harvests" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      margin: "4px 0 14px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "serif",
+    style: {
+      fontSize: 22,
+      color: INK,
+      fontWeight: "600",
+      letterSpacing: "-0.3px"
+    }
+  }, "Harvests"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      setModal({
+        type: "harvest",
+        payload: {}
+      });
+    },
+    style: {
+      background: "linear-gradient(135deg,#4a6b44,#3a5530)",
+      border: "none",
+      borderRadius: 10,
+      color: "#fdfbf2",
+      padding: "6px 14px",
+      fontSize: 12,
+      cursor: "pointer",
+      fontFamily: "inherit",
+      fontWeight: "600",
+      boxShadow: "0 2px 6px rgba(63,92,58,0.2)"
+    }
+  }, "+ Log")), harvests.length === 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      padding: "50px 0",
+      color: DIM
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 38,
+      marginBottom: 10
+    }
+  }, "\uD83C\uDF3E"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14
+    }
+  }, "No harvests logged yet."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      marginTop: 4
+    }
+  }, "Tap + Log to record your first harvest.")), harvests.length > 0 && function () {
+    var yr = new Date().getFullYear();
+    var thisYear = harvests.filter(function (h) {
+      return h.date && new Date(h.date).getFullYear() === yr;
+    });
+    // Sum by plant+unit
+    var totals = {};
+    thisYear.forEach(function (h) {
+      var p = plants.find(function (pl) {
+        return pl.id === h.plantId;
+      });
+      var name = p ? p.name : "Unknown";
+      var emoji = p ? p.emoji : "🌱";
+      var key = name + "|" + (h.unit || "");
+      if (!totals[key]) totals[key] = {
+        name: name,
+        emoji: emoji,
+        unit: h.unit || "",
+        amount: 0
+      };
+      totals[key].amount += parseFloat(h.amount) || 0;
+    });
+    var rows = Object.keys(totals).map(function (k) {
+      return totals[k];
+    }).sort(function (a, b) {
+      return b.amount - a.amount;
+    });
+    if (rows.length === 0) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: "linear-gradient(135deg,#3f5c3a,#2f4a2b)",
+        borderRadius: 16,
+        padding: "16px 16px 14px",
+        marginBottom: 16,
+        boxShadow: "0 4px 14px rgba(63,92,58,0.22)"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "rgba(243,236,217,0.75)",
+        textTransform: "uppercase",
+        letterSpacing: "1px",
+        fontWeight: "600",
+        marginBottom: 10
+      }
+    }, yr, " Harvest Totals"), rows.slice(0, 6).map(function (r) {
+      return /*#__PURE__*/React.createElement("div", {
+        key: r.name + r.unit,
+        style: {
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          padding: "5px 0"
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 17,
+          flexShrink: 0
+        }
+      }, r.emoji), /*#__PURE__*/React.createElement("span", {
+        style: {
+          flex: 1,
+          fontSize: 13,
+          color: "#f3ecd9"
+        }
+      }, r.name), /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontSize: 14,
+          color: "#fff",
+          fontWeight: "700"
+        }
+      }, Math.round(r.amount * 10) / 10, " ", r.unit));
+    }), rows.length > 6 && /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: "rgba(243,236,217,0.6)",
+        marginTop: 6
+      }
+    }, "+ ", rows.length - 6, " more"));
+  }(), harvests.slice().sort(function (a, b) {
+    return b.date.localeCompare(a.date);
+  }).map(function (h) {
+    var p = plants.find(function (pl) {
+      return pl.id === h.plantId;
+    });
+    return /*#__PURE__*/React.createElement("div", {
+      key: h.id,
+      onClick: function onClick() {
+        setModal({
+          type: "harvest",
+          payload: h
+        });
+      },
+      style: {
+        background: "#fffdf8",
+        border: "1px solid #ece5d5",
+        borderRadius: 12,
+        padding: "12px 14px",
+        marginBottom: 8,
+        display: "flex",
+        alignItems: "center",
+        gap: 11,
+        cursor: "pointer",
+        boxShadow: "0 1px 3px rgba(63,92,58,0.06)"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 22,
+        flexShrink: 0
+      }
+    }, p ? p.emoji : "🌱"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 14,
+        color: INK,
+        fontWeight: "500"
+      }
+    }, p ? p.name : "Unknown plant"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        color: DIM,
+        marginTop: 1
+      }
+    }, fmtDate(h.date), h.notes ? "  ·  " + h.notes : "")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 15,
+        color: "#bb8a2e",
+        fontWeight: "700",
+        flexShrink: 0
+      }
+    }, h.amount, " ", h.unit));
+  })), view === "more" && moreTab === "settings" && /*#__PURE__*/React.createElement(SettingsView, {
     settings: settings,
     onSave: function onSave(s) {
       upd("settings", s);
+    },
+    onExport: exportData,
+    onImport: importData
+  })), toast && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      left: "50%",
+      bottom: "calc(28px + env(safe-area-inset-bottom))",
+      transform: "translateX(-50%)",
+      zIndex: 300,
+      background: "#2f4a2b",
+      color: "#f3ecd9",
+      padding: "11px 20px",
+      borderRadius: 24,
+      fontSize: 13,
+      fontWeight: "500",
+      boxShadow: "0 6px 20px rgba(47,74,43,0.4)",
+      animation: "fadeUp 0.25s ease",
+      maxWidth: "90vw",
+      textAlign: "center"
     }
-  })), modal && modal.type === "bed" && /*#__PURE__*/React.createElement(Modal, {
+  }, toast), modal && modal.type === "bed" && /*#__PURE__*/React.createElement(Modal, {
     title: modal.payload.id ? "Edit Area" : "New Area",
     onClose: function onClose() {
       setModal(null);
@@ -7545,8 +8256,8 @@ function GardenApp() {
   }, plantDetail.category, "  \xB7  ", (beds.find(function (b) {
     return b.id === plantDetail.bedId;
   }) || {}).name), /*#__PURE__*/React.createElement(Tag, {
-    color: (STATUS_CFG[plantDetail.status] || STATUS_CFG.healthy).color
-  }, (STATUS_CFG[plantDetail.status] || STATUS_CFG.healthy).label), plantDetail.category && /*#__PURE__*/React.createElement("span", {
+    color: (STATUS_CFG[displayStatus(plantDetail)] || STATUS_CFG.healthy).color
+  }, (STATUS_CFG[displayStatus(plantDetail)] || STATUS_CFG.healthy).label), plantDetail.category && /*#__PURE__*/React.createElement("span", {
     style: {
       marginLeft: 5
     }
