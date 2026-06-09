@@ -1764,6 +1764,29 @@ var CAT_COLORS = {
   "Bulb": "#d98a96",
   "Citrus": "#d9a441"
 };
+
+// Default care-note suggestions by category (used to pre-fill the notes field; editable)
+var CARE_NOTES = {
+  "Rose": "Full sun. Deadhead spent blooms to encourage rebloom. Prune in early spring before bud break. Watch for blackspot and aphids.",
+  "Peony": "Full sun. Do not plant too deep - eyes should sit just below soil. Cut foliage to ground in late fall. Support heavy blooms.",
+  "Hydrangea": "Part shade, consistent moisture. Bigleaf types bloom on old wood - prune right after flowering only. Soil pH affects flower color.",
+  "Perennial": "Right plant, right place for sun. Deadhead to extend bloom. Divide every few years to keep vigorous. Cut back in late fall or early spring.",
+  "Groundcover": "Spreads to fill space - give room or edge to contain. Water until established. Low maintenance once settled.",
+  "Ornamental Grass": "Full sun. Cut back to a few inches in early spring before new growth. Divide clumps every few years if center dies out.",
+  "Flowering Tree": "Water deeply when young. Prune for shape after flowering. Mulch the root zone but keep mulch off the trunk.",
+  "Evergreen": "Minimal pruning needed. Water through dry spells, especially before winter. Watch for spider mites in heat and deer browse in winter.",
+  "Shrub": "Prune to shape after flowering. Mulch to retain moisture. Check label for sun and acid needs.",
+  "Bulb": "Plant in fall, pointed end up, a few inches deep. Let foliage die back naturally to feed next year. Good drainage prevents rot.",
+  "Citrus": "Full sun. Bring indoors below ~50F. Feed regularly in growing season. Consistent watering - avoid soggy soil.",
+  "Vegetable": "Full sun, consistent water. Feed during the growing season. Watch for common pests and rotate beds yearly.",
+  "Herb": "Most prefer full sun and well-drained soil. Pinch / harvest often to keep bushy and prevent bolting.",
+  "Fruit Tree": "Water deeply, mulch the root zone away from the trunk. Prune in dormancy. Thin fruit for better size.",
+  "Berry": "Full sun for best fruiting. Mulch to keep roots cool and moist. Prune out old canes annually.",
+  "Strawberry": "Full sun. Pinch first-year flowers to build roots. Renovate beds after fruiting. Watch for slugs."
+};
+function careNoteFor(category) {
+  return CARE_NOTES[category] || "";
+}
 function catColor(cat) {
   return CAT_COLORS[cat] || "#3f5c3a";
 }
@@ -2203,7 +2226,16 @@ function PlantForm(props) {
         if (!form.name) upd("name", crop.name);
         if (!form.category || form.category === "") upd("category", crop.category);
         if (form.emoji === "🌱") upd("emoji", crop.emoji);
+        if (!form.notes && crop.tip) upd("notes", crop.tip);
       }
+    }
+  }
+  // Suggest care notes when the category changes, only if notes is still empty
+  function onCategory(val) {
+    upd("category", val);
+    if (!form.notes) {
+      var suggestion = careNoteFor(val);
+      if (suggestion) upd("notes", suggestion);
     }
   }
   var statuses = Object.entries(STATUS_CFG);
@@ -2253,7 +2285,7 @@ function PlantForm(props) {
     style: INP,
     value: form.category,
     onChange: function onChange(e) {
-      upd("category", e.target.value);
+      onCategory(e.target.value);
     },
     placeholder: "e.g. Tomato, Blueberry, Fig"
   }), /*#__PURE__*/React.createElement(Label, null, "Area"), /*#__PURE__*/React.createElement("select", {
@@ -2370,7 +2402,28 @@ function PlantForm(props) {
       fontSize: 13,
       color: "#6b6354"
     }
-  }, "Deer resistant"))), /*#__PURE__*/React.createElement(Label, null, "Notes"), /*#__PURE__*/React.createElement("textarea", {
+  }, "Deer resistant"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "baseline"
+    }
+  }, /*#__PURE__*/React.createElement(Label, null, "Notes"), careNoteFor(form.category) && form.notes !== careNoteFor(form.category) && /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      upd("notes", careNoteFor(form.category));
+    },
+    style: {
+      background: "transparent",
+      border: "none",
+      color: G,
+      cursor: "pointer",
+      fontSize: 11,
+      fontFamily: "inherit",
+      fontWeight: "600",
+      padding: 0,
+      marginTop: 14
+    }
+  }, "\u21BB Suggest care notes")), /*#__PURE__*/React.createElement("textarea", {
     style: Object.assign({}, INP, {
       height: 72,
       resize: "none"
@@ -3658,6 +3711,54 @@ var CROPS = [
   depth: "1/2\"",
   sunlight: "Full/Part sun",
   tip: "Sow mid-September for October harvest. Fast and easy fall crop."
+},
+// Carrots (spring)
+{
+  id: "c18",
+  name: "Carrots",
+  emoji: "🥕",
+  category: "Root Veg",
+  startIndoor: null,
+  transplant: null,
+  directSow: addDays(LAST_FROST, -14),
+  harvest: addDays(LAST_FROST, 70),
+  frostTender: false,
+  spacing: "2-3\"",
+  depth: "1/4\"",
+  sunlight: "Full sun",
+  tip: "Direct sow only - do not transplant. Loose stone-free soil for straight roots. Keep moist 2-3 weeks to germinate, then thin to 2-3 inches. Sweeter after a light frost."
+},
+// Carrots (fall)
+{
+  id: "c19",
+  name: "Carrots (Fall)",
+  emoji: "🥕",
+  category: "Root Veg",
+  startIndoor: null,
+  transplant: null,
+  directSow: addDays(FIRST_FROST, -75),
+  harvest: addDays(FIRST_FROST, -5),
+  frostTender: false,
+  spacing: "2-3\"",
+  depth: "1/4\"",
+  sunlight: "Full sun",
+  tip: "Sow mid-to-late summer for a fall crop. Cold weather makes them sweeter - harvest after the first light frosts."
+},
+// Beets
+{
+  id: "c20",
+  name: "Beets",
+  emoji: "🌰",
+  category: "Root Veg",
+  startIndoor: null,
+  transplant: null,
+  directSow: addDays(LAST_FROST, -14),
+  harvest: addDays(LAST_FROST, 55),
+  frostTender: false,
+  spacing: "3-4\"",
+  depth: "1/2\"",
+  sunlight: "Full sun",
+  tip: "Direct sow. Each seed is a cluster - thin seedlings to one per spot. Greens are edible too. Succession sow every 2-3 weeks."
 }];
 var CATEGORIES = ["All", "Nightshade", "Brassica", "Leafy Green", "Cucurbit", "Legume", "Herb", "Root Veg", "Allium"];
 function statusForCrop(crop) {
