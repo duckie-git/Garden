@@ -1787,6 +1787,126 @@ var CARE_NOTES = {
 function careNoteFor(category) {
   return CARE_NOTES[category] || "";
 }
+
+// Plant-name keyword -> specific care note. Matched case-insensitively against the name.
+// More specific than category notes; checked first.
+var NAME_NOTES = [{
+  kw: ["tomato"],
+  note: "Full sun. Bury 2/3 of the stem at transplant for strong roots. Cage or stake early. Water deeply and evenly to prevent blossom end rot and cracking. Watch for hornworms and early blight."
+}, {
+  kw: ["pepper", "jalapeno", "habanero"],
+  note: "Full sun and warmth. Slow to start - keep warm. Support heavy plants. Even moisture; let fruit ripen on the plant for best flavor."
+}, {
+  kw: ["cucumber", "cuke"],
+  note: "Full sun, rich soil, lots of water. Trellis to save space and keep fruit clean. Harvest often to keep them producing. Watch for cucumber beetles and powdery mildew."
+}, {
+  kw: ["zucchini", "squash", "courgette"],
+  note: "Full sun, heavy feeder. Give it room. Harvest young and often. Watch for squash vine borer and powdery mildew - water at the base."
+}, {
+  kw: ["pumpkin"],
+  note: "Full sun, long season, lots of space and water. Feed heavily. Set fruit on a board to prevent rot. Harvest when the rind is hard."
+}, {
+  kw: ["lettuce", "mesclun"],
+  note: "Cool-season; bolts in heat. Part shade in summer. Succession sow every 2-3 weeks. Keep moist. Harvest outer leaves or cut-and-come-again."
+}, {
+  kw: ["spinach"],
+  note: "Cool-season, bolts in heat and long days. Sow early spring and fall. Rich soil, steady moisture. Harvest outer leaves."
+}, {
+  kw: ["kale", "collard"],
+  note: "Hardy cool-season green. Improves after frost. Pick outer leaves. Watch for cabbage worms - row cover or B.t. helps."
+}, {
+  kw: ["carrot"],
+  note: "Direct sow only - never transplant. Loose, stone-free soil for straight roots. Keep moist 2-3 weeks to germinate, then thin to 2-3 inches. Sweeter after a light frost."
+}, {
+  kw: ["beet"],
+  note: "Direct sow. Seeds are clusters - thin to one seedling per spot. Greens are edible. Succession sow every 2-3 weeks. Likes cool weather."
+}, {
+  kw: ["radish"],
+  note: "Fast and easy. Direct sow. Thin early. Harvest promptly - they get woody and hot if left too long. Great cool-season succession crop."
+}, {
+  kw: ["onion", "scallion", "shallot"],
+  note: "Full sun. Long-day varieties for the Northeast. Keep weeded. Stop watering when tops flop; cure in a dry spot before storing."
+}, {
+  kw: ["garlic"],
+  note: "Plant cloves in fall, pointed end up, ~2 inches deep, mulch over winter. Cut scapes in early summer. Harvest when lower leaves brown."
+}, {
+  kw: ["bean", "pole bean", "bush bean"],
+  note: "Direct sow after frost. Pole types need a trellis. Pick often to keep them producing. Don't work plants when wet to avoid spreading disease."
+}, {
+  kw: ["pea", "snap pea", "snow pea"],
+  note: "Cool-season - sow as early as soil can be worked. Trellis most types. Harvest often. Done once heat arrives."
+}, {
+  kw: ["basil"],
+  note: "Full sun, warmth. Pinch tops often to keep bushy and delay flowering. Don't let it bolt. Harvest in the morning for best flavor."
+}, {
+  kw: ["mint"],
+  note: "Vigorous spreader - keep it in a pot or it will take over. Part shade is fine. Cut back hard to refresh."
+}, {
+  kw: ["rosemary", "thyme", "oregano", "sage"],
+  note: "Mediterranean herb - full sun, well-drained soil, on the dry side. Don't overwater. Trim to shape and encourage new growth."
+}, {
+  kw: ["strawberr"],
+  note: "Full sun. Pinch first-year flowers to build roots. Mulch to keep berries clean. Renew beds every few years. Net against birds."
+}, {
+  kw: ["blueberr"],
+  note: "Needs acidic soil (pH 4.5-5.5) - use Holly-tone. Full sun, consistent moisture, mulch well. Plant more than one variety for pollination. Net against birds."
+}, {
+  kw: ["raspberr", "blackberr", "bramble"],
+  note: "Full sun. Provide support. Prune out spent canes after fruiting. Watch the spread. Mulch to keep roots cool."
+}, {
+  kw: ["fig"],
+  note: "Full sun, warm spot. In Zone 7 protect or wrap in winter, or grow in a pot to overwinter. Prune in late winter. Don't overfeed nitrogen."
+}, {
+  kw: ["pear", "apple"],
+  note: "Full sun. Usually needs a second variety for pollination. Prune in dormancy for structure and airflow. Thin fruit. Watch for fire blight and codling moth."
+}, {
+  kw: ["persimmon"],
+  note: "Full sun. Low-maintenance once established. Astringent types must be fully soft-ripe to eat. Prune lightly in dormancy."
+}, {
+  kw: ["lemon", "lime", "orange", "citrus", "meyer"],
+  note: "Full sun. In Zone 7 grow in a pot and bring indoors below ~50F. Consistent water, regular citrus feed. Fragrant blooms."
+}, {
+  kw: ["rose"],
+  note: "Full sun. Deadhead to encourage rebloom. Prune in early spring before bud break. Good airflow; watch for blackspot, aphids, and Japanese beetles."
+}, {
+  kw: ["peony"],
+  note: "Full sun. Don't plant too deep - eyes just below the surface. Support heavy blooms. Cut foliage to the ground in late fall. Ants on buds are harmless."
+}, {
+  kw: ["hydrangea"],
+  note: "Part shade, steady moisture. Bigleaf types bloom on old wood - prune right after flowering only. Soil pH shifts blue/pink."
+}, {
+  kw: ["hosta"],
+  note: "Shade to part shade. Grown for foliage. Keep evenly moist. Watch for slugs and deer (a favorite). Divide in spring or fall."
+}, {
+  kw: ["daylily", "hemerocallis"],
+  note: "Tough and adaptable, full sun to part shade. Remove spent blooms and scapes. Divide every few years when clumps get crowded."
+}, {
+  kw: ["tulip", "daffodil", "narcissus", "allium", "crocus", "bulb"],
+  note: "Plant in fall, pointed end up, a few inches deep. Let foliage die back naturally to feed next year. Good drainage prevents rot."
+}, {
+  kw: ["boxwood"],
+  note: "Part shade to sun. Shear to shape in late spring. Watch for boxwood blight and leafminer. Don't prune in late fall."
+}, {
+  kw: ["arborvitae", "spruce", "pine", "evergreen", "fir"],
+  note: "Full sun. Minimal pruning. Water before winter. Watch for spider mites in heat and heavy deer browse in winter - protect if needed."
+}, {
+  kw: ["rhododendron", "azalea"],
+  note: "Part shade, acidic soil, good drainage. Deadhead spent blooms. Shallow roots - mulch and don't let dry out. Prune right after flowering."
+}, {
+  kw: ["asparagus"],
+  note: "Perennial - give it a permanent bed. Don't harvest heavily until year 3. Cut ferns down after they yellow in fall. Top-dress with compost yearly."
+}];
+function nameNoteFor(name) {
+  if (!name) return "";
+  var n = name.toLowerCase();
+  for (var i = 0; i < NAME_NOTES.length; i++) {
+    var entry = NAME_NOTES[i];
+    for (var j = 0; j < entry.kw.length; j++) {
+      if (n.indexOf(entry.kw[j]) !== -1) return entry.note;
+    }
+  }
+  return "";
+}
 function catColor(cat) {
   return CAT_COLORS[cat] || "#3f5c3a";
 }
@@ -2189,7 +2309,7 @@ function BedForm(props) {
 function PlantForm(props) {
   var plant = props.plant;
   var beds = props.beds;
-  var EMOJIS = ["🌱", "🍅", "🫐", "🍓", "🍐", "🟠", "🍎", "🌿", "🌸", "🌻", "🥬", "🫛", "🌶️", "🥒", "🧅", "🧄", "🌹", "🌷", "🌼", "🌾", "🌳", "🌲", "🧡", "🍋"];
+  var EMOJIS = ["🌱", "🍅", "🫐", "🍓", "🍐", "🟠", "🍎", "🌿", "🌸", "🌻", "🥬", "🫛", "🌶️", "🥒", "🥕", "🥦", "🫑", "🍆", "🧅", "🧄", "🥔", "🌽", "🎃", "🌹", "🌷", "🌼", "🌾", "🌳", "🌲", "🧡", "🍋"];
   var _useState9 = useState(_objectSpread({
       name: "",
       category: "",
@@ -2231,10 +2351,17 @@ function PlantForm(props) {
     }
   }
   // Suggest care notes when the category changes, only if notes is still empty
+  function onName(val) {
+    upd("name", val);
+    if (!form.notes) {
+      var s = nameNoteFor(val);
+      if (s) upd("notes", s);
+    }
+  }
   function onCategory(val) {
     upd("category", val);
     if (!form.notes) {
-      var suggestion = careNoteFor(val);
+      var suggestion = nameNoteFor(form.name) || careNoteFor(val);
       if (suggestion) upd("notes", suggestion);
     }
   }
@@ -2256,7 +2383,7 @@ function PlantForm(props) {
     style: INP,
     value: form.name,
     onChange: function onChange(e) {
-      upd("name", e.target.value);
+      onName(e.target.value);
     },
     placeholder: "e.g. Sun Gold Tomato"
   }), /*#__PURE__*/React.createElement(Label, null, "Emoji"), /*#__PURE__*/React.createElement("div", {
@@ -2408,9 +2535,9 @@ function PlantForm(props) {
       justifyContent: "space-between",
       alignItems: "baseline"
     }
-  }, /*#__PURE__*/React.createElement(Label, null, "Notes"), careNoteFor(form.category) && form.notes !== careNoteFor(form.category) && /*#__PURE__*/React.createElement("button", {
+  }, /*#__PURE__*/React.createElement(Label, null, "Notes"), (nameNoteFor(form.name) || careNoteFor(form.category)) && form.notes !== (nameNoteFor(form.name) || careNoteFor(form.category)) && /*#__PURE__*/React.createElement("button", {
     onClick: function onClick() {
-      upd("notes", careNoteFor(form.category));
+      upd("notes", nameNoteFor(form.name) || careNoteFor(form.category));
     },
     style: {
       background: "transparent",
@@ -3748,7 +3875,7 @@ var CROPS = [
 {
   id: "c20",
   name: "Beets",
-  emoji: "🌰",
+  emoji: "🥔",
   category: "Root Veg",
   startIndoor: null,
   transplant: null,
@@ -3759,6 +3886,86 @@ var CROPS = [
   depth: "1/2\"",
   sunlight: "Full sun",
   tip: "Direct sow. Each seed is a cluster - thin seedlings to one per spot. Greens are edible too. Succession sow every 2-3 weeks."
+},
+// Broccoli
+{
+  id: "c25",
+  name: "Broccoli",
+  emoji: "🥦",
+  category: "Brassica",
+  startIndoor: addDays(LAST_FROST, -42),
+  transplant: addDays(LAST_FROST, -14),
+  directSow: null,
+  harvest: addDays(LAST_FROST, 60),
+  frostTender: false,
+  spacing: "18\"",
+  depth: "1/4\"",
+  sunlight: "Full sun",
+  tip: "Cool-season. Start indoors. Harvest the central head before flowers open, then enjoy side shoots. Row cover against cabbage worms."
+},
+// Cabbage
+{
+  id: "c26",
+  name: "Cabbage",
+  emoji: "🥬",
+  category: "Brassica",
+  startIndoor: addDays(LAST_FROST, -42),
+  transplant: addDays(LAST_FROST, -14),
+  directSow: null,
+  harvest: addDays(LAST_FROST, 70),
+  frostTender: false,
+  spacing: "18\"",
+  depth: "1/4\"",
+  sunlight: "Full sun",
+  tip: "Cool-season. Even moisture prevents splitting. Watch for cabbage worms - row cover or B.t. Harvest when heads are firm."
+},
+// Cilantro
+{
+  id: "c27",
+  name: "Cilantro",
+  emoji: "🌿",
+  category: "Herb",
+  startIndoor: null,
+  transplant: null,
+  directSow: addDays(LAST_FROST, -14),
+  harvest: addDays(LAST_FROST, 21),
+  frostTender: false,
+  spacing: "4\"",
+  depth: "1/4\"",
+  sunlight: "Full/Part sun",
+  tip: "Cool-season; bolts fast in heat. Succession sow every 2-3 weeks. Let some bolt for coriander seed. Part shade extends the season."
+},
+// Parsley
+{
+  id: "c28",
+  name: "Parsley",
+  emoji: "🌿",
+  category: "Herb",
+  startIndoor: addDays(LAST_FROST, -42),
+  transplant: addDays(LAST_FROST, 0),
+  directSow: addDays(LAST_FROST, 0),
+  harvest: addDays(LAST_FROST, 50),
+  frostTender: false,
+  spacing: "8\"",
+  depth: "1/4\"",
+  sunlight: "Full/Part sun",
+  tip: "Slow to germinate - soak seed and be patient. Biennial; harvest outer stems. Tolerates frost well."
+},
+// Dill
+{
+  id: "c29",
+  name: "Dill",
+  emoji: "🌿",
+  category: "Herb",
+  startIndoor: null,
+  transplant: null,
+  directSow: addDays(LAST_FROST, 0),
+  harvest: addDays(LAST_FROST, 45),
+  frostTender: false,
+  spacing: "8\"",
+  depth: "1/4\"",
+  sunlight: "Full sun",
+  tip: "Direct sow - dislikes transplanting. Succession sow. Lets self-seed if you let it flower. Host plant for swallowtail caterpillars."
 }];
 var CATEGORIES = ["All", "Nightshade", "Brassica", "Leafy Green", "Cucurbit", "Legume", "Herb", "Root Veg", "Allium"];
 function statusForCrop(crop) {
