@@ -6429,7 +6429,7 @@ function GardenApp() {
     if (!sb || !session) return;
     var cancelled = false;
     _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-      var mem, gid, ins, g, _t;
+      var gardenName, rpc, gid, g, _t;
       return _regenerator().w(function (_context) {
         while (1) switch (_context.p = _context.n) {
           case 0:
@@ -6438,65 +6438,51 @@ function GardenApp() {
             _context.n = 1;
             return sb.rpc("claim_invites");
           case 1:
+            // find a garden I'm a member of
+            gardenName = data.settings && data.settings.gardenName || "Tendril";
             _context.n = 2;
-            return sb.from("garden_members").select("garden_id, role").limit(1);
+            return sb.rpc("get_or_create_garden", {
+              p_name: gardenName,
+              p_data: data
+            });
           case 2:
-            mem = _context.v;
-            console.log("mem result:", JSON.stringify(mem));
-            gid = null;
-            if (!(mem.data && mem.data.length)) {
+            rpc = _context.v;
+            console.log("get_or_create_garden result:", JSON.stringify(rpc));
+            if (!rpc.error) {
               _context.n = 3;
               break;
             }
-            gid = mem.data[0].garden_id;
-            _context.n = 6;
-            break;
+            throw rpc.error;
           case 3:
-            _context.n = 4;
-            return sb.from("gardens").insert({
-              name: data.settings && data.settings.gardenName || "Tendril",
-              owner_id: session.user.id,
-              data: data
-            }).select("id").single();
-          case 4:
-            ins = _context.v;
-            console.log("insert result:", JSON.stringify(ins));
-            if (!ins.error) {
-              _context.n = 5;
-              break;
-            }
-            throw ins.error;
-          case 5:
-            gid = ins.data.id;
-          case 6:
+            gid = rpc.data;
             if (!cancelled) {
-              _context.n = 7;
+              _context.n = 4;
               break;
             }
             return _context.a(2);
-          case 7:
+          case 4:
             setGardenId(gid);
             // pull remote data
-            _context.n = 8;
+            _context.n = 5;
             return sb.from("gardens").select("data, updated_at").eq("id", gid).single();
-          case 8:
+          case 5:
             g = _context.v;
             if (g.data && g.data.data && _typeof(g.data.data) === "object" && Object.keys(g.data.data).length) {
               lastPushed.current = JSON.stringify(g.data.data);
               setData(g.data.data);
             }
             setSyncState("synced");
-            _context.n = 10;
+            _context.n = 7;
             break;
-          case 9:
-            _context.p = 9;
+          case 6:
+            _context.p = 6;
             _t = _context.v;
             console.error("Tendril sync error:", _t);
             if (!cancelled) setSyncState("error");
-          case 10:
+          case 7:
             return _context.a(2);
         }
-      }, _callee, null, [[0, 9]]);
+      }, _callee, null, [[0, 6]]);
     }))();
     return function () {
       cancelled = true;
