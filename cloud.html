@@ -6442,6 +6442,7 @@ function GardenApp() {
             return sb.from("garden_members").select("garden_id, role").limit(1);
           case 2:
             mem = _context.v;
+            console.log("mem result:", JSON.stringify(mem));
             gid = null;
             if (!(mem.data && mem.data.length)) {
               _context.n = 3;
@@ -6459,6 +6460,7 @@ function GardenApp() {
             }).select("id").single();
           case 4:
             ins = _context.v;
+            console.log("insert result:", JSON.stringify(ins));
             if (!ins.error) {
               _context.n = 5;
               break;
@@ -6489,6 +6491,7 @@ function GardenApp() {
           case 9:
             _context.p = 9;
             _t = _context.v;
+            console.error("Tendril sync error:", _t);
             if (!cancelled) setSyncState("error");
           case 10:
             return _context.a(2);
