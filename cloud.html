@@ -6447,7 +6447,6 @@ function GardenApp() {
             });
           case 2:
             rpc = _context.v;
-            console.log("get_or_create_garden result:", JSON.stringify(rpc));
             if (!rpc.error) {
               _context.n = 3;
               break;
@@ -6477,7 +6476,6 @@ function GardenApp() {
           case 6:
             _context.p = 6;
             _t = _context.v;
-            console.error("Tendril sync error:", _t);
             if (!cancelled) setSyncState("error");
           case 7:
             return _context.a(2);
